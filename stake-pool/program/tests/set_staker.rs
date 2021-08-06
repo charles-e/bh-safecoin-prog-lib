@@ -3,10 +3,9 @@
 mod helpers;
 
 use {
-    borsh::BorshSerialize,
+    borsh::{BorshDeserialize, BorshSerialize},
     helpers::*,
     solana_program::{
-        borsh::try_from_slice_unchecked,
         hash::Hash,
         instruction::{AccountMeta, Instruction},
     },
@@ -55,8 +54,7 @@ async fn success_set_staker_as_manager() {
     banks_client.process_transaction(transaction).await.unwrap();
 
     let stake_pool = get_account(&mut banks_client, &stake_pool_accounts.stake_pool.pubkey()).await;
-    let stake_pool =
-        try_from_slice_unchecked::<state::StakePool>(&stake_pool.data.as_slice()).unwrap();
+    let stake_pool = state::StakePool::try_from_slice(&stake_pool.data.as_slice()).unwrap();
 
     assert_eq!(stake_pool.staker, new_staker.pubkey());
 }
@@ -79,8 +77,7 @@ async fn success_set_staker_as_staker() {
     banks_client.process_transaction(transaction).await.unwrap();
 
     let stake_pool = get_account(&mut banks_client, &stake_pool_accounts.stake_pool.pubkey()).await;
-    let stake_pool =
-        try_from_slice_unchecked::<state::StakePool>(&stake_pool.data.as_slice()).unwrap();
+    let stake_pool = state::StakePool::try_from_slice(&stake_pool.data.as_slice()).unwrap();
 
     assert_eq!(stake_pool.staker, new_staker.pubkey());
 
@@ -97,8 +94,7 @@ async fn success_set_staker_as_staker() {
     banks_client.process_transaction(transaction).await.unwrap();
 
     let stake_pool = get_account(&mut banks_client, &stake_pool_accounts.stake_pool.pubkey()).await;
-    let stake_pool =
-        try_from_slice_unchecked::<state::StakePool>(&stake_pool.data.as_slice()).unwrap();
+    let stake_pool = state::StakePool::try_from_slice(&stake_pool.data.as_slice()).unwrap();
 
     assert_eq!(stake_pool.staker, stake_pool_accounts.staker.pubkey());
 }

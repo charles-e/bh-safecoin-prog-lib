@@ -48,12 +48,12 @@ pub struct StableCurve {
 /// d = (leverage * sum_x + d_product * n_coins) * initial_d / ((leverage - 1) * initial_d + (n_coins + 1) * d_product)
 fn calculate_step(initial_d: &U256, leverage: u64, sum_x: u128, d_product: &U256) -> Option<U256> {
     let leverage_mul = U256::from(leverage).checked_mul(sum_x.into())?;
-    let d_p_mul = checked_u8_mul(d_product, N_COINS)?;
+    let d_p_mul = checked_u8_mul(&d_product, N_COINS)?;
 
     let l_val = leverage_mul.checked_add(d_p_mul)?.checked_mul(*initial_d)?;
 
     let leverage_sub = initial_d.checked_mul((leverage.checked_sub(1)?).into())?;
-    let n_coins_sum = checked_u8_mul(d_product, N_COINS.checked_add(1)?)?;
+    let n_coins_sum = checked_u8_mul(&d_product, N_COINS.checked_add(1)?)?;
 
     let r_val = leverage_sub.checked_add(n_coins_sum)?;
 
@@ -158,9 +158,7 @@ impl CurveCalculator for StableCurve {
         })
     }
 
-    /// Re-implementation of `remove_liquidty`:
-    ///
-    /// <https://github.com/curvefi/curve-contract/blob/80bbe179083c9a7062e4c482b0be3bfb7501f2bd/contracts/pool-templates/base/SwapTemplateBase.vy#L513>
+    /// Re-implementation of `remove_liquidty`: https://github.com/curvefi/curve-contract/blob/80bbe179083c9a7062e4c482b0be3bfb7501f2bd/contracts/pool-templates/base/SwapTemplateBase.vy#L513
     fn pool_tokens_to_trading_tokens(
         &self,
         pool_tokens: u128,
@@ -201,9 +199,7 @@ impl CurveCalculator for StableCurve {
     }
 
     /// Get the amount of pool tokens for the given amount of token A or B.
-    /// Re-implementation of `calc_token_amount`:
-    ///
-    /// <https://github.com/curvefi/curve-contract/blob/80bbe179083c9a7062e4c482b0be3bfb7501f2bd/contracts/pool-templates/base/SwapTemplateBase.vy#L267>
+    /// Re-implementation of `calc_token_amount`: https://github.com/curvefi/curve-contract/blob/80bbe179083c9a7062e4c482b0be3bfb7501f2bd/contracts/pool-templates/base/SwapTemplateBase.vy#L267
     fn deposit_single_token_type(
         &self,
         source_amount: u128,
@@ -275,7 +271,7 @@ impl CurveCalculator for StableCurve {
         swap_token_a_amount: u128,
         swap_token_b_amount: u128,
     ) -> Option<PreciseNumber> {
-        #[cfg(not(any(test, feature = "fuzz")))]
+        #[cfg(not(test))]
         {
             let leverage = self.amp.checked_mul(N_COINS as u64)?;
             PreciseNumber::new(compute_d(
@@ -284,7 +280,7 @@ impl CurveCalculator for StableCurve {
                 swap_token_b_amount,
             )?)
         }
-        #[cfg(any(test, feature = "fuzz"))]
+        #[cfg(test)]
         {
             use roots::{find_roots_cubic_normalized, Roots};
             let x = swap_token_a_amount as f64;
@@ -426,10 +422,8 @@ mod tests {
             let diff =
                 (sim_result as i128 - result.destination_amount_swapped as i128).abs();
 
-            let tolerance = std::cmp::max(1, sim_result as i128 / 1_000_000_000);
-
             assert!(
-                diff <= tolerance,
+                diff <= 1,
                 "result={}, sim_result={}, amp={}, source_amount={}, swap_source_amount={}, swap_destination_amount={}, diff={}",
                 result.destination_amount_swapped,
                 sim_result,

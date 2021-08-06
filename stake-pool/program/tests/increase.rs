@@ -93,8 +93,8 @@ async fn success() {
     assert!(transient_account.is_none());
 
     let rent = banks_client.get_rent().await.unwrap();
-    let stake_rent = rent.minimum_balance(std::mem::size_of::<stake_program::StakeState>());
-    let increase_amount = reserve_lamports - stake_rent - 1;
+    let lamports = rent.minimum_balance(std::mem::size_of::<stake_program::StakeState>());
+    let reserve_lamports = reserve_lamports - lamports;
     let error = stake_pool_accounts
         .increase_validator_stake(
             &mut banks_client,
@@ -102,7 +102,7 @@ async fn success() {
             &recent_blockhash,
             &validator_stake.transient_stake_account,
             &validator_stake.vote.pubkey(),
-            increase_amount,
+            reserve_lamports,
         )
         .await;
     assert!(error.is_none());
@@ -116,7 +116,7 @@ async fn success() {
     let reserve_stake_state =
         deserialize::<stake_program::StakeState>(&reserve_stake_account.data).unwrap();
     assert_eq!(
-        pre_reserve_stake_account.lamports - increase_amount - stake_rent,
+        pre_reserve_stake_account.lamports - reserve_lamports,
         reserve_stake_account.lamports
     );
     assert!(reserve_stake_state.delegation().is_none());
@@ -126,10 +126,7 @@ async fn success() {
         get_account(&mut banks_client, &validator_stake.transient_stake_account).await;
     let transient_stake_state =
         deserialize::<stake_program::StakeState>(&transient_stake_account.data).unwrap();
-    assert_eq!(
-        transient_stake_account.lamports,
-        increase_amount + stake_rent
-    );
+    assert_eq!(transient_stake_account.lamports, reserve_lamports);
     assert_ne!(
         transient_stake_state.delegation().unwrap().activation_epoch,
         Epoch::MAX
@@ -335,7 +332,7 @@ async fn fail_with_small_lamport_amount() {
     ) = setup().await;
 
     let rent = banks_client.get_rent().await.unwrap();
-    let stake_rent = rent.minimum_balance(std::mem::size_of::<stake_program::StakeState>());
+    let lamports = rent.minimum_balance(std::mem::size_of::<stake_program::StakeState>());
 
     let error = stake_pool_accounts
         .increase_validator_stake(
@@ -344,14 +341,14 @@ async fn fail_with_small_lamport_amount() {
             &recent_blockhash,
             &validator_stake.transient_stake_account,
             &validator_stake.vote.pubkey(),
-            stake_rent,
+            lamports,
         )
         .await
         .unwrap()
         .unwrap();
 
     match error {
-        TransactionError::InstructionError(_, InstructionError::AccountNotRentExempt) => {}
+        TransactionError::InstructionError(_, InstructionError::InvalidError) => {}
         _ => panic!("Wrong error"),
     }
 }

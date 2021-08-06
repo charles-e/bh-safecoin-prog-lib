@@ -21,11 +21,11 @@ export const cluster = chooseCluster();
 
 export const url =
   process.env.RPC_URL ||
-  (process.env.LIVE ? clusterApiUrl(cluster, false) : 'http://localhost:8328');
+  (process.env.LIVE ? clusterApiUrl(cluster, false) : 'http://localhost:8899');
 
 export const urlTls =
   process.env.RPC_URL ||
-  (process.env.LIVE ? clusterApiUrl(cluster, true) : 'http://localhost:8328');
+  (process.env.LIVE ? clusterApiUrl(cluster, true) : 'http://localhost:8899');
 
 export let walletUrl =
   process.env.WALLET_URL || 'https://solana-example-webwallet.herokuapp.com/';

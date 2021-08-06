@@ -20,7 +20,7 @@ use spl_token_lending::{
 use std::u64;
 
 #[tokio::test]
-async fn test_borrow_usdc_fixed_amount() {
+async fn test_borrow_quote_currency() {
     let mut test = ProgramTest::new(
         "spl_token_lending",
         spl_token_lending::id(),
@@ -28,7 +28,7 @@ async fn test_borrow_usdc_fixed_amount() {
     );
 
     // limit to track compute unit increase
-    test.set_bpf_compute_max_units(60_000);
+    test.set_bpf_compute_max_units(41_000);
 
     const USDC_TOTAL_BORROW_FRACTIONAL: u64 = 1_000 * FRACTIONAL_TO_USDC;
     const FEE_AMOUNT: u64 = 100;
@@ -40,16 +40,15 @@ async fn test_borrow_usdc_fixed_amount() {
     const USDC_RESERVE_LIQUIDITY_FRACTIONAL: u64 = 2 * USDC_TOTAL_BORROW_FRACTIONAL;
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 50;
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
@@ -61,12 +60,9 @@ async fn test_borrow_usdc_fixed_amount() {
         },
     );
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             liquidity_amount: USDC_RESERVE_LIQUIDITY_FRACTIONAL,
@@ -130,6 +126,7 @@ async fn test_borrow_usdc_fixed_amount() {
             FeeCalculation::Exclusive,
         )
         .unwrap();
+
     assert_eq!(total_fee, FEE_AMOUNT);
     assert_eq!(host_fee, HOST_FEE_AMOUNT);
 
@@ -167,7 +164,7 @@ async fn test_borrow_usdc_fixed_amount() {
 }
 
 #[tokio::test]
-async fn test_borrow_sol_max_amount() {
+async fn test_borrow_max_base_currency() {
     let mut test = ProgramTest::new(
         "spl_token_lending",
         spl_token_lending::id(),
@@ -175,7 +172,7 @@ async fn test_borrow_sol_max_amount() {
     );
 
     // limit to track compute unit increase
-    test.set_bpf_compute_max_units(60_000);
+    test.set_bpf_compute_max_units(42_000);
 
     const FEE_AMOUNT: u64 = 5000;
     const HOST_FEE_AMOUNT: u64 = 1000;
@@ -187,17 +184,15 @@ async fn test_borrow_sol_max_amount() {
     const SAFE_RESERVE_LIQUIDITY_LAMPORTS: u64 = 2 * SAFE_BORROW_AMOUNT_LAMPORTS;
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 50;
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             liquidity_amount: USDC_RESERVE_COLLATERAL_FRACTIONAL,
@@ -209,11 +204,9 @@ async fn test_borrow_sol_max_amount() {
         },
     );
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             liquidity_amount: SAFE_RESERVE_LIQUIDITY_LAMPORTS,
@@ -321,16 +314,15 @@ async fn test_borrow_too_large() {
     const USDC_RESERVE_LIQUIDITY_FRACTIONAL: u64 = 2 * USDC_BORROW_AMOUNT_FRACTIONAL;
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 50;
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
@@ -342,12 +334,9 @@ async fn test_borrow_too_large() {
         },
     );
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             liquidity_amount: USDC_RESERVE_LIQUIDITY_FRACTIONAL,

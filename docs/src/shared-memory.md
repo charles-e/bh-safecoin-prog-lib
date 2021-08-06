@@ -7,7 +7,7 @@ the provided account's data
 
 ## Background
 
-Solcoin's programming model and the definitions of the Solcoin terms used in this
+Solana's programming model and the definitions of the Solana terms used in this
 document are available at:
 
 - https://docs.solana.com/apps

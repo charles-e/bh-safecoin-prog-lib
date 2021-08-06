@@ -1,7 +1,7 @@
 [package]
 name = "spl-shared-memory"
 version = "2.0.6"
-description = "Solcoin Program Library Shared-memory"
+description = "Solana Program Library Shared-memory"
 authors = ["Solana Maintainers <maintainers@solana.foundation>"]
 repository = "https://github.com/solana-labs/safecoin-program-library"
 license = "Apache-2.0"
@@ -12,11 +12,11 @@ test-bpf = []
 
 [dependencies]
 arrayref = "0.3.6"
-safecoin-program = "=1.7.7"
+safecoin-program = "=1.6.7"
 
 [dev-dependencies]
-safecoin-program-test = "=1.7.7"
-solana-sdk = "=1.7.7"
+safecoin-program-test = "=1.6.7"
+solana-sdk = "=1.6.7"
 
 [lib]
 crate-type = ["cdylib", "lib"]

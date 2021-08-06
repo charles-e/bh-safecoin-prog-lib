@@ -32,13 +32,12 @@ async fn test_success() {
     let user_accounts_owner = Keypair::new();
     let user_transfer_authority = Keypair::new();
 
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             user_liquidity_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,

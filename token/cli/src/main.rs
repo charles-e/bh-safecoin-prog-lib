@@ -2,23 +2,24 @@ use clap::{
     crate_description, crate_name, crate_version, value_t, value_t_or_exit, App, AppSettings, Arg,
     ArgMatches, SubCommand,
 };
+use console::Emoji;
 use solana_account_decoder::{
     parse_token::{TokenAccountType, UiAccountState},
     UiAccountData,
 };
 use solana_clap_utils::{
     fee_payer::fee_payer_arg,
-    input_parsers::{pubkey_of_signer, pubkeys_of_multiple_signers, value_of},
+    input_parsers::{pubkey_of_signer, pubkeys_of_multiple_signers, signer_of, value_of},
     input_validators::{
         is_amount, is_amount_or_all, is_parsable, is_url_or_moniker, is_valid_pubkey,
         is_valid_signer, normalize_to_url_if_moniker,
     },
-    keypair::{signer_from_path, CliSignerInfo},
+    keypair::{signer_from_path, DefaultSigner, SignerFromPathConfig},
     nonce::*,
     offline::{self, *},
     ArgConstant,
 };
-use solana_cli_output::{return_signers, CliSignature, OutputFormat};
+use solana_cli_output::{display::println_name_value, return_signers, OutputFormat};
 use solana_client::{
     blockhash_query::BlockhashQuery, rpc_client::RpcClient, rpc_request::TokenAccountsFilter,
 };
@@ -44,26 +45,10 @@ use spl_token::{
 };
 use std::{collections::HashMap, process::exit, str::FromStr, sync::Arc};
 
-mod config;
-use config::Config;
-
-mod output;
-use output::*;
-
 mod sort;
 use sort::sort_and_parse_token_accounts;
 
-pub const OWNER_ADDRESS_ARG: ArgConstant<'static> = ArgConstant {
-    name: "owner",
-    long: "owner",
-    help: "Address of the token's owner. Defaults to the client keypair address.",
-};
-
-pub const OWNER_KEYPAIR_ARG: ArgConstant<'static> = ArgConstant {
-    name: "owner",
-    long: "owner",
-    help: "Keypair of the token's owner. Defaults to the client keypair.",
-};
+static WARNING: Emoji = Emoji("⚠️", "!");
 
 pub const MINT_ADDRESS_ARG: ArgConstant<'static> = ArgConstant {
     name: "mint_address",
@@ -88,28 +73,6 @@ pub const MULTISIG_SIGNER_ARG: ArgConstant<'static> = ArgConstant {
     long: "multisig-signer",
     help: "Member signer of a multisig account",
 };
-
-pub fn owner_address_arg<'a, 'b>() -> Arg<'a, 'b> {
-    Arg::with_name(OWNER_ADDRESS_ARG.name)
-        .long(OWNER_ADDRESS_ARG.long)
-        .takes_value(true)
-        .value_name("OWNER_ADDRESS")
-        .validator(is_valid_pubkey)
-        .help(OWNER_ADDRESS_ARG.help)
-}
-
-pub fn owner_keypair_arg_with_value_name<'a, 'b>(value_name: &'static str) -> Arg<'a, 'b> {
-    Arg::with_name(OWNER_KEYPAIR_ARG.name)
-        .long(OWNER_KEYPAIR_ARG.long)
-        .takes_value(true)
-        .value_name(value_name)
-        .validator(is_valid_signer)
-        .help(OWNER_KEYPAIR_ARG.help)
-}
-
-pub fn owner_keypair_arg<'a, 'b>() -> Arg<'a, 'b> {
-    owner_keypair_arg_with_value_name("OWNER_KEYPAIR")
-}
 
 pub fn mint_address_arg<'a, 'b>() -> Arg<'a, 'b> {
     Arg::with_name(MINT_ADDRESS_ARG.name)
@@ -182,29 +145,26 @@ fn is_multisig_minimum_signers(string: String) -> Result<(), String> {
     }
 }
 
+struct Config<'a> {
+    rpc_client: RpcClient,
+    verbose: bool,
+    owner: Pubkey,
+    fee_payer: Pubkey,
+    default_signer: DefaultSigner,
+    nonce_account: Option<Pubkey>,
+    nonce_authority: Option<Pubkey>,
+    blockhash_query: BlockhashQuery,
+    sign_only: bool,
+    multisigner_pubkeys: Vec<&'a Pubkey>,
+}
+
 type Error = Box<dyn std::error::Error>;
 type CommandResult = Result<Option<(u64, Vec<Vec<Instruction>>)>, Error>;
 
-fn new_throwaway_signer() -> (Box<dyn Signer>, Pubkey) {
+fn new_throwaway_signer() -> (Option<Box<dyn Signer>>, Option<Pubkey>) {
     let keypair = Keypair::new();
     let pubkey = keypair.pubkey();
-    (Box::new(keypair) as Box<dyn Signer>, pubkey)
-}
-
-fn get_signer(
-    matches: &ArgMatches<'_>,
-    keypair_name: &str,
-    wallet_manager: &mut Option<Arc<RemoteWalletManager>>,
-) -> Option<(Box<dyn Signer>, Pubkey)> {
-    matches.value_of(keypair_name).map(|path| {
-        let signer =
-            signer_from_path(matches, path, keypair_name, wallet_manager).unwrap_or_else(|e| {
-                eprintln!("error: {}", e);
-                exit(1);
-            });
-        let signer_pubkey = signer.pubkey();
-        (signer, signer_pubkey)
-    })
+    (Some(Box::new(keypair) as Box<dyn Signer>), Some(pubkey))
 }
 
 fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(), Error> {
@@ -222,16 +182,12 @@ fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(),
     }
 }
 
-fn check_wallet_balance(
-    config: &Config,
-    wallet: &Pubkey,
-    required_balance: u64,
-) -> Result<(), Error> {
-    let balance = config.rpc_client.get_balance(wallet)?;
+fn check_owner_balance(config: &Config, required_balance: u64) -> Result<(), Error> {
+    let balance = config.rpc_client.get_balance(&config.owner)?;
     if balance < required_balance {
         Err(format!(
-            "Wallet {}, has insufficient balance: {} required, {} available",
-            wallet,
+            "Owner, {}, has insufficient balance: {} required, {} available",
+            config.owner,
             lamports_to_sol(required_balance),
             lamports_to_sol(balance)
         )
@@ -265,11 +221,10 @@ fn command_create_token(
     config: &Config,
     decimals: u8,
     token: Pubkey,
-    authority: Pubkey,
     enable_freeze: bool,
     memo: Option<String>,
 ) -> CommandResult {
-    println_display(config, format!("Creating token {}", token));
+    println!("Creating token {}", token);
 
     let minimum_balance_for_rent_exemption = if !config.sign_only {
         config
@@ -278,7 +233,11 @@ fn command_create_token(
     } else {
         0
     };
-    let freeze_authority_pubkey = if enable_freeze { Some(authority) } else { None };
+    let freeze_authority_pubkey = if enable_freeze {
+        Some(config.owner)
+    } else {
+        None
+    };
 
     let mut instructions = vec![
         system_instruction::create_account(
@@ -291,13 +250,13 @@ fn command_create_token(
         initialize_mint(
             &spl_token::id(),
             &token,
-            &authority,
+            &config.owner,
             freeze_authority_pubkey.as_ref(),
             decimals,
         )?,
     ];
     if let Some(text) = memo {
-        instructions.push(spl_memo::build_memo(text.as_bytes(), &[&config.fee_payer]));
+        instructions.push(spl_memo::build_memo(text.as_bytes(), &[&config.owner]));
     }
     Ok(Some((
         minimum_balance_for_rent_exemption,
@@ -308,7 +267,6 @@ fn command_create_token(
 fn command_create_account(
     config: &Config,
     token: Pubkey,
-    owner: Pubkey,
     maybe_account: Option<Pubkey>,
 ) -> CommandResult {
     let minimum_balance_for_rent_exemption = if !config.sign_only {
@@ -320,7 +278,7 @@ fn command_create_account(
     };
 
     let (account, system_account_ok, instructions) = if let Some(account) = maybe_account {
-        println_display(config, format!("Creating account {}", account));
+        println!("Creating account {}", account);
         (
             account,
             false,
@@ -332,18 +290,18 @@ fn command_create_account(
                     Account::LEN as u64,
                     &spl_token::id(),
                 ),
-                initialize_account(&spl_token::id(), &account, &token, &owner)?,
+                initialize_account(&spl_token::id(), &account, &token, &config.owner)?,
             ],
         )
     } else {
-        let account = get_associated_token_address(&owner, &token);
-        println_display(config, format!("Creating account {}", account));
+        let account = get_associated_token_address(&config.owner, &token);
+        println!("Creating account {}", account);
         (
             account,
             true,
             vec![create_associated_token_account(
                 &config.fee_payer,
-                &owner,
+                &config.owner,
                 &token,
             )],
         )
@@ -373,14 +331,11 @@ fn command_create_multisig(
     minimum_signers: u8,
     multisig_members: Vec<Pubkey>,
 ) -> CommandResult {
-    println_display(
-        config,
-        format!(
-            "Creating {}/{} multisig {}",
-            minimum_signers,
-            multisig_members.len(),
-            multisig
-        ),
+    println!(
+        "Creating {}/{} multisig {}",
+        minimum_signers,
+        multisig_members.len(),
+        multisig
     );
 
     let minimum_balance_for_rent_exemption = if !config.sign_only {
@@ -416,8 +371,7 @@ fn command_authorize(
     config: &Config,
     account: Pubkey,
     authority_type: AuthorityType,
-    authority: Pubkey,
-    new_authority: Option<Pubkey>,
+    new_owner: Option<Pubkey>,
     force_authorize: bool,
 ) -> CommandResult {
     let auth_str = match authority_type {
@@ -440,16 +394,15 @@ fn command_authorize(
         } else if let Ok(token_account) = Account::unpack(&target_account.data) {
             let check_associated_token_account = || -> Result<(), Error> {
                 let maybe_associated_token_account =
-                    get_associated_token_address(&token_account.owner, &token_account.mint);
+                    get_associated_token_address(&config.owner, &token_account.mint);
                 if account == maybe_associated_token_account
                     && !force_authorize
-                    && Some(authority) != new_authority
+                    && Some(config.owner) != new_owner
                 {
-                    Err(format!(
-                        "Error: attempting to change the `{}` of an associated token account",
-                        auth_str
+                    Err(
+                        format!("Error: attempting to change the `{}` of an associated token account of `--owner`", auth_str)
+                            .into(),
                     )
-                    .into())
                 } else {
                     Ok(())
                 }
@@ -477,28 +430,25 @@ fn command_authorize(
     } else {
         COption::None
     };
-    println_display(
-        config,
-        format!(
-            "Updating {}\n  Current {}: {}\n  New {}: {}",
-            account,
-            auth_str,
-            previous_authority
-                .map(|pubkey| pubkey.to_string())
-                .unwrap_or_else(|| "disabled".to_string()),
-            auth_str,
-            new_authority
-                .map(|pubkey| pubkey.to_string())
-                .unwrap_or_else(|| "disabled".to_string())
-        ),
+    println!(
+        "Updating {}\n  Current {}: {}\n  New {}: {}",
+        account,
+        auth_str,
+        previous_authority
+            .map(|pubkey| pubkey.to_string())
+            .unwrap_or_else(|| "disabled".to_string()),
+        auth_str,
+        new_owner
+            .map(|pubkey| pubkey.to_string())
+            .unwrap_or_else(|| "disabled".to_string())
     );
 
     let instructions = vec![set_authority(
         &spl_token::id(),
         &account,
-        new_authority.as_ref(),
+        new_owner.as_ref(),
         authority_type,
-        &authority,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
@@ -513,7 +463,7 @@ fn resolve_mint_info(
     if !config.sign_only {
         let source_account = config
             .rpc_client
-            .get_token_account(token_account)?
+            .get_token_account(&token_account)?
             .ok_or_else(|| format!("Could not find token account {}", token_account))?;
         let source_mint = Pubkey::from_str(&source_account.mint)?;
         if let Some(mint) = mint_address {
@@ -549,7 +499,6 @@ fn command_transfer(
     ui_amount: Option<f64>,
     recipient: Pubkey,
     sender: Option<Pubkey>,
-    sender_owner: Pubkey,
     allow_unfunded_recipient: bool,
     fund_recipient: bool,
     mint_decimals: Option<u8>,
@@ -558,7 +507,7 @@ fn command_transfer(
     let sender = if let Some(sender) = sender {
         sender
     } else {
-        get_associated_token_address(&sender_owner, &token)
+        get_associated_token_address(&config.owner, &token)
     };
     let (mint_pubkey, decimals) = resolve_mint_info(config, &sender, Some(token), mint_decimals)?;
     let maybe_transfer_balance =
@@ -581,14 +530,11 @@ fn command_transfer(
         })?;
 
         let transfer_balance = maybe_transfer_balance.unwrap_or(sender_balance);
-        println_display(
-            config,
-            format!(
-                "Transfer {} tokens\n  Sender: {}\n  Recipient: {}",
-                spl_token::amount_to_ui_amount(transfer_balance, decimals),
-                sender,
-                recipient
-            ),
+        println!(
+            "Transfer {} tokens\n  Sender: {}\n  Recipient: {}",
+            spl_token::amount_to_ui_amount(transfer_balance, decimals),
+            sender,
+            recipient
         );
 
         if transfer_balance > sender_balance {
@@ -629,12 +575,9 @@ fn command_transfer(
 
     if !recipient_is_token_account {
         recipient_token_account = get_associated_token_address(&recipient, &mint_pubkey);
-        println_display(
-            config,
-            format!(
-                "  Recipient associated token account: {}",
-                recipient_token_account
-            ),
+        println!(
+            "  Recipient associated token account: {}",
+            recipient_token_account
         );
 
         let needs_funding = if !config.sign_only {
@@ -668,13 +611,10 @@ fn command_transfer(
                     minimum_balance_for_rent_exemption += config
                         .rpc_client
                         .get_minimum_balance_for_rent_exemption(Account::LEN)?;
-                    println_display(
-                        config,
-                        format!(
-                            "  Funding recipient: {} ({} SAFE)",
-                            recipient_token_account,
-                            lamports_to_sol(minimum_balance_for_rent_exemption)
-                        ),
+                    println!(
+                        "  Funding recipient: {} ({} SAFE)",
+                        recipient_token_account,
+                        lamports_to_sol(minimum_balance_for_rent_exemption)
                     );
                 }
                 instructions.push(create_associated_token_account(
@@ -697,7 +637,7 @@ fn command_transfer(
         &sender,
         &mint_pubkey,
         &recipient_token_account,
-        &sender_owner,
+        &config.owner,
         &config.multisigner_pubkeys,
         transfer_balance,
         decimals,
@@ -711,15 +651,11 @@ fn command_transfer(
 fn command_burn(
     config: &Config,
     source: Pubkey,
-    source_owner: Pubkey,
     ui_amount: f64,
     mint_address: Option<Pubkey>,
     mint_decimals: Option<u8>,
 ) -> CommandResult {
-    println_display(
-        config,
-        format!("Burn {} tokens\n  Source: {}", ui_amount, source),
-    );
+    println!("Burn {} tokens\n  Source: {}", ui_amount, source);
 
     let (mint_pubkey, decimals) = resolve_mint_info(config, &source, mint_address, mint_decimals)?;
     let amount = spl_token::ui_amount_to_amount(ui_amount, decimals);
@@ -728,7 +664,7 @@ fn command_burn(
         &spl_token::id(),
         &source,
         &mint_pubkey,
-        &source_owner,
+        &config.owner,
         &config.multisigner_pubkeys,
         amount,
         decimals,
@@ -742,14 +678,10 @@ fn command_mint(
     ui_amount: f64,
     recipient: Pubkey,
     mint_decimals: Option<u8>,
-    mint_authority: Pubkey,
 ) -> CommandResult {
-    println_display(
-        config,
-        format!(
-            "Minting {} tokens\n  Token: {}\n  Recipient: {}",
-            ui_amount, token, recipient
-        ),
+    println!(
+        "Minting {} tokens\n  Token: {}\n  Recipient: {}",
+        ui_amount, token, recipient
     );
 
     let (_, decimals) = resolve_mint_info(config, &recipient, None, mint_decimals)?;
@@ -759,7 +691,7 @@ fn command_mint(
         &spl_token::id(),
         &token,
         &recipient,
-        &mint_authority,
+        &config.owner,
         &config.multisigner_pubkeys,
         amount,
         decimals,
@@ -767,82 +699,58 @@ fn command_mint(
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_freeze(
-    config: &Config,
-    account: Pubkey,
-    mint_address: Option<Pubkey>,
-    freeze_authority: Pubkey,
-) -> CommandResult {
+fn command_freeze(config: &Config, account: Pubkey, mint_address: Option<Pubkey>) -> CommandResult {
     let (token, _) = resolve_mint_info(config, &account, mint_address, None)?;
 
-    println_display(
-        config,
-        format!("Freezing account: {}\n  Token: {}", account, token),
-    );
+    println!("Freezing account: {}\n  Token: {}", account, token);
 
     let instructions = vec![freeze_account(
         &spl_token::id(),
         &account,
         &token,
-        &freeze_authority,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_thaw(
-    config: &Config,
-    account: Pubkey,
-    mint_address: Option<Pubkey>,
-    freeze_authority: Pubkey,
-) -> CommandResult {
+fn command_thaw(config: &Config, account: Pubkey, mint_address: Option<Pubkey>) -> CommandResult {
     let (token, _) = resolve_mint_info(config, &account, mint_address, None)?;
 
-    println_display(
-        config,
-        format!("Freezing account: {}\n  Token: {}", account, token),
-    );
+    println!("Freezing account: {}\n  Token: {}", account, token);
 
     let instructions = vec![thaw_account(
         &spl_token::id(),
         &account,
         &token,
-        &freeze_authority,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_wrap(
-    config: &Config,
-    sol: f64,
-    wallet_address: Pubkey,
-    wrapped_sol_account: Option<Pubkey>,
-) -> CommandResult {
+fn command_wrap(config: &Config, sol: f64, account: Option<Pubkey>) -> CommandResult {
     let lamports = sol_to_lamports(sol);
 
-    let instructions = if let Some(wrapped_sol_account) = wrapped_sol_account {
-        println_display(
-            config,
-            format!("Wrapping {} SAFE into {}", sol, wrapped_sol_account),
-        );
+    let instructions = if let Some(account) = account {
+        println!("Wrapping {} SAFE into {}", sol, account);
         vec![
             system_instruction::create_account(
-                &wallet_address,
-                &wrapped_sol_account,
+                &config.owner,
+                &account,
                 lamports,
                 Account::LEN as u64,
                 &spl_token::id(),
             ),
             initialize_account(
                 &spl_token::id(),
-                &wrapped_sol_account,
+                &account,
                 &native_mint::id(),
-                &wallet_address,
+                &config.owner,
             )?,
         ]
     } else {
-        let account = get_associated_token_address(&wallet_address, &native_mint::id());
+        let account = get_associated_token_address(&config.owner, &native_mint::id());
 
         if !config.sign_only {
             if let Some(account_data) = config
@@ -856,27 +764,23 @@ fn command_wrap(
             }
         }
 
-        println_display(config, format!("Wrapping {} SAFE into {}", sol, account));
+        println!("Wrapping {} SAFE into {}", sol, account);
         vec![
-            system_instruction::transfer(&wallet_address, &account, lamports),
-            create_associated_token_account(&config.fee_payer, &wallet_address, &native_mint::id()),
+            system_instruction::transfer(&config.owner, &account, lamports),
+            create_associated_token_account(&config.fee_payer, &config.owner, &native_mint::id()),
         ]
     };
     if !config.sign_only {
-        check_wallet_balance(config, &wallet_address, lamports)?;
+        check_owner_balance(config, lamports)?;
     }
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_unwrap(
-    config: &Config,
-    wallet_address: Pubkey,
-    address: Option<Pubkey>,
-) -> CommandResult {
+fn command_unwrap(config: &Config, address: Option<Pubkey>) -> CommandResult {
     let use_associated_account = address.is_none();
-    let address = address
-        .unwrap_or_else(|| get_associated_token_address(&wallet_address, &native_mint::id()));
-    println_display(config, format!("Unwrapping {}", address));
+    let address =
+        address.unwrap_or_else(|| get_associated_token_address(&config.owner, &native_mint::id()));
+    println!("Unwrapping {}", address);
     if !config.sign_only {
         let lamports = config.rpc_client.get_balance(&address)?;
         if lamports == 0 {
@@ -886,18 +790,15 @@ fn command_unwrap(
                 return Err(format!("No wrapped SAFE in {}", address).into());
             }
         }
-        println_display(
-            config,
-            format!("  Amount: {} SAFE", lamports_to_sol(lamports)),
-        );
+        println!("  Amount: {} SAFE", lamports_to_sol(lamports),);
     }
-    println_display(config, format!("  Recipient: {}", &wallet_address));
+    println!("  Recipient: {}", &config.owner);
 
     let instructions = vec![close_account(
         &spl_token::id(),
         &address,
-        &wallet_address,
-        &wallet_address,
+        &config.owner,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
@@ -906,18 +807,14 @@ fn command_unwrap(
 fn command_approve(
     config: &Config,
     account: Pubkey,
-    owner: Pubkey,
     ui_amount: f64,
     delegate: Pubkey,
     mint_address: Option<Pubkey>,
     mint_decimals: Option<u8>,
 ) -> CommandResult {
-    println_display(
-        config,
-        format!(
-            "Approve {} tokens\n  Account: {}\n  Delegate: {}",
-            ui_amount, account, delegate
-        ),
+    println!(
+        "Approve {} tokens\n  Account: {}\n  Delegate: {}",
+        ui_amount, account, delegate
     );
 
     let (mint_pubkey, decimals) = resolve_mint_info(config, &account, mint_address, mint_decimals)?;
@@ -928,7 +825,7 @@ fn command_approve(
         &account,
         &mint_pubkey,
         &delegate,
-        &owner,
+        &config.owner,
         &config.multisigner_pubkeys,
         amount,
         decimals,
@@ -936,12 +833,7 @@ fn command_approve(
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_revoke(
-    config: &Config,
-    account: Pubkey,
-    owner: Pubkey,
-    delegate: Option<Pubkey>,
-) -> CommandResult {
+fn command_revoke(config: &Config, account: Pubkey, delegate: Option<Pubkey>) -> CommandResult {
     let delegate = if !config.sign_only {
         let source_account = config
             .rpc_client
@@ -958,12 +850,9 @@ fn command_revoke(
     };
 
     if let Some(delegate) = delegate {
-        println_display(
-            config,
-            format!(
-                "Revoking approval\n  Account: {}\n  Delegate: {}",
-                account, delegate
-            ),
+        println!(
+            "Revoking approval\n  Account: {}\n  Delegate: {}",
+            account, delegate
         );
     } else {
         return Err(format!("No delegate on account {}", account).into());
@@ -972,7 +861,7 @@ fn command_revoke(
     let instructions = vec![revoke(
         &spl_token::id(),
         &account,
-        &owner,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
@@ -980,10 +869,15 @@ fn command_revoke(
 
 fn command_close(
     config: &Config,
-    account: Pubkey,
-    close_authority: Pubkey,
+    token: Option<Pubkey>,
     recipient: Pubkey,
+    account: Option<Pubkey>,
 ) -> CommandResult {
+    let account = if let Some(account) = account {
+        account
+    } else {
+        get_associated_token_address(&config.owner, &token.unwrap())
+    };
     if !config.sign_only {
         let source_account = config
             .rpc_client
@@ -1014,43 +908,50 @@ fn command_close(
         &spl_token::id(),
         &account,
         &recipient,
-        &close_authority,
+        &config.owner,
         &config.multisigner_pubkeys,
     )?];
     Ok(Some((0, vec![instructions])))
 }
 
-fn command_balance(config: &Config, address: Pubkey) -> CommandResult {
+fn command_balance(
+    config: &Config,
+    token: Option<Pubkey>,
+    address: Option<Pubkey>,
+) -> CommandResult {
+    let address = if let Some(address) = address {
+        address
+    } else {
+        get_associated_token_address(&config.owner, &token.unwrap())
+    };
     let balance = config
         .rpc_client
         .get_token_account_balance(&address)
         .map_err(|_| format!("Could not find token account {}", address))?;
-    let cli_token_amount = CliTokenAmount { amount: balance };
-    println!(
-        "{}",
-        config.output_format.formatted_string(&cli_token_amount)
-    );
 
+    if config.verbose {
+        println!("ui amount: {}", balance.real_number_string_trimmed());
+        println!("decimals: {}", balance.decimals);
+        println!("amount: {}", balance.amount);
+    } else {
+        println!("{}", balance.real_number_string_trimmed());
+    }
     Ok(None)
 }
 
 fn command_supply(config: &Config, address: Pubkey) -> CommandResult {
     let supply = config.rpc_client.get_token_supply(&address)?;
-    let cli_token_amount = CliTokenAmount { amount: supply };
-    println!(
-        "{}",
-        config.output_format.formatted_string(&cli_token_amount)
-    );
 
+    println!("{}", supply.real_number_string_trimmed());
     Ok(None)
 }
 
-fn command_accounts(config: &Config, token: Option<Pubkey>, owner: Pubkey) -> CommandResult {
+fn command_accounts(config: &Config, token: Option<Pubkey>) -> CommandResult {
     if let Some(token) = token {
         validate_mint(config, token)?;
     }
     let accounts = config.rpc_client.get_token_accounts_by_owner(
-        &owner,
+        &config.owner,
         match token {
             Some(token) => TokenAccountsFilter::Mint(token),
             None => TokenAccountsFilter::ProgramId(spl_token::id()),
@@ -1058,67 +959,191 @@ fn command_accounts(config: &Config, token: Option<Pubkey>, owner: Pubkey) -> Co
     )?;
     if accounts.is_empty() {
         println!("None");
-        return Ok(None);
     }
 
     let (mint_accounts, unsupported_accounts, max_len_balance, includes_aux) =
-        sort_and_parse_token_accounts(&owner, accounts);
+        sort_and_parse_token_accounts(&config.owner, accounts);
     let aux_len = if includes_aux { 10 } else { 0 };
+    let mut gc_alert = false;
 
-    let cli_token_accounts = CliTokenAccounts {
-        accounts: mint_accounts
-            .into_iter()
-            .map(|(_mint, accounts_list)| accounts_list)
-            .collect(),
-        unsupported_accounts,
-        max_len_balance,
-        aux_len,
-        token_is_some: token.is_some(),
-    };
-    println!(
-        "{}",
-        config.output_format.formatted_string(&cli_token_accounts)
-    );
+    if config.verbose {
+        if token.is_some() {
+            println!("{:<44}  {:<2$}", "Account", "Balance", max_len_balance);
+            println!("-------------------------------------------------------------");
+        } else {
+            println!(
+                "{:<44}  {:<44}  {:<3$}",
+                "Token", "Account", "Balance", max_len_balance
+            );
+            println!("----------------------------------------------------------------------------------------------------------");
+        }
+    } else if token.is_some() {
+        println!("{:<1$}", "Balance", max_len_balance);
+        println!("-------------");
+    } else {
+        println!("{:<44}  {:<2$}", "Token", "Balance", max_len_balance);
+        println!("---------------------------------------------------------------");
+    }
+    for (_mint, accounts_list) in mint_accounts.iter() {
+        let mut aux_counter = 1;
+        for account in accounts_list {
+            let maybe_aux = if !account.is_associated {
+                gc_alert = true;
+                let message = format!("  (Aux-{}*)", aux_counter);
+                aux_counter += 1;
+                message
+            } else {
+                "".to_string()
+            };
+            let maybe_frozen = if let UiAccountState::Frozen = account.ui_token_account.state {
+                format!(" {}  Frozen", WARNING)
+            } else {
+                "".to_string()
+            };
+            if config.verbose {
+                if token.is_some() {
+                    println!(
+                        "{:<44}  {:<4$}{:<5$}{}",
+                        account.address,
+                        account
+                            .ui_token_account
+                            .token_amount
+                            .real_number_string_trimmed(),
+                        maybe_aux,
+                        maybe_frozen,
+                        max_len_balance,
+                        aux_len,
+                    )
+                } else {
+                    println!(
+                        "{:<44}  {:<44}  {:<5$}{:<6$}{}",
+                        account.ui_token_account.mint,
+                        account.address,
+                        account
+                            .ui_token_account
+                            .token_amount
+                            .real_number_string_trimmed(),
+                        maybe_aux,
+                        maybe_frozen,
+                        max_len_balance,
+                        aux_len,
+                    )
+                }
+            } else if token.is_some() {
+                println!(
+                    "{:<3$}{:<4$}{}",
+                    account
+                        .ui_token_account
+                        .token_amount
+                        .real_number_string_trimmed(),
+                    maybe_aux,
+                    maybe_frozen,
+                    max_len_balance,
+                    aux_len,
+                )
+            } else {
+                println!(
+                    "{:<44}  {:<4$}{:<5$}{}",
+                    account.ui_token_account.mint,
+                    account
+                        .ui_token_account
+                        .token_amount
+                        .real_number_string_trimmed(),
+                    maybe_aux,
+                    maybe_frozen,
+                    max_len_balance,
+                    aux_len,
+                )
+            }
+        }
+    }
+    for unsupported_account in unsupported_accounts {
+        println!(
+            "{:<44}  {}",
+            unsupported_account.address, unsupported_account.err
+        );
+    }
+    if gc_alert {
+        println!();
+        println!("* Please run `spl-token gc` to clean up Aux accounts");
+    }
     Ok(None)
 }
 
-fn command_address(config: &Config, token: Option<Pubkey>, owner: Pubkey) -> CommandResult {
-    let mut cli_address = CliWalletAddress {
-        wallet_address: owner.to_string(),
-        ..CliWalletAddress::default()
-    };
+fn command_address(config: &Config, token: Option<Pubkey>) -> CommandResult {
     if let Some(token) = token {
         validate_mint(config, token)?;
-        let associated_token_address = get_associated_token_address(&owner, &token);
-        cli_address.associated_token_address = Some(associated_token_address.to_string());
+        let associated_token_address = get_associated_token_address(&config.owner, &token);
+        println!("Wallet address: {:?}", config.owner);
+        println!("Associated token address: {:?}", associated_token_address);
+    } else {
+        println!("Wallet address: {:?}", config.owner);
     }
-    println!("{}", config.output_format.formatted_string(&cli_address));
     Ok(None)
 }
 
-fn command_account_info(config: &Config, address: Pubkey) -> CommandResult {
+fn command_account_info(
+    config: &Config,
+    token: Option<Pubkey>,
+    address: Option<Pubkey>,
+) -> CommandResult {
+    let mut is_associated = false;
+    let address = if let Some(address) = address {
+        address
+    } else {
+        is_associated = true;
+        get_associated_token_address(&config.owner, &token.unwrap())
+    };
     let account = config
         .rpc_client
         .get_token_account(&address)
         .map_err(|_| format!("Could not find token account {}", address))?
         .unwrap();
-    let mint = Pubkey::from_str(&account.mint).unwrap();
-    let owner = Pubkey::from_str(&account.owner).unwrap();
-    let is_associated = get_associated_token_address(&owner, &mint) == address;
-    let cli_token_account = CliTokenAccount {
-        address: address.to_string(),
-        is_associated,
-        account,
+    if !is_associated {
+        if let Ok(mint) = Pubkey::from_str(&account.mint) {
+            is_associated = get_associated_token_address(&config.owner, &mint) == address;
+        }
+    }
+    let address_message = if is_associated {
+        address.to_string()
+    } else {
+        format!("{}  (Aux*)", address)
     };
-    println!(
-        "{}",
-        config.output_format.formatted_string(&cli_token_account)
+    println!();
+    println_name_value("Address:", &address_message);
+    println_name_value(
+        "Balance:",
+        &account.token_amount.real_number_string_trimmed(),
     );
+    let mint = format!(
+        "{}{}",
+        account.mint,
+        if account.is_native { " (native)" } else { "" }
+    );
+    println_name_value("Mint:", &mint);
+    println_name_value("Owner:", &account.owner);
+    println_name_value("State:", &format!("{:?}", account.state));
+    if let Some(delegate) = &account.delegate {
+        println!("Delegation:");
+        println_name_value("  Delegate:", delegate);
+        let allowance = account.delegated_amount.as_ref().unwrap();
+        println_name_value("  Allowance:", &allowance.real_number_string_trimmed());
+    } else {
+        println_name_value("Delegation:", "");
+    }
+    println_name_value(
+        "Close authority:",
+        &account.close_authority.as_ref().unwrap_or(&String::new()),
+    );
+    if !is_associated {
+        println!();
+        println!("* Please run `spl-token gc` to clean up Aux accounts");
+    }
     Ok(None)
 }
 
 fn get_multisig(config: &Config, address: &Pubkey) -> Result<Multisig, Error> {
-    let account = config.rpc_client.get_account(address)?;
+    let account = config.rpc_client.get_account(&address)?;
     Multisig::unpack(&account.data).map_err(|e| e.into())
 }
 
@@ -1126,34 +1151,27 @@ fn command_multisig(config: &Config, address: Pubkey) -> CommandResult {
     let multisig = get_multisig(config, &address)?;
     let n = multisig.n as usize;
     assert!(n <= multisig.signers.len());
-    let cli_multisig = CliMultisig {
-        address: address.to_string(),
-        m: multisig.m,
-        n: multisig.n,
-        signers: multisig
-            .signers
-            .iter()
-            .enumerate()
-            .filter_map(|(i, signer)| {
-                if i < n {
-                    Some(signer.to_string())
-                } else {
-                    None
-                }
-            })
-            .collect(),
-    };
-    println!("{}", config.output_format.formatted_string(&cli_multisig));
+    println!();
+    println_name_value("Address:", &address.to_string());
+    println_name_value("M/N:", &format!("{}/{}", multisig.m, n));
+    println_name_value("Signers:", " ");
+    let width = if n >= 9 { 4 } else { 3 };
+    for i in 0..n {
+        let title = format!("{1:>0$}:", width, i + 1);
+        let pubkey = &multisig.signers[i];
+        println_name_value(&title, &pubkey.to_string())
+    }
     Ok(None)
 }
 
-fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
-    println_display(config, "Fetching token accounts".to_string());
-    let accounts = config
-        .rpc_client
-        .get_token_accounts_by_owner(&owner, TokenAccountsFilter::ProgramId(spl_token::id()))?;
+fn command_gc(config: &Config) -> CommandResult {
+    println!("Fetching token accounts");
+    let accounts = config.rpc_client.get_token_accounts_by_owner(
+        &config.owner,
+        TokenAccountsFilter::ProgramId(spl_token::id()),
+    )?;
     if accounts.is_empty() {
-        println_display(config, "Nothing to do".to_string());
+        println!("Nothing to do");
         return Ok(None);
     }
 
@@ -1189,10 +1207,11 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
                         .parse::<u64>()
                         .unwrap_or_else(|err| panic!("Invalid token amount: {}", err));
 
-                    let close_authority = ui_token_account.close_authority.map_or(owner, |s| {
-                        s.parse::<Pubkey>()
-                            .unwrap_or_else(|err| panic!("Invalid close authority: {}", err))
-                    });
+                    let close_authority =
+                        ui_token_account.close_authority.map_or(config.owner, |s| {
+                            s.parse::<Pubkey>()
+                                .unwrap_or_else(|err| panic!("Invalid close authority: {}", err))
+                        });
 
                     let entry = accounts_by_token.entry(token).or_insert_with(HashMap::new);
                     entry.insert(
@@ -1213,15 +1232,15 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
     let mut lamports_needed = 0;
 
     for (token, accounts) in accounts_by_token.into_iter() {
-        println_display(config, format!("Processing token: {}", token));
-        let associated_token_account = get_associated_token_address(&owner, &token);
+        println!("Processing token: {}", token);
+        let associated_token_account = get_associated_token_address(&config.owner, &token);
         let total_balance: u64 = accounts.values().map(|account| account.0).sum();
 
         if total_balance > 0 && !accounts.contains_key(&associated_token_account) {
             // Create the associated token account
             instructions.push(vec![create_associated_token_account(
                 &config.fee_payer,
-                &owner,
+                &config.owner,
                 &token,
             )]);
             lamports_needed += minimum_balance_for_rent_exemption;
@@ -1247,19 +1266,19 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
                     &address,
                     &token,
                     &associated_token_account,
-                    &owner,
+                    &config.owner,
                     &config.multisigner_pubkeys,
                     amount,
                     decimals,
                 )?);
             }
             // Close the account if config.owner is able to
-            if close_authority == owner {
+            if close_authority == config.owner {
                 account_instructions.push(close_account(
                     &spl_token::id(),
                     &address,
-                    &owner,
-                    &owner,
+                    &config.owner,
+                    &config.owner,
                     &config.multisigner_pubkeys,
                 )?);
             }
@@ -1271,11 +1290,6 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
     }
 
     Ok(Some((lamports_needed, instructions)))
-}
-
-fn command_sync_native(native_account_address: Pubkey) -> CommandResult {
-    let instructions = vec![sync_native(&spl_token::id(), &native_account_address)?];
-    Ok(Some((0, vec![instructions])))
 }
 
 struct SignOnlyNeedsFullMintSpec {}
@@ -1322,7 +1336,7 @@ fn main() {
                 .global(true)
                 .help("Configuration file to use");
             if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
-                arg.default_value(config_file)
+                arg.default_value(&config_file)
             } else {
                 arg
             }
@@ -1336,15 +1350,6 @@ fn main() {
                 .help("Show additional information"),
         )
         .arg(
-            Arg::with_name("output_format")
-                .long("output")
-                .value_name("FORMAT")
-                .global(true)
-                .takes_value(true)
-                .possible_values(&["json", "json-compact"])
-                .help("Return information in specified output format"),
-        )
-        .arg(
             Arg::with_name("json_rpc_url")
                 .short("u")
                 .long("url")
@@ -1353,16 +1358,38 @@ fn main() {
                 .global(true)
                 .validator(is_url_or_moniker)
                 .help(
-                    "URL for Solcoin's JSON RPC or moniker (or their first letter): \
+                    "URL for Solana's JSON RPC or moniker (or their first letter): \
                        [mainnet-beta, testnet, devnet, localhost] \
                     Default from the configuration file."
+                ),
+        )
+        .arg(
+            Arg::with_name("owner")
+                .long("owner")
+                .value_name("KEYPAIR")
+                .validator(is_valid_signer)
+                .takes_value(true)
+                .global(true)
+                .help(
+                    "Specify the token owner account. \
+                     This may be a keypair file, the ASK keyword. \
+                     Defaults to the client keypair.",
                 ),
         )
         .arg(fee_payer_arg().global(true))
         .subcommand(SubCommand::with_name("create-token").about("Create a new token")
                 .arg(
+                    Arg::with_name("decimals")
+                        .long("decimals")
+                        .validator(is_mint_decimals)
+                        .value_name("DECIMALS")
+                        .takes_value(true)
+                        .default_value(&default_decimals)
+                        .help("Number of base 10 digits to the right of the decimal place"),
+                )
+                .arg(
                     Arg::with_name("token_keypair")
-                        .value_name("TOKEN_KEYPAIR")
+                        .value_name("KEYPAIR")
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .index(1)
@@ -1371,27 +1398,6 @@ fn main() {
                              This may be a keypair file or the ASK keyword. \
                              [default: randomly generated keypair]"
                         ),
-                )
-                .arg(
-                    Arg::with_name("mint_authority")
-                        .long("mint-authority")
-                        .alias("owner")
-                        .value_name("ADDRESS")
-                        .validator(is_valid_pubkey)
-                        .takes_value(true)
-                        .help(
-                            "Specify the mint authority address. \
-                             Defaults to the client keypair address."
-                        ),
-                )
-                .arg(
-                    Arg::with_name("decimals")
-                        .long("decimals")
-                        .validator(is_mint_decimals)
-                        .value_name("DECIMALS")
-                        .takes_value(true)
-                        .default_value(default_decimals)
-                        .help("Number of base 10 digits to the right of the decimal place"),
                 )
                 .arg(
                     Arg::with_name("enable_freeze")
@@ -1424,7 +1430,7 @@ fn main() {
                 )
                 .arg(
                     Arg::with_name("account_keypair")
-                        .value_name("ACCOUNT_KEYPAIR")
+                        .value_name("KEYPAIR")
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .index(2)
@@ -1434,7 +1440,6 @@ fn main() {
                              [default: associated token account for --owner]"
                         ),
                 )
-                .arg(owner_address_arg())
                 .nonce_args(true)
                 .offline_args(),
         )
@@ -1515,18 +1520,6 @@ fn main() {
                         .help("The address of the new authority"),
                 )
                 .arg(
-                    Arg::with_name("authority")
-                        .long("authority")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the current authority keypair. \
-                             Defaults to the client keypair."
-                        ),
-                )
-                .arg(
                     Arg::with_name("disable")
                         .long("disable")
                         .takes_value(false)
@@ -1583,13 +1576,6 @@ fn main() {
                         .long("from")
                         .help("Specify the sending token account \
                             [default: owner's associated token account]")
-                )
-                .arg(owner_keypair_arg_with_value_name("SENDER_TOKEN_OWNER_KEYPAIR")
-                        .help(
-                            "Specify the owner of the sending token account. \
-                            This may be a keypair file, the ASK keyword. \
-                            Defaults to the client keypair.",
-                        ),
                 )
                 .arg(
                     Arg::with_name("allow_unfunded_recipient")
@@ -1648,13 +1634,6 @@ fn main() {
                         .required(true)
                         .help("Amount to burn, in tokens"),
                 )
-                .arg(owner_keypair_arg_with_value_name("SOURCE_TOKEN_OWNER_KEYPAIR")
-                        .help(
-                            "Specify the source token owner account. \
-                            This may be a keypair file, the ASK keyword. \
-                            Defaults to the client keypair.",
-                        ),
-                )
                 .arg(multisig_signer_arg())
                 .mint_args()
                 .nonce_args(true)
@@ -1689,19 +1668,6 @@ fn main() {
                         .index(3)
                         .help("The token account address of recipient [default: associated token account for --owner]"),
                 )
-                .arg(
-                    Arg::with_name("mint_authority")
-                        .long("mint-authority")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the mint authority keypair. \
-                             This may be a keypair file or the ASK keyword. \
-                             Defaults to the client keypair."
-                        ),
-                )
                 .arg(mint_decimals_arg())
                 .arg(multisig_signer_arg())
                 .nonce_args(true)
@@ -1718,19 +1684,6 @@ fn main() {
                         .index(1)
                         .required(true)
                         .help("The address of the token account to freeze"),
-                )
-                .arg(
-                    Arg::with_name("freeze_authority")
-                        .long("freeze-authority")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the freeze authority keypair. \
-                             This may be a keypair file or the ASK keyword. \
-                             Defaults to the client keypair."
-                        ),
                 )
                 .arg(mint_address_arg())
                 .arg(multisig_signer_arg())
@@ -1749,19 +1702,6 @@ fn main() {
                         .required(true)
                         .help("The address of the token account to thaw"),
                 )
-                .arg(
-                    Arg::with_name("freeze_authority")
-                        .long("freeze-authority")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the freeze authority keypair. \
-                             This may be a keypair file or the ASK keyword. \
-                             Defaults to the client keypair."
-                        ),
-                )
                 .arg(mint_address_arg())
                 .arg(multisig_signer_arg())
                 .nonce_args(true)
@@ -1778,19 +1718,6 @@ fn main() {
                         .index(1)
                         .required(true)
                         .help("Amount of SAFE to wrap"),
-                )
-                .arg(
-                    Arg::with_name("wallet_keypair")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the keypair for the wallet which will have its native SAFE wrapped. \
-                             This wallet will be assigned as the owner of the wrapped SAFE token account. \
-                             This may be a keypair file or the ASK keyword. \
-                             Defaults to the client keypair."
-                        ),
                 )
                 .arg(
                     Arg::with_name("create_aux_account")
@@ -1812,19 +1739,6 @@ fn main() {
                         .index(1)
                         .help("The address of the auxiliary token account to unwrap \
                             [default: associated token account for --owner]"),
-                )
-                .arg(
-                    Arg::with_name("wallet_keypair")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the keypair for the wallet which owns the wrapped SAFE. \
-                             This wallet will receive the unwrapped SAFE. \
-                             This may be a keypair file or the ASK keyword. \
-                             Defaults to the client keypair."
-                        ),
                 )
                 .arg(multisig_signer_arg())
                 .nonce_args(true)
@@ -1860,9 +1774,6 @@ fn main() {
                         .required(true)
                         .help("The token account address of delegate"),
                 )
-                .arg(
-                    owner_keypair_arg()
-                )
                 .arg(multisig_signer_arg())
                 .mint_args()
                 .nonce_args(true)
@@ -1879,8 +1790,6 @@ fn main() {
                         .index(1)
                         .required(true)
                         .help("The address of the token account"),
-                )
-                .arg(owner_keypair_arg()
                 )
                 .arg(delegate_address_arg())
                 .arg(multisig_signer_arg())
@@ -1899,7 +1808,6 @@ fn main() {
                         .required_unless("address")
                         .help("Token to close. To close a specific account, use the `--address` parameter instead"),
                 )
-                .arg(owner_address_arg())
                 .arg(
                     Arg::with_name("recipient")
                         .long("recipient")
@@ -1907,20 +1815,6 @@ fn main() {
                         .value_name("REFUND_ACCOUNT_ADDRESS")
                         .takes_value(true)
                         .help("The address of the account to receive remaining SAFE [default: --owner]"),
-                )
-                .arg(
-                    Arg::with_name("close_authority")
-                        .long("close-authority")
-                        .alias("owner")
-                        .value_name("KEYPAIR")
-                        .validator(is_valid_signer)
-                        .takes_value(true)
-                        .help(
-                            "Specify the token's close authority if it has one, \
-                            otherwise specify the token's owner keypair. \
-                            This may be a keypair file, the ASK keyword. \
-                            Defaults to the client keypair.",
-                        ),
                 )
                 .arg(
                     Arg::with_name("address")
@@ -1948,7 +1842,6 @@ fn main() {
                         .required_unless("address")
                         .help("Token of associated account. To query a specific account, use the `--address` parameter instead"),
                 )
-                .arg(owner_address_arg().conflicts_with("address"))
                 .arg(
                     Arg::with_name("address")
                         .validator(is_valid_pubkey)
@@ -1983,8 +1876,7 @@ fn main() {
                         .takes_value(true)
                         .index(1)
                         .help("Limit results to the given token. [Default: list accounts for all tokens]"),
-                )
-                .arg(owner_address_arg())
+                ),
         )
         .subcommand(
             SubCommand::with_name("address")
@@ -1996,14 +1888,7 @@ fn main() {
                         .takes_value(true)
                         .long("token")
                         .requires("verbose")
-                        .help("Return the associated token address for the given token. \
-                               [Default: return the client keypair address]")
-                )
-                .arg(
-                    owner_address_arg()
-                        .requires("token")
-                        .help("Return the associated token address for the given owner. \
-                               [Default: return the associated token address for the client keypair]"),
+                        .help("Return the associated token address for the given token. [Default: --owner address]"),
                 ),
         )
         .subcommand(
@@ -2015,18 +1900,8 @@ fn main() {
                         .value_name("TOKEN_ADDRESS")
                         .takes_value(true)
                         .index(1)
-                        .conflicts_with("address")
                         .required_unless("address")
-                        .help("Token of associated account. \
-                               To query a specific account, use the `--address` parameter instead"),
-                )
-                .arg(
-                    owner_address_arg()
-                        .index(2)
-                        .conflicts_with("address")
-                        .help("Owner of the associated account for the specified token. \
-                               To query a specific account, use the `--address` parameter instead. \
-                               Defaults to the client keypair."),
+                        .help("Token of associated account. To query a specific account, use the `--address` parameter instead"),
                 )
                 .arg(
                     Arg::with_name("address")
@@ -2054,33 +1929,11 @@ fn main() {
         .subcommand(
             SubCommand::with_name("gc")
                 .about("Cleanup unnecessary token accounts")
-                .arg(owner_keypair_arg())
-        )
-        .subcommand(
-            SubCommand::with_name("sync-native")
-                .about("Sync a native SAFE token account to its underlying lamports")
-                .arg(
-                    owner_address_arg()
-                        .index(1)
-                        .conflicts_with("address")
-                        .help("Owner of the associated account for the native token. \
-                               To query a specific account, use the `--address` parameter instead. \
-                               Defaults to the client keypair."),
-                )
-                .arg(
-                    Arg::with_name("address")
-                        .validator(is_valid_pubkey)
-                        .value_name("TOKEN_ACCOUNT_ADDRESS")
-                        .takes_value(true)
-                        .long("address")
-                        .conflicts_with("owner")
-                        .help("Specify the specific token account address to sync"),
-                ),
         )
         .get_matches();
 
     let mut wallet_manager = None;
-    let mut bulk_signers: Vec<Box<dyn Signer>> = Vec::new();
+    let mut bulk_signers: Vec<Option<Box<dyn Signer>>> = Vec::new();
     let mut multisigner_ids = Vec::new();
 
     let (sub_command, sub_matches) = app_matches.subcommand();
@@ -2098,8 +1951,32 @@ fn main() {
                 .unwrap_or(&cli_config.json_rpc_url),
         );
 
+        let default_signer_arg_name = "owner".to_string();
+        let default_signer_path = matches
+            .value_of(&default_signer_arg_name)
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| cli_config.keypair_path.clone());
+        let default_signer = DefaultSigner {
+            path: default_signer_path,
+            arg_name: default_signer_arg_name,
+        };
+
+        let (owner, signer) = {
+            let config = SignerFromPathConfig {
+                allow_null_signer: true,
+            };
+            let owner = default_signer
+                .signer_from_path_with_config(&matches, &mut wallet_manager, &config)
+                .unwrap_or_else(|e| {
+                    eprintln!("error: {}", e);
+                    exit(1);
+                });
+            (owner.pubkey(), Some(owner))
+        };
+        bulk_signers.push(signer);
+
         let (signer, fee_payer) = signer_from_path(
-            matches,
+            &matches,
             matches
                 .value_of("fee_payer")
                 .unwrap_or(&cli_config.keypair_path),
@@ -2108,7 +1985,7 @@ fn main() {
         )
         .map(|s| {
             let p = s.pubkey();
-            (s, p)
+            (Some(s), p)
         })
         .unwrap_or_else(|e| {
             eprintln!("error: {}", e);
@@ -2117,52 +1994,34 @@ fn main() {
         bulk_signers.push(signer);
 
         let verbose = matches.is_present("verbose");
-        let output_format = matches
-            .value_of("output_format")
-            .map(|value| match value {
-                "json" => OutputFormat::Json,
-                "json-compact" => OutputFormat::JsonCompact,
-                _ => unreachable!(),
-            })
-            .unwrap_or(if verbose {
-                OutputFormat::DisplayVerbose
-            } else {
-                OutputFormat::Display
-            });
 
-        let nonce_account = pubkey_of_signer(matches, NONCE_ARG.name, &mut wallet_manager)
+        let nonce_account = pubkey_of_signer(&matches, NONCE_ARG.name, &mut wallet_manager)
             .unwrap_or_else(|e| {
                 eprintln!("error: {}", e);
                 exit(1);
             });
-        let nonce_authority = if nonce_account.is_some() {
-            let (signer, nonce_authority) = signer_from_path(
-                matches,
-                matches
-                    .value_of(NONCE_AUTHORITY_ARG.name)
-                    .unwrap_or(&cli_config.keypair_path),
-                NONCE_AUTHORITY_ARG.name,
-                &mut wallet_manager,
-            )
-            .map(|s| {
-                let p = s.pubkey();
-                (s, p)
-            })
-            .unwrap_or_else(|e| {
-                eprintln!("error: {}", e);
-                exit(1);
-            });
-            bulk_signers.push(signer);
-
-            Some(nonce_authority)
-        } else {
-            None
-        };
+        let (signer, nonce_authority) = signer_from_path(
+            &matches,
+            matches
+                .value_of(NONCE_AUTHORITY_ARG.name)
+                .unwrap_or(&cli_config.keypair_path),
+            NONCE_AUTHORITY_ARG.name,
+            &mut wallet_manager,
+        )
+        .map(|s| {
+            let p = s.pubkey();
+            (Some(s), Some(p))
+        })
+        .unwrap_or_else(|e| {
+            eprintln!("error: {}", e);
+            exit(1);
+        });
+        bulk_signers.push(signer);
 
         let blockhash_query = BlockhashQuery::new_from_matches(matches);
         let sign_only = matches.is_present(SIGN_ONLY_ARG.name);
 
-        let multisig_signers = signers_of(matches, MULTISIG_SIGNER_ARG.name, &mut wallet_manager)
+        let multisig_signers = signers_of(&matches, MULTISIG_SIGNER_ARG.name, &mut wallet_manager)
             .unwrap_or_else(|e| {
                 eprintln!("error: {}", e);
                 exit(1);
@@ -2170,16 +2029,17 @@ fn main() {
         if let Some(mut multisig_signers) = multisig_signers {
             multisig_signers.sort_by(|(_, lp), (_, rp)| lp.cmp(rp));
             let (signers, pubkeys): (Vec<_>, Vec<_>) = multisig_signers.into_iter().unzip();
-            bulk_signers.extend(signers);
+            bulk_signers.extend(signers.into_iter().map(Some));
             multisigner_ids = pubkeys;
         }
         let multisigner_pubkeys = multisigner_ids.iter().collect::<Vec<_>>();
 
         Config {
             rpc_client: RpcClient::new_with_commitment(json_rpc_url, CommitmentConfig::confirmed()),
-            output_format,
+            verbose,
+            owner,
             fee_payer,
-            default_keypair_path: cli_config.keypair_path,
+            default_signer,
             nonce_account,
             nonce_authority,
             blockhash_query,
@@ -2188,25 +2048,35 @@ fn main() {
         }
     };
 
+    if matches.is_present(MULTISIG_SIGNER_ARG.name)
+        && !config.sign_only
+        && get_multisig(&config, &config.owner).is_err()
+    {
+        eprintln!("error: {} is not a multisig account", config.owner);
+        exit(1);
+    }
+
     solana_logger::setup_with_default("solana=info");
 
     let _ = match (sub_command, sub_matches) {
         ("create-token", Some(arg_matches)) => {
             let decimals = value_t_or_exit!(arg_matches, "decimals", u8);
-            let mint_authority =
-                config.pubkey_or_default(arg_matches, "mint_authority", &mut wallet_manager);
             let memo = value_t!(arg_matches, "memo", String).ok();
-
-            let (token_signer, token) =
-                get_signer(arg_matches, "token_keypair", &mut wallet_manager)
-                    .unwrap_or_else(new_throwaway_signer);
-            bulk_signers.push(token_signer);
+            let (signer, token) = if arg_matches.is_present("token_keypair") {
+                signer_of(&arg_matches, "token_keypair", &mut wallet_manager).unwrap_or_else(|e| {
+                    eprintln!("error: {}", e);
+                    exit(1);
+                })
+            } else {
+                new_throwaway_signer()
+            };
+            let token = token.unwrap();
+            bulk_signers.push(signer);
 
             command_create_token(
                 &config,
                 decimals,
                 token,
-                mint_authority,
                 arg_matches.is_present("enable_freeze"),
                 memo,
             )
@@ -2216,21 +2086,27 @@ fn main() {
                 .unwrap()
                 .unwrap();
 
-            // No need to add a signer when creating an associated token account
-            let account = get_signer(arg_matches, "account_keypair", &mut wallet_manager).map(
-                |(signer, account)| {
-                    bulk_signers.push(signer);
-                    account
-                },
-            );
+            let account = if arg_matches.is_present("account_keypair") {
+                let (signer, account) =
+                    signer_of(&arg_matches, "account_keypair", &mut wallet_manager).unwrap_or_else(
+                        |e| {
+                            eprintln!("error: {}", e);
+                            exit(1);
+                        },
+                    );
+                bulk_signers.push(signer);
+                account
+            } else {
+                // No need to add a signer when creating an associated token account
+                None
+            };
 
-            let owner = config.pubkey_or_default(arg_matches, "owner", &mut wallet_manager);
-            command_create_account(&config, token, owner, account)
+            command_create_account(&config, token, account)
         }
         ("create-multisig", Some(arg_matches)) => {
-            let minimum_signers = value_of::<u8>(arg_matches, "minimum_signers").unwrap();
+            let minimum_signers = value_of::<u8>(&arg_matches, "minimum_signers").unwrap();
             let multisig_members =
-                pubkeys_of_multiple_signers(arg_matches, "multisig_member", &mut wallet_manager)
+                pubkeys_of_multiple_signers(&arg_matches, "multisig_member", &mut wallet_manager)
                     .unwrap_or_else(|e| {
                         eprintln!("error: {}", e);
                         exit(1);
@@ -2244,8 +2120,17 @@ fn main() {
                 exit(1);
             }
 
-            let (signer, account) = get_signer(arg_matches, "address_keypair", &mut wallet_manager)
-                .unwrap_or_else(new_throwaway_signer);
+            let (signer, account) = if arg_matches.is_present("address_keypair") {
+                signer_of(&arg_matches, "address_keypair", &mut wallet_manager).unwrap_or_else(
+                    |e| {
+                        eprintln!("error: {}", e);
+                        exit(1);
+                    },
+                )
+            } else {
+                new_throwaway_signer()
+            };
+            let account = account.unwrap();
             bulk_signers.push(signer);
 
             command_create_multisig(&config, account, minimum_signers, multisig_members)
@@ -2262,11 +2147,6 @@ fn main() {
                 "close" => AuthorityType::CloseAccount,
                 _ => unreachable!(),
             };
-
-            let (authority_signer, authority) =
-                config.signer_or_default(arg_matches, "authority", &mut wallet_manager);
-            bulk_signers.push(authority_signer);
-
             let new_authority =
                 pubkey_of_signer(arg_matches, "new_authority", &mut wallet_manager).unwrap();
             let force_authorize = arg_matches.is_present("force");
@@ -2274,7 +2154,6 @@ fn main() {
                 &config,
                 address,
                 authority_type,
-                authority,
                 new_authority,
                 force_authorize,
             )
@@ -2291,12 +2170,7 @@ fn main() {
                 .unwrap()
                 .unwrap();
             let sender = pubkey_of_signer(arg_matches, "from", &mut wallet_manager).unwrap();
-
-            let (owner_signer, owner) =
-                config.signer_or_default(arg_matches, "owner", &mut wallet_manager);
-            bulk_signers.push(owner_signer);
-
-            let mint_decimals = value_of::<u8>(arg_matches, MINT_DECIMALS_ARG.name);
+            let mint_decimals = value_of::<u8>(&arg_matches, MINT_DECIMALS_ARG.name);
             let fund_recipient = matches.is_present("fund_recipient");
             let allow_unfunded_recipient = matches.is_present("allow_empty_recipient")
                 || matches.is_present("allow_unfunded_recipient");
@@ -2309,7 +2183,6 @@ fn main() {
                 amount,
                 recipient,
                 sender,
-                owner,
                 allow_unfunded_recipient,
                 fund_recipient,
                 mint_decimals,
@@ -2320,95 +2193,56 @@ fn main() {
             let source = pubkey_of_signer(arg_matches, "source", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
-
-            let (owner_signer, owner) =
-                config.signer_or_default(arg_matches, "owner", &mut wallet_manager);
-            bulk_signers.push(owner_signer);
-
             let amount = value_t_or_exit!(arg_matches, "amount", f64);
             let mint_address =
                 pubkey_of_signer(arg_matches, MINT_ADDRESS_ARG.name, &mut wallet_manager).unwrap();
-            let mint_decimals = value_of::<u8>(arg_matches, MINT_DECIMALS_ARG.name);
-            command_burn(&config, source, owner, amount, mint_address, mint_decimals)
+            let mint_decimals = value_of::<u8>(&arg_matches, MINT_DECIMALS_ARG.name);
+            command_burn(&config, source, amount, mint_address, mint_decimals)
         }
         ("mint", Some(arg_matches)) => {
-            let (mint_authority_signer, mint_authority) =
-                config.signer_or_default(arg_matches, "mint_authority", &mut wallet_manager);
-            bulk_signers.push(mint_authority_signer);
-
             let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
             let amount = value_t_or_exit!(arg_matches, "amount", f64);
-            let recipient = config.associated_token_address_or_override(
-                arg_matches,
-                "recipient",
-                &mut wallet_manager,
-            );
-            let mint_decimals = value_of::<u8>(arg_matches, MINT_DECIMALS_ARG.name);
-            command_mint(
-                &config,
-                token,
-                amount,
-                recipient,
-                mint_decimals,
-                mint_authority,
-            )
+            let recipient = pubkey_of_signer(arg_matches, "recipient", &mut wallet_manager)
+                .unwrap()
+                .unwrap_or_else(|| get_associated_token_address(&config.owner, &token));
+            let mint_decimals = value_of::<u8>(&arg_matches, MINT_DECIMALS_ARG.name);
+            command_mint(&config, token, amount, recipient, mint_decimals)
         }
         ("freeze", Some(arg_matches)) => {
-            let (freeze_authority_signer, freeze_authority) =
-                config.signer_or_default(arg_matches, "freeze_authority", &mut wallet_manager);
-            bulk_signers.push(freeze_authority_signer);
-
             let account = pubkey_of_signer(arg_matches, "account", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
             let mint_address =
                 pubkey_of_signer(arg_matches, MINT_ADDRESS_ARG.name, &mut wallet_manager).unwrap();
-            command_freeze(&config, account, mint_address, freeze_authority)
+            command_freeze(&config, account, mint_address)
         }
         ("thaw", Some(arg_matches)) => {
-            let (freeze_authority_signer, freeze_authority) =
-                config.signer_or_default(arg_matches, "freeze_authority", &mut wallet_manager);
-            bulk_signers.push(freeze_authority_signer);
-
             let account = pubkey_of_signer(arg_matches, "account", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
             let mint_address =
                 pubkey_of_signer(arg_matches, MINT_ADDRESS_ARG.name, &mut wallet_manager).unwrap();
-            command_thaw(&config, account, mint_address, freeze_authority)
+            command_thaw(&config, account, mint_address)
         }
         ("wrap", Some(arg_matches)) => {
             let amount = value_t_or_exit!(arg_matches, "amount", f64);
             let account = if arg_matches.is_present("create_aux_account") {
                 let (signer, account) = new_throwaway_signer();
                 bulk_signers.push(signer);
-                Some(account)
+                account
             } else {
                 // No need to add a signer when creating an associated token account
                 None
             };
-
-            let (wallet_signer, wallet_address) =
-                config.signer_or_default(arg_matches, "wallet_keypair", &mut wallet_manager);
-            bulk_signers.push(wallet_signer);
-
-            command_wrap(&config, amount, wallet_address, account)
+            command_wrap(&config, amount, account)
         }
         ("unwrap", Some(arg_matches)) => {
-            let (wallet_signer, wallet_address) =
-                config.signer_or_default(arg_matches, "wallet_keypair", &mut wallet_manager);
-            bulk_signers.push(wallet_signer);
-
             let address = pubkey_of_signer(arg_matches, "address", &mut wallet_manager).unwrap();
-            command_unwrap(&config, wallet_address, address)
+            command_unwrap(&config, address)
         }
         ("approve", Some(arg_matches)) => {
-            let (owner_signer, owner_address) =
-                config.signer_or_default(arg_matches, "owner", &mut wallet_manager);
-            bulk_signers.push(owner_signer);
-
             let account = pubkey_of_signer(arg_matches, "account", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
@@ -2418,11 +2252,10 @@ fn main() {
                 .unwrap();
             let mint_address =
                 pubkey_of_signer(arg_matches, MINT_ADDRESS_ARG.name, &mut wallet_manager).unwrap();
-            let mint_decimals = value_of::<u8>(arg_matches, MINT_DECIMALS_ARG.name);
+            let mint_decimals = value_of::<u8>(&arg_matches, MINT_DECIMALS_ARG.name);
             command_approve(
                 &config,
                 account,
-                owner_address,
                 amount,
                 delegate,
                 mint_address,
@@ -2430,38 +2263,26 @@ fn main() {
             )
         }
         ("revoke", Some(arg_matches)) => {
-            let (owner_signer, owner_address) =
-                config.signer_or_default(arg_matches, "owner", &mut wallet_manager);
-            bulk_signers.push(owner_signer);
-
             let account = pubkey_of_signer(arg_matches, "account", &mut wallet_manager)
                 .unwrap()
                 .unwrap();
             let delegate_address =
                 pubkey_of_signer(arg_matches, DELEGATE_ADDRESS_ARG.name, &mut wallet_manager)
                     .unwrap();
-            command_revoke(&config, account, owner_address, delegate_address)
+            command_revoke(&config, account, delegate_address)
         }
         ("close", Some(arg_matches)) => {
-            let (close_authority_signer, close_authority) =
-                config.signer_or_default(arg_matches, "close_authority", &mut wallet_manager);
-            bulk_signers.push(close_authority_signer);
-
-            let address = config.associated_token_address_or_override(
-                arg_matches,
-                "address",
-                &mut wallet_manager,
-            );
-            let recipient = config.pubkey_or_default(arg_matches, "recipient", &mut wallet_manager);
-            command_close(&config, address, close_authority, recipient)
+            let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager).unwrap();
+            let recipient = pubkey_of_signer(arg_matches, "recipient", &mut wallet_manager)
+                .unwrap()
+                .unwrap_or(config.owner);
+            let account = pubkey_of_signer(arg_matches, "address", &mut wallet_manager).unwrap();
+            command_close(&config, token, recipient, account)
         }
         ("balance", Some(arg_matches)) => {
-            let address = config.associated_token_address_or_override(
-                arg_matches,
-                "address",
-                &mut wallet_manager,
-            );
-            command_balance(&config, address)
+            let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager).unwrap();
+            let address = pubkey_of_signer(arg_matches, "address", &mut wallet_manager).unwrap();
+            command_balance(&config, token, address)
         }
         ("supply", Some(arg_matches)) => {
             let address = pubkey_of_signer(arg_matches, "address", &mut wallet_manager)
@@ -2471,21 +2292,16 @@ fn main() {
         }
         ("accounts", Some(arg_matches)) => {
             let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager).unwrap();
-            let owner = config.pubkey_or_default(arg_matches, "owner", &mut wallet_manager);
-            command_accounts(&config, token, owner)
+            command_accounts(&config, token)
         }
         ("address", Some(arg_matches)) => {
             let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager).unwrap();
-            let owner = config.pubkey_or_default(arg_matches, "owner", &mut wallet_manager);
-            command_address(&config, token, owner)
+            command_address(&config, token)
         }
         ("account-info", Some(arg_matches)) => {
-            let address = config.associated_token_address_or_override(
-                arg_matches,
-                "address",
-                &mut wallet_manager,
-            );
-            command_account_info(&config, address)
+            let token = pubkey_of_signer(arg_matches, "token", &mut wallet_manager).unwrap();
+            let address = pubkey_of_signer(arg_matches, "address", &mut wallet_manager).unwrap();
+            command_account_info(&config, token, address)
         }
         ("multisig-info", Some(arg_matches)) => {
             let address = pubkey_of_signer(arg_matches, "address", &mut wallet_manager)
@@ -2493,40 +2309,19 @@ fn main() {
                 .unwrap();
             command_multisig(&config, address)
         }
-        ("gc", Some(arg_matches)) => {
-            match config.output_format {
-                OutputFormat::Json | OutputFormat::JsonCompact => {
-                    eprintln!(
-                        "`spl-token gc` does not support the `--ouput` parameter at this time"
-                    );
-                    exit(1);
-                }
-                _ => {}
-            }
-            let (owner_signer, owner_address) =
-                config.signer_or_default(arg_matches, "owner", &mut wallet_manager);
-            bulk_signers.push(owner_signer);
-
-            command_gc(&config, owner_address)
-        }
-        ("sync-native", Some(arg_matches)) => {
-            let address = config.associated_token_address_for_token_or_override(
-                arg_matches,
-                "address",
-                &mut wallet_manager,
-                Some(native_mint::id()),
-            );
-
-            command_sync_native(address)
-        }
+        ("gc", Some(_arg_matches)) => command_gc(&config),
         _ => unreachable!(),
     }
     .and_then(|transaction_info| {
         if let Some((minimum_balance_for_rent_exemption, instruction_batches)) = transaction_info {
             let fee_payer = Some(&config.fee_payer);
-            let signer_info = CliSignerInfo {
-                signers: bulk_signers,
-            };
+            let signer_info = config
+                .default_signer
+                .generate_unique_signers(bulk_signers, &matches, &mut wallet_manager)
+                .unwrap_or_else(|e| {
+                    eprintln!("error: {}", e);
+                    exit(1);
+                });
 
             for instructions in instruction_batches {
                 let message = if let Some(nonce_account) = config.nonce_account.as_ref() {
@@ -2562,7 +2357,7 @@ fn main() {
 
                 if config.sign_only {
                     transaction.try_partial_sign(&signers, recent_blockhash)?;
-                    println!("{}", return_signers(&transaction, &config.output_format)?);
+                    println!("{}", return_signers(&transaction, &OutputFormat::Display)?);
                 } else {
                     transaction.try_sign(&signers, recent_blockhash)?;
                     let signature = if no_wait {
@@ -2572,10 +2367,7 @@ fn main() {
                             .rpc_client
                             .send_and_confirm_transaction_with_spinner(&transaction)?
                     };
-                    let signature = CliSignature {
-                        signature: signature.to_string(),
-                    };
-                    println!("{}", config.output_format.formatted_string(&signature));
+                    println!("Signature: {}", signature);
                 }
             }
         }

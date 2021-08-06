@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .global(true)
                 .help("Configuration file to use");
             if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
-                arg.default_value(config_file)
+                arg.default_value(&config_file)
             } else {
                 arg
             }
@@ -115,7 +115,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .value_name("FILENAME")
                         .required(true)
                         .default_value("feature-proposal.csv")
-                        .help("Allocations CSV file for use with safecoin-tokens"),
+                        .help("Allocations CSV file for use with solana-tokens"),
                 )
                 .arg(
                     Arg::with_name("confirm")
@@ -329,14 +329,14 @@ fn process_propose(
         Some(&config.keypair.pubkey()),
     );
     let blockhash = rpc_client.get_recent_blockhash()?.0;
-    transaction.try_sign(&[&config.keypair, feature_proposal_keypair], blockhash)?;
+    transaction.try_sign(&[&config.keypair, &feature_proposal_keypair], blockhash)?;
 
     println!("JSON RPC URL: {}", config.json_rpc_url);
 
     println!();
     println!("Distribute the proposal tokens to all validators by running:");
     println!(
-        "    $ safecoin-tokens distribute-spl-tokens \
+        "    $ solana-tokens distribute-spl-tokens \
                   --from {} \
                   --input-csv {} \
                   --db-path db.{} \
@@ -347,7 +347,7 @@ fn process_propose(
         &feature_proposal_keypair.pubkey().to_string()[..8]
     );
     println!(
-        "    $ safecoin-tokens spl-token-balances \
+        "    $ solana-tokens spl-token-balances \
                  --mint {} --input-csv {}",
         mint_address, distribution_file
     );
@@ -399,9 +399,10 @@ fn process_tally(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let feature_proposal = get_feature_proposal(rpc_client, feature_proposal_address)?;
 
-    let feature_id_address = spl_feature_proposal::get_feature_id_address(feature_proposal_address);
+    let feature_id_address =
+        spl_feature_proposal::get_feature_id_address(&feature_proposal_address);
     let acceptance_token_address =
-        spl_feature_proposal::get_acceptance_token_address(feature_proposal_address);
+        spl_feature_proposal::get_acceptance_token_address(&feature_proposal_address);
 
     println!("Feature Id: {}", feature_id_address);
     println!("Acceptance Token Address: {}", acceptance_token_address);

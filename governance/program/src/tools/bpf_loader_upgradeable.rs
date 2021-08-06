@@ -42,8 +42,8 @@ pub fn set_program_upgrade_authority<'a>(
 ) -> Result<(), ProgramError> {
     let set_upgrade_authority_instruction = bpf_loader_upgradeable::set_upgrade_authority(
         program_address,
-        program_upgrade_authority_info.key,
-        Some(new_authority_info.key),
+        &program_upgrade_authority_info.key,
+        Some(&new_authority_info.key),
     );
 
     invoke(
@@ -72,24 +72,26 @@ pub fn assert_program_upgrade_authority_is_signer(
         return Err(GovernanceError::InvalidProgramDataAccountAddress.into());
     }
 
-    let upgrade_authority = if let UpgradeableLoaderState::ProgramData {
-        slot: _,
-        upgrade_authority_address,
-    } = deserialize(&program_data_info.data.borrow())
+    let upgrade_authority = match deserialize(&program_data_info.data.borrow())
         .map_err(|_| GovernanceError::InvalidProgramDataAccountData)?
     {
-        upgrade_authority_address
-    } else {
-        None
+        UpgradeableLoaderState::ProgramData {
+            slot: _,
+            upgrade_authority_address,
+        } => upgrade_authority_address,
+        _ => None,
     };
 
-    let upgrade_authority = upgrade_authority.ok_or(GovernanceError::ProgramNotUpgradable)?;
-
-    if upgrade_authority != *program_upgrade_authority_info.key {
-        return Err(GovernanceError::InvalidUpgradeAuthority.into());
-    }
-    if !program_upgrade_authority_info.is_signer {
-        return Err(GovernanceError::UpgradeAuthorityMustSign.into());
+    match upgrade_authority {
+        Some(upgrade_authority) => {
+            if upgrade_authority != *program_upgrade_authority_info.key {
+                return Err(GovernanceError::InvalidUpgradeAuthority.into());
+            }
+            if !program_upgrade_authority_info.is_signer {
+                return Err(GovernanceError::UpgradeAuthorityMustSign.into());
+            }
+        }
+        None => return Err(GovernanceError::ProgramNotUpgradable.into()),
     }
 
     Ok(())

@@ -363,16 +363,6 @@ pub enum TokenInstruction {
         /// The new account's owner/multisignature.
         owner: Pubkey,
     },
-    /// Given a wrapped / native token account (a token account containing SAFE)
-    /// updates its amount field based on the account's underlying `lamports`.
-    /// This is useful if a non-wrapped SAFE account uses `system_instruction::transfer`
-    /// to move lamports to a wrapped token account, and needs to have its token
-    /// `amount` field updated.
-    ///
-    /// Accounts expected by this instruction:
-    ///
-    ///   0. `[writable]`  The native token account to sync with its underlying lamports.
-    SyncNative,
 }
 impl TokenInstruction {
     /// Unpacks a byte buffer into a [TokenInstruction](enum.TokenInstruction.html).
@@ -474,7 +464,6 @@ impl TokenInstruction {
                 let (owner, _rest) = Self::unpack_pubkey(rest)?;
                 Self::InitializeAccount2 { owner }
             }
-            17 => Self::SyncNative,
 
             _ => return Err(TokenError::InvalidInstruction.into()),
         })
@@ -550,9 +539,6 @@ impl TokenInstruction {
             &Self::InitializeAccount2 { owner } => {
                 buf.push(16);
                 buf.extend_from_slice(owner.as_ref());
-            }
-            &Self::SyncNative => {
-                buf.push(17);
             }
         };
         buf
@@ -1133,20 +1119,6 @@ pub fn burn_checked(
     })
 }
 
-/// Creates a `SyncNative` instruction
-pub fn sync_native(
-    token_program_id: &Pubkey,
-    account_pubkey: &Pubkey,
-) -> Result<Instruction, ProgramError> {
-    check_program_account(token_program_id)?;
-
-    Ok(Instruction {
-        program_id: *token_program_id,
-        accounts: vec![AccountMeta::new(*account_pubkey, false)],
-        data: TokenInstruction::SyncNative.pack(),
-    })
-}
-
 /// Utility function that checks index is between MIN_SIGNERS and MAX_SIGNERS
 pub fn is_valid_signer_index(index: usize) -> bool {
     (MIN_SIGNERS..=MAX_SIGNERS).contains(&index)
@@ -1313,13 +1285,6 @@ mod test {
         let packed = check.pack();
         let mut expect = vec![16u8];
         expect.extend_from_slice(&[2u8; 32]);
-        assert_eq!(packed, expect);
-        let unpacked = TokenInstruction::unpack(&expect).unwrap();
-        assert_eq!(unpacked, check);
-
-        let check = TokenInstruction::SyncNative;
-        let packed = check.pack();
-        let expect = vec![17u8];
         assert_eq!(packed, expect);
         let unpacked = TokenInstruction::unpack(&expect).unwrap();
         assert_eq!(unpacked, check);

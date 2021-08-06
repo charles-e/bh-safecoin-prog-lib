@@ -2,7 +2,7 @@
 
 //! A program for creating and managing pools of stake
 
-pub mod big_vec;
+pub mod borsh;
 pub mod error;
 pub mod instruction;
 pub mod processor;
@@ -15,8 +15,8 @@ pub mod entrypoint;
 // Export current sdk types for downstream users building with a different sdk version
 pub use solana_program;
 use {
-    crate::{stake_program::Meta, state::Fee},
-    solana_program::{native_token::LAMPORTS_PER_SOL, pubkey::Pubkey},
+    crate::stake_program::Meta,
+    solana_program::{native_token::LAMPORTS_PER_SAFE, pubkey::Pubkey},
 };
 
 /// Seed for deposit authority seed
@@ -30,24 +30,11 @@ const TRANSIENT_STAKE_SEED: &[u8] = b"transient";
 
 /// Minimum amount of staked SAFE required in a validator stake account to allow
 /// for merges without a mismatch on credits observed
-pub const MINIMUM_ACTIVE_STAKE: u64 = LAMPORTS_PER_SOL;
+pub const MINIMUM_ACTIVE_STAKE: u64 = LAMPORTS_PER_SAFE;
 
 /// Maximum amount of validator stake accounts to update per
 /// `UpdateValidatorListBalance` instruction, based on compute limits
-pub const MAX_VALIDATORS_TO_UPDATE: usize = 5;
-
-/// Maximum factor by which a withdrawal fee can be increased per epoch
-/// protecting stakers from malicious users.
-/// If current fee is 0, WITHDRAWAL_BASELINE_FEE is used as the baseline
-pub const MAX_WITHDRAWAL_FEE_INCREASE: Fee = Fee {
-    numerator: 3,
-    denominator: 2,
-};
-/// Drop-in baseline fee when evaluating withdrawal fee increases when fee is 0
-pub const WITHDRAWAL_BASELINE_FEE: Fee = Fee {
-    numerator: 1,
-    denominator: 1000,
-};
+pub const MAX_VALIDATORS_TO_UPDATE: usize = 10;
 
 /// Get the stake amount under consideration when calculating pool token
 /// conversions
@@ -115,4 +102,4 @@ pub fn find_transient_stake_program_address(
     )
 }
 
-solana_program::declare_id!("SPoo1xuN9wGpxNjGnPNbRPtpQ7mHgKM8d9BeFC549Jy");
+solana_program::declare_id!("poo1B9L9nR3CrcaziKVYVpRX6A9Y1LAXYasjjfCbApj");

@@ -1,7 +1,7 @@
 module.exports = {
-  title: "Solcoin Program Library Docs",
+  title: "Solana Program Library Docs",
   tagline:
-    "Solcoin is an open source project implementing a new, high-performance, permissionless blockchain.",
+    "Solana is an open source project implementing a new, high-performance, permissionless blockchain.",
   url: "https://spl.solana.com",
   baseUrl: "/",
   favicon: "img/favicon.ico",
@@ -10,7 +10,7 @@ module.exports = {
   themeConfig: {
     navbar: {
       logo: {
-        alt: "Solcoin Logo",
+        alt: "Solana Logo",
         src: "img/logo-horizontal.svg",
         srcDark: "img/logo-horizontal-dark.svg",
       },

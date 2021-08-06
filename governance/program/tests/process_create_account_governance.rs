@@ -4,7 +4,7 @@ mod program_test;
 use solana_program_test::*;
 
 use program_test::*;
-use spl_governance::{error::GovernanceError, state::enums::VoteThresholdPercentage};
+use spl_governance::{error::GovernanceError, state::governance::GovernanceConfig};
 
 #[tokio::test]
 async fn test_create_account_governance() {
@@ -66,33 +66,45 @@ async fn test_create_account_governance_with_invalid_config_error() {
     let realm_cookie = governance_test.with_realm().await;
     let governed_account_cookie = governance_test.with_governed_account().await;
 
-    // Arrange
-    let mut config = governance_test.get_default_governance_config();
-    config.vote_threshold_percentage = VoteThresholdPercentage::YesVote(0); // below 1% threshold
+    // Arrange below 50% threshold
+    let config = GovernanceConfig {
+        realm: realm_cookie.address,
+        governed_account: governed_account_cookie.address,
+        vote_threshold_percentage: 49, // below 50% threshold
+        min_tokens_to_create_proposal: 1,
+        min_instruction_hold_up_time: 1,
+        max_voting_time: 1,
+    };
 
     // Act
     let err = governance_test
-        .with_account_governance_using_config(&realm_cookie, &governed_account_cookie, &config)
+        .with_account_governance_config(&realm_cookie, &governed_account_cookie, config)
         .await
         .err()
         .unwrap();
 
     // Assert
 
-    assert_eq!(err, GovernanceError::InvalidVoteThresholdPercentage.into());
+    assert_eq!(err, GovernanceError::InvalidGovernanceConfig.into());
 
-    // Arrange
-    let mut config = governance_test.get_default_governance_config();
-    config.vote_threshold_percentage = VoteThresholdPercentage::YesVote(101); // Above 100% threshold
+    // Arrange  above 100% threshold
+    let config = GovernanceConfig {
+        realm: realm_cookie.address,
+        governed_account: governed_account_cookie.address,
+        vote_threshold_percentage: 101, // Above 100% threshold
+        min_tokens_to_create_proposal: 1,
+        min_instruction_hold_up_time: 1,
+        max_voting_time: 1,
+    };
 
     // Act
     let err = governance_test
-        .with_account_governance_using_config(&realm_cookie, &governed_account_cookie, &config)
+        .with_account_governance_config(&realm_cookie, &governed_account_cookie, config)
         .await
         .err()
         .unwrap();
 
     // Assert
 
-    assert_eq!(err, GovernanceError::InvalidVoteThresholdPercentage.into());
+    assert_eq!(err, GovernanceError::InvalidGovernanceConfig.into());
 }

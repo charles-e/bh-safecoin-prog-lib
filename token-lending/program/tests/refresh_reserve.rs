@@ -25,14 +25,15 @@ async fn test_success() {
     );
 
     // limit to track compute unit increase
-    test.set_bpf_compute_max_units(30_000);
+    test.set_bpf_compute_max_units(16_000);
 
     const SAFE_RESERVE_LIQUIDITY_LAMPORTS: u64 = 100 * LAMPORTS_TO_SAFE;
     const USDC_RESERVE_LIQUIDITY_FRACTIONAL: u64 = 100 * FRACTIONAL_TO_USDC;
     const BORROW_AMOUNT: u64 = 100;
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 80;
@@ -43,12 +44,9 @@ async fn test_success() {
     reserve_config.optimal_borrow_rate = BORROW_RATE;
     reserve_config.optimal_utilization_rate = 100;
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             borrow_amount: BORROW_AMOUNT,
@@ -61,11 +59,9 @@ async fn test_success() {
         },
     );
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             borrow_amount: BORROW_AMOUNT,
@@ -90,15 +86,11 @@ async fn test_success() {
 
     let mut transaction = Transaction::new_with_payer(
         &[
-            refresh_reserve(
-                spl_token_lending::id(),
-                usdc_test_reserve.pubkey,
-                usdc_oracle.price_pubkey,
-            ),
+            refresh_reserve(spl_token_lending::id(), usdc_test_reserve.pubkey, None),
             refresh_reserve(
                 spl_token_lending::id(),
                 sol_test_reserve.pubkey,
-                sol_oracle.price_pubkey,
+                sol_test_reserve.liquidity_oracle_pubkey,
             ),
         ],
         Some(&payer.pubkey()),

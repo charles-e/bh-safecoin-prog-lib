@@ -11,7 +11,7 @@ log from a trusted provider.
 
 ## Background
 
-Solcoin's programming model and the definitions of the Solcoin terms used in this
+Solana's programming model and the definitions of the Solana terms used in this
 document are available at:
 
 - https://docs.solana.com/apps
@@ -62,7 +62,7 @@ Logging ends with the status of the instruction, one of:
 
 For more information about exposing program logs on a node, head to the
 [developer
-docs](https://docs.solana.com/developing/on-chain-programs/debugging#logging)
+docs](https://docs.solana.com/developing/deployed-programs/debugging#logging)
 
 ### Compute Limits
 

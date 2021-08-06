@@ -4,7 +4,7 @@ An implementation of Brave's THEMIS research project. This project contains
 two privacy-oriented smart contracts, the Policy Smart Contract (PSC) and
 the Fund Smart Contract (FSC). Together, the two contracts allow users to
 be compensated for engaging with ad publishers. The users do not expose
-their identities or preferences.
+their identities or preferences. 
 
 ## Build and Run the TPS demo client
 
@@ -30,10 +30,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 ```
 
-Install the Solcoin command-line tools:
+Install the Solana command-line tools:
 
 ```bash
-curl -sSf https://raw.githubusercontent.com/solana-labs/solana/v1.4.2/install/safecoin-install-init.sh | sh -s - v1.4.2
+curl -sSf https://raw.githubusercontent.com/solana-labs/solana/v1.4.2/install/solana-install-init.sh | sh -s - v1.4.2
 export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 ```
 
@@ -53,19 +53,19 @@ cd themis/client_ristretto
 cargo build --example tps
 ```
 
-### Configure the default Solcoin wallet
+### Configure the default Solana wallet
 
 Point to the testnet cluster (default is mainnet-beta):
 
 ```bash
-safecoin config set --url http://api.testnet.safecoin.org
+solana config set --url http://testnet.solana.com
 ```
 
 Create a keypair and airdrop it some SAFE:
 
 ```bash
-safecoin-keygen new --no-passphrase
-safecoin airdrop 10
+solana-keygen new --no-passphrase
+solana airdrop 10
 ```
 
 ### Run the TPS example app

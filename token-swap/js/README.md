@@ -15,7 +15,7 @@ $ npm install
 
 ### Select a Network
 
-The client connects to a local Solcoin cluster by default.
+The client connects to a local Solana cluster by default.
 
 To enable on-chain program logs, set the `RUST_LOG` environment variable:
 
@@ -23,13 +23,13 @@ To enable on-chain program logs, set the `RUST_LOG` environment variable:
 $ export RUST_LOG=solana_runtime::native_loader=trace,solana_runtime::system_instruction_processor=trace,solana_runtime::bank=debug,solana_bpf_loader=debug,solana_rbpf=debug
 ```
 
-To start a local Solcoin cluster run:
+To start a local Solana cluster run:
 ```bash
 $ npm run localnet:update
 $ npm run localnet:up
 ```
 
-Solcoin cluster logs are available with:
+Solana cluster logs are available with:
 ```bash
 $ npm run localnet:logs
 ```
@@ -49,9 +49,9 @@ $ npm run build:program
 $ npm run start
 ```
 
-## Pointing to a public Solcoin cluster
+## Pointing to a public Solana cluster
 
-Solcoin maintains three public clusters:
+Solana maintains three public clusters:
 - `devnet` - Development cluster with airdrops enabled
 - `testnet` - Tour De Sol test cluster without airdrops enabled
 - `mainnet-beta` -  Main cluster

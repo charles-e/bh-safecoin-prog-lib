@@ -29,7 +29,7 @@ general.
 
 ## Background
 
-Solcoin's programming model and the definitions of the Solcoin terms used in this
+Solana's programming model and the definitions of the Solana terms used in this
 document are available at:
 
 - https://docs.solana.com/apps
@@ -55,13 +55,13 @@ The [get_associated_token_address](https://docs.rs/spl-associated-token-account/
 Rust function may be used by clients to derive the wallet's associated token address.
 
 
-The associated account address can be derived in TypeScript with:
+The associated account address can be derived in Javascript with:
 ```ts
 import { PublicKey } from '@safecoin/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID: PublicKey = new PublicKey(
-  'PUFQTv9BK3ax6bKPFnyjBTbVa3782mcfvb22TZovvrm',
+  'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
 );
 
 async function findAssociatedTokenAddress(

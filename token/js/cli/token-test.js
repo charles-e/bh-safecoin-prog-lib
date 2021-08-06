@@ -7,8 +7,6 @@ import {
   BpfLoader,
   PublicKey,
   Signer,
-  SystemProgram,
-  Transaction,
   BPF_LOADER_PROGRAM_ID,
 } from '@safecoin/web3.js';
 
@@ -20,7 +18,6 @@ import {
 } from '../client/token';
 import {url} from '../url';
 import {newAccountWithLamports} from '../client/util/new-account-with-lamports';
-import {sendAndConfirmTransaction} from '../client/util/send-and-confirm-transaction';
 import {sleep} from '../client/util/sleep';
 import {Store} from './store';
 
@@ -44,9 +41,9 @@ function assert(condition, message) {
   }
 }
 
-async function didThrow(func): Promise<boolean> {
+async function didThrow(obj, func, args): Promise<boolean> {
   try {
-    await func();
+    await func.apply(testToken, args);
   } catch (e) {
     return true;
   }
@@ -124,11 +121,11 @@ async function GetPrograms(connection: Connection): Promise<void> {
 
     programId = await loadProgram(
       connection,
-      '../../target/deploy/spl_token.so',
+      '../../target/bpfel-unknown-unknown/release/spl_token.so',
     );
     associatedProgramId = await loadProgram(
       connection,
-      '../../target/deploy/spl_associated_token_account.so',
+      '../../target/bpfel-unknown-unknown/release/spl_associated_token_account.so',
     );
     await store.save('config.json', {
       tokenProgramId: programId.toString(),
@@ -229,9 +226,9 @@ export async function createAssociatedAccount(): Promise<void> {
 
   // creating again should cause TX error for the associated token account
   assert(
-    await didThrow(async () => {
-      await testToken.createAssociatedTokenAccount(owner.publicKey);
-    }),
+    await didThrow(testToken, testToken.createAssociatedTokenAccount, [
+      owner.publicKey,
+    ]),
   );
 }
 
@@ -247,15 +244,13 @@ export async function mintTo(): Promise<void> {
 
 export async function mintToChecked(): Promise<void> {
   assert(
-    await didThrow(async () => {
-      await testToken.mintToChecked(
-        testAccount,
-        testMintAuthority,
-        [],
-        1000,
-        1,
-      );
-    }),
+    await didThrow(testToken, testToken.mintToChecked, [
+      testAccount,
+      testMintAuthority,
+      [],
+      1000,
+      1,
+    ]),
   );
 
   await testToken.mintToChecked(testAccount, testMintAuthority, [], 1000, 2);
@@ -288,16 +283,14 @@ export async function transferChecked(): Promise<void> {
   const dest = await testToken.createAccount(destOwner.publicKey);
 
   assert(
-    await didThrow(async () => {
-      await testToken.transferChecked(
-        testAccount,
-        dest,
-        testAccountOwner,
-        [],
-        100,
-        testTokenDecimals - 1,
-      );
-    }),
+    await didThrow(testToken, testToken.transferChecked, [
+      testAccount,
+      dest,
+      testAccountOwner,
+      [],
+      100,
+      testTokenDecimals - 1,
+    ]),
   );
 
   await testToken.transferChecked(
@@ -368,6 +361,7 @@ export async function failOnApproveOverspend(): Promise<void> {
   const delegate = Keypair.generate();
 
   await testToken.transfer(testAccount, account1, testAccountOwner, [], 10);
+
   await testToken.approve(account1, delegate.publicKey, owner, [], 2);
 
   let account1Info = await testToken.getAccountInfo(account1);
@@ -393,9 +387,13 @@ export async function failOnApproveOverspend(): Promise<void> {
   assert(account1Info.delegatedAmount.toNumber() == 0);
 
   assert(
-    await didThrow(async () => {
-      await testToken.transfer(account1, account2, delegate, [], 1);
-    }),
+    await didThrow(testToken, testToken.transfer, [
+      account1,
+      account2,
+      delegate,
+      [],
+      1,
+    ]),
   );
 }
 
@@ -409,15 +407,13 @@ export async function setAuthority(): Promise<void> {
     [],
   );
   assert(
-    await didThrow(async () => {
-      await testToken.setAuthority(
-        testAccount,
-        newOwner.publicKey,
-        'AccountOwner',
-        testAccountOwner,
-        [],
-      );
-    }),
+    await didThrow(testToken, testToken.setAuthority, [
+      testAccount,
+      newOwner.publicKey,
+      'AccountOwner',
+      testAccountOwner,
+      [],
+    ]),
   );
   await testToken.setAuthority(
     testAccount,
@@ -443,9 +439,13 @@ export async function burnChecked(): Promise<void> {
   const amount = accountInfo.amount.toNumber();
 
   assert(
-    await didThrow(async () => {
-      await testToken.burnChecked(testAccount, testAccountOwner, [], 1, 1);
-    }),
+    await didThrow(testToken, testToken.burnChecked, [
+      testAccount,
+      testAccountOwner,
+      [],
+      1,
+      1,
+    ]),
   );
 
   await testToken.burnChecked(testAccount, testAccountOwner, [], 1, 2);
@@ -464,9 +464,13 @@ export async function freezeThawAccount(): Promise<void> {
   const dest = await testToken.createAccount(destOwner.publicKey);
 
   assert(
-    await didThrow(async () => {
-      await testToken.transfer(testAccount, dest, testAccountOwner, [], 100);
-    }),
+    await didThrow(testToken, testToken.transfer, [
+      testAccount,
+      dest,
+      testAccountOwner,
+      [],
+      100,
+    ]),
   );
 
   await testToken.thawAccount(testAccount, testMintAuthority, []);
@@ -499,9 +503,12 @@ export async function closeAccount(): Promise<void> {
 
   // Check that accounts with non-zero token balance cannot be closed
   assert(
-    await didThrow(async () => {
-      await testToken.closeAccount(testAccount, dest, closeAuthority, []);
-    }),
+    await didThrow(testToken, testToken.closeAccount, [
+      testAccount,
+      dest,
+      closeAuthority,
+      [],
+    ]),
   );
 
   const connection = await getConnection();
@@ -631,36 +638,6 @@ export async function nativeToken(): Promise<void> {
     balance = info.lamports;
   } else {
     throw new Error('Account not found');
-  }
-
-  const programVersion = process.env.PROGRAM_VERSION;
-  if (!programVersion) {
-    // transfer lamports into the native account
-    const additionalLamports = 100;
-    await sendAndConfirmTransaction(
-      'TransferLamports',
-      connection,
-      new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: payer.publicKey,
-          toPubkey: native,
-          lamports: additionalLamports,
-        }),
-      ),
-      payer,
-    );
-
-    // no change in the amount
-    accountInfo = await token.getAccountInfo(native);
-    assert(accountInfo.amount.toNumber() === lamportsToWrap);
-
-    // sync, amount changes
-    await token.syncNative(native);
-    accountInfo = await token.getAccountInfo(native);
-    assert(
-      accountInfo.amount.toNumber() === lamportsToWrap + additionalLamports,
-    );
-    balance += additionalLamports;
   }
 
   const balanceNeeded = await connection.getMinimumBalanceForRentExemption(0);

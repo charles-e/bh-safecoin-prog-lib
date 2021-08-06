@@ -1,4 +1,4 @@
-//! FIXME copied from the safecoin stake program
+//! FIXME copied from the solana stake program
 
 use {
     borsh::{
@@ -26,14 +26,14 @@ pub fn config_id() -> Pubkey {
     Pubkey::from_str(STAKE_CONFIG).unwrap()
 }
 
-/// FIXME copied from safecoin stake program
+/// FIXME copied from solana stake program
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum StakeInstruction {
     /// Initialize a stake with lockup and authorization information
     ///
     /// # Account references
-    ///   0. `[WRITE]` Uninitialized stake account
-    ///   1. `[]` Rent sysvar
+    ///   0. [WRITE] Uninitialized stake account
+    ///   1. [] Rent sysvar
     ///
     /// Authorized carries pubkeys that must sign staker transactions
     ///   and withdrawer transactions.
@@ -43,20 +43,20 @@ pub enum StakeInstruction {
     /// Authorize a key to manage stake or withdrawal
     ///
     /// # Account references
-    ///   0. `[WRITE]` Stake account to be updated
-    ///   1. `[]` (reserved for future use) Clock sysvar
-    ///   2. `[SIGNER]` The stake or withdraw authority
+    ///   0. [WRITE] Stake account to be updated
+    ///   1. [] (reserved for future use) Clock sysvar
+    ///   2. [SIGNER] The stake or withdraw authority
     Authorize(Pubkey, StakeAuthorize),
 
     /// Delegate a stake to a particular vote account
     ///
     /// # Account references
-    ///   0. `[WRITE]` Initialized stake account to be delegated
-    ///   1. `[]` Vote account to which this stake will be delegated
-    ///   2. `[]` Clock sysvar
-    ///   3. `[]` Stake history sysvar that carries stake warmup/cooldown history
-    ///   4. `[]` Address of config account that carries stake config
-    ///   5. `[SIGNER]` Stake authority
+    ///   0. [WRITE] Initialized stake account to be delegated
+    ///   1. [] Vote account to which this stake will be delegated
+    ///   2. [] Clock sysvar
+    ///   3. [] Stake history sysvar that carries stake warmup/cooldown history
+    ///   4. [] Address of config account that carries stake config
+    ///   5. [SIGNER] Stake authority
     ///
     /// The entire balance of the staking account is staked.  DelegateStake
     ///   can be called multiple times, but re-delegation is delayed
@@ -66,20 +66,20 @@ pub enum StakeInstruction {
     /// Split u64 tokens and stake off a stake account into another stake account.
     ///
     /// # Account references
-    ///   0. `[WRITE]` Stake account to be split; must be in the Initialized or Stake state
-    ///   1. `[WRITE]` Uninitialized stake account that will take the split-off amount
-    ///   2. `[SIGNER]` Stake authority
+    ///   0. [WRITE] Stake account to be split; must be in the Initialized or Stake state
+    ///   1. [WRITE] Uninitialized stake account that will take the split-off amount
+    ///   2. [SIGNER] Stake authority
     Split(u64),
 
     /// Withdraw unstaked lamports from the stake account
     ///
     /// # Account references
-    ///   0. `[WRITE]` Stake account from which to withdraw
-    ///   1. `[WRITE]` Recipient account
-    ///   2. `[]` Clock sysvar
-    ///   3. `[]` Stake history sysvar that carries stake warmup/cooldown history
-    ///   4. `[SIGNER]` Withdraw authority
-    ///   5. Optional: `[SIGNER]` Lockup authority, if before lockup expiration
+    ///   0. [WRITE] Stake account from which to withdraw
+    ///   1. [WRITE] Recipient account
+    ///   2. [] Clock sysvar
+    ///   3. [] Stake history sysvar that carries stake warmup/cooldown history
+    ///   4. [SIGNER] Withdraw authority
+    ///   5. Optional: [SIGNER] Lockup authority, if before lockup expiration
     ///
     /// The u64 is the portion of the stake account balance to be withdrawn,
     ///    must be `<= ValidatorStakeAccount.lamports - staked_lamports`.
@@ -88,34 +88,34 @@ pub enum StakeInstruction {
     /// Deactivates the stake in the account
     ///
     /// # Account references
-    ///   0. `[WRITE]` Delegated stake account
-    ///   1. `[]` Clock sysvar
-    ///   2. `[SIGNER]` Stake authority
+    ///   0. [WRITE] Delegated stake account
+    ///   1. [] Clock sysvar
+    ///   2. [SIGNER] Stake authority
     Deactivate,
 
     /// Set stake lockup
     ///
     /// # Account references
-    ///   0. `[WRITE]` Initialized stake account
-    ///   1. `[SIGNER]` Lockup authority
+    ///   0. [WRITE] Initialized stake account
+    ///   1. [SIGNER] Lockup authority
     SetLockup,
 
     /// Merge two stake accounts. Both accounts must be deactivated and have identical lockup and
     /// authority keys.
     ///
     /// # Account references
-    ///   0. `[WRITE]` Destination stake account for the merge
-    ///   1. `[WRITE]` Source stake account for to merge.  This account will be drained
-    ///   2. `[]` Clock sysvar
-    ///   3. `[]` Stake history sysvar that carries stake warmup/cooldown history
-    ///   4. `[SIGNER]` Stake authority
+    ///   0. [WRITE] Destination stake account for the merge
+    ///   1. [WRITE] Source stake account for to merge.  This account will be drained
+    ///   2. [] Clock sysvar
+    ///   3. [] Stake history sysvar that carries stake warmup/cooldown history
+    ///   4. [SIGNER] Stake authority
     Merge,
 
     /// Authorize a key to manage stake or withdrawal with a derived key
     ///
     /// # Account references
-    ///   0. `[WRITE]` Stake account to be updated
-    ///   1. `[SIGNER]` Base key of stake or withdraw authority
+    ///   0. [WRITE] Stake account to be updated
+    ///   1. [SIGNER] Base key of stake or withdraw authority
     AuthorizeWithSeed,
 }
 
@@ -645,32 +645,9 @@ pub fn deactivate_stake(stake_pubkey: &Pubkey, authorized_pubkey: &Pubkey) -> In
     Instruction::new_with_bincode(id(), &StakeInstruction::Deactivate, account_metas)
 }
 
-/// FIXME copied from the stake program
-pub fn withdraw(
-    stake_pubkey: &Pubkey,
-    withdrawer_pubkey: &Pubkey,
-    to_pubkey: &Pubkey,
-    lamports: u64,
-    custodian_pubkey: Option<&Pubkey>,
-) -> Instruction {
-    let mut account_metas = vec![
-        AccountMeta::new(*stake_pubkey, false),
-        AccountMeta::new(*to_pubkey, false),
-        AccountMeta::new_readonly(sysvar::clock::id(), false),
-        AccountMeta::new_readonly(sysvar::stake_history::id(), false),
-        AccountMeta::new_readonly(*withdrawer_pubkey, true),
-    ];
-
-    if let Some(custodian_pubkey) = custodian_pubkey {
-        account_metas.push(AccountMeta::new_readonly(*custodian_pubkey, true));
-    }
-
-    Instruction::new_with_bincode(id(), &StakeInstruction::Withdraw(lamports), account_metas)
-}
-
 #[cfg(test)]
 mod test {
-    use {super::*, bincode::serialize, solana_program::borsh::try_from_slice_unchecked};
+    use {super::*, crate::borsh::try_from_slice_unchecked, bincode::serialize};
 
     fn check_borsh_deserialization(stake: StakeState) {
         let serialized = serialize(&stake).unwrap();

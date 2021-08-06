@@ -25,11 +25,11 @@ import * as Layout from './layout';
 import {sendAndConfirmTransaction} from './util/send-and-confirm-transaction';
 
 export const TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
-  'HMGr16f8Ct1Zeb9TGPypt9rPgzCkmhCQB8Not8vwiPW1',
+  'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
 );
 
 export const ASSOCIATED_TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
-  'PUFQTv9BK3ax6bKPFnyjBTbVa3782mcfvb22TZovvrm',
+  'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
 );
 
 const FAILED_TO_FIND_ACCOUNT = 'Failed to find account';
@@ -586,7 +586,7 @@ export class Token {
    *
    * This function sends lamports to the new account before initializing it.
    *
-   * @param connection A safecoin web3 connection
+   * @param connection A solana web3 connection
    * @param programId The token program ID
    * @param owner The owner of the new token account
    * @param payer The source of the lamports to initialize, and payer of the initialization fees.
@@ -1394,22 +1394,6 @@ export class Token {
       ),
       this.payer,
       ...signers,
-    );
-  }
-
-  /**
-   * Sync amount in native SPL token account to underlying lamports
-   *
-   * @param nativeAccount Account to sync
-   */
-  async syncNative(nativeAccount: PublicKey): Promise<void> {
-    await sendAndConfirmTransaction(
-      'SyncNative',
-      this.connection,
-      new Transaction().add(
-        Token.createSyncNativeInstruction(this.programId, nativeAccount),
-      ),
-      this.payer,
     );
   }
 
@@ -2242,30 +2226,6 @@ export class Token {
   }
 
   /**
-   * Construct a SyncNative instruction
-   *
-   * @param programId SPL Token program account
-   * @param nativeAccount Account to sync lamports from
-   */
-  static createSyncNativeInstruction(
-    programId: PublicKey,
-    nativeAccount: PublicKey,
-  ): TransactionInstruction {
-    const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')]);
-
-    const data = Buffer.alloc(dataLayout.span);
-    dataLayout.encode(
-      {
-        instruction: 17, // SyncNative instruction
-      },
-      data,
-    );
-
-    let keys = [{pubkey: nativeAccount, isSigner: false, isWritable: true}];
-    return new TransactionInstruction({keys, programId: programId, data});
-  }
-
-  /**
    * Get the address for the associated token account
    *
    * @param associatedProgramId SPL Associated Token program account
@@ -2279,9 +2239,8 @@ export class Token {
     programId: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    allowOwnerOffCurve: boolean = false,
   ): Promise<PublicKey> {
-    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer())) {
+    if (!PublicKey.isOnCurve(owner.toBuffer())) {
       throw new Error(`Owner cannot sign: ${owner.toString()}`);
     }
     return (

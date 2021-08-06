@@ -14,7 +14,7 @@ use solana_program::{
     sysvar,
 };
 
-solana_program::declare_id!("PUFQTv9BK3ax6bKPFnyjBTbVa3782mcfvb22TZovvrm");
+solana_program::declare_id!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
 pub(crate) fn get_associated_token_address_and_bump_seed(
     wallet_address: &Pubkey,
@@ -34,7 +34,7 @@ pub fn get_associated_token_address(
     wallet_address: &Pubkey,
     spl_token_mint_address: &Pubkey,
 ) -> Pubkey {
-    get_associated_token_address_and_bump_seed(wallet_address, spl_token_mint_address, &id()).0
+    get_associated_token_address_and_bump_seed(&wallet_address, &spl_token_mint_address, &id()).0
 }
 
 fn get_associated_token_address_and_bump_seed_internal(

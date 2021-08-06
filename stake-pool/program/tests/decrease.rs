@@ -349,7 +349,7 @@ async fn fail_with_small_lamport_amount() {
         .unwrap();
 
     match error {
-        TransactionError::InstructionError(_, InstructionError::AccountNotRentExempt) => {}
+        TransactionError::InstructionError(_, InstructionError::InvalidError) => {}
         _ => panic!("Wrong error occurs while try to decrease small stake"),
     }
 }

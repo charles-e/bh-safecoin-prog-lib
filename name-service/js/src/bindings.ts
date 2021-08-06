@@ -26,12 +26,13 @@ export const NAME_PROGRAM_ID = new PublicKey(
   'namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX'
 );
 export const HASH_PREFIX = 'SPL Name Service';
+export const VERIFICATION_AUTHORITY_OFFSET = 64;
 
 ////////////////////////////////////////////////////////////
 /**
  * Creates a name account with the given rent budget, allocated space, owner and class.
  *
- * @param connection The safecoin connection object to the RPC node
+ * @param connection The solana connection object to the RPC node
  * @param name The name of the new account
  * @param space The space in bytes allocated to the account
  * @param payerKey The allocation cost payer
@@ -57,6 +58,8 @@ export async function createNameRegistry(
     nameClass,
     parentName
   );
+
+  space += 96; // Accounting for the Registry State Header
 
   const balance = lamports
     ? lamports
@@ -88,7 +91,7 @@ export async function createNameRegistry(
 /**
  * Overwrite the data of the given name registry.
  *
- * @param connection The safecoin connection object to the RPC node
+ * @param connection The solana connection object to the RPC node
  * @param name The name of the name registry to update
  * @param offset The offset to which the data should be written into the registry
  * @param input_data The data to be written
@@ -132,7 +135,7 @@ export async function updateNameRegistryData(
 /**
  * Change the owner of a given name account.
  *
- * @param connection The safecoin connection object to the RPC node
+ * @param connection The solana connection object to the RPC node
  * @param name The name of the name account
  * @param newOwner The new owner to be set
  * @param curentNameOwner the current name Owner
@@ -177,7 +180,7 @@ export async function transferNameOwnership(
 /**
  * Delete the name account and transfer the rent to the target.
  *
- * @param connection The safecoin connection object to the RPC node
+ * @param connection The solana connection object to the RPC node
  * @param name The name of the name account
  * @param refundTargetKey The refund destination address
  * @param nameClass The class of this name, if it exsists

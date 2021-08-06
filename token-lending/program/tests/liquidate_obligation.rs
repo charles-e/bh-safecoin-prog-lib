@@ -25,7 +25,7 @@ async fn test_success() {
     );
 
     // limit to track compute unit increase
-    test.set_bpf_compute_max_units(68_000);
+    test.set_bpf_compute_max_units(51_000);
 
     // 100 SAFE collateral
     const SAFE_DEPOSIT_AMOUNT_LAMPORTS: u64 = 100 * LAMPORTS_TO_SAFE * INITIAL_COLLATERAL_RATIO;
@@ -41,18 +41,17 @@ async fn test_success() {
 
     let user_accounts_owner = Keypair::new();
     let user_transfer_authority = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 50;
     reserve_config.liquidation_threshold = 80;
     reserve_config.liquidation_bonus = 10;
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
@@ -64,12 +63,9 @@ async fn test_success() {
         },
     );
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             borrow_amount: USDC_BORROW_AMOUNT_FRACTIONAL,
