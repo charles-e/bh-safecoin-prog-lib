@@ -2,10 +2,11 @@
 
 use crate::{
     error::GovernanceError,
-    state::{enums::GovernanceAccountType, governance::GovernanceConfig, realm::Realm},
     tools::account::{get_account_data, AccountMaxSize},
     PROGRAM_AUTHORITY_SEED,
 };
+
+use crate::state::enums::GovernanceAccountType;
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
@@ -35,6 +36,10 @@ pub struct TokenOwnerRecord {
     /// This amount is the voter weight used when voting on proposals
     pub governing_token_deposit_amount: u64,
 
+    /// A single account that is allowed to operate governance with the deposited governing tokens
+    /// It can be delegated to by the governing_token_owner or current governance_delegate
+    pub governance_delegate: Option<Pubkey>,
+
     /// The number of votes cast by TokenOwner but not relinquished yet
     /// Every time a vote is cast this number is increased and it's always decreased when relinquishing a vote regardless of the vote state
     pub unrelinquished_votes_count: u32,
@@ -42,18 +47,11 @@ pub struct TokenOwnerRecord {
     /// The total number of votes cast by the TokenOwner
     /// If TokenOwner withdraws vote while voting is still in progress total_votes_count is decreased  and the vote doesn't count towards the total
     pub total_votes_count: u32,
-
-    /// Reserved space for future versions
-    pub reserved: [u8; 8],
-
-    /// A single account that is allowed to operate governance with the deposited governing tokens
-    /// It can be delegated to by the governing_token_owner or current governance_delegate
-    pub governance_delegate: Option<Pubkey>,
 }
 
 impl AccountMaxSize for TokenOwnerRecord {
     fn get_max_size(&self) -> Option<usize> {
-        Some(154)
+        Some(146)
     }
 }
 
@@ -82,28 +80,6 @@ impl TokenOwnerRecord {
         }
 
         Err(GovernanceError::GoverningTokenOwnerOrDelegateMustSign.into())
-    }
-
-    /// Asserts TokenOwner has enough tokens to be allowed to create proposal
-    pub fn assert_can_create_proposal(
-        &self,
-        realm_data: &Realm,
-        config: &GovernanceConfig,
-    ) -> Result<(), ProgramError> {
-        let min_tokens_to_create_proposal =
-            if self.governing_token_mint == realm_data.community_mint {
-                config.min_community_tokens_to_create_proposal
-            } else if Some(self.governing_token_mint) == realm_data.council_mint {
-                config.min_council_tokens_to_create_proposal
-            } else {
-                return Err(GovernanceError::InvalidGoverningTokenMint.into());
-            };
-
-        if self.governing_token_deposit_amount < min_tokens_to_create_proposal {
-            return Err(GovernanceError::NotEnoughTokensToCreateProposal.into());
-        }
-
-        Ok(())
     }
 }
 
@@ -159,33 +135,21 @@ pub fn get_token_owner_record_data_for_seeds(
     get_token_owner_record_data(program_id, token_owner_record_info)
 }
 
-/// Deserializes TokenOwnerRecord account and asserts it belongs to the given realm
-pub fn get_token_owner_record_data_for_realm(
-    program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-    realm: &Pubkey,
-) -> Result<TokenOwnerRecord, ProgramError> {
-    let token_owner_record_data = get_token_owner_record_data(program_id, token_owner_record_info)?;
-
-    if token_owner_record_data.realm != *realm {
-        return Err(GovernanceError::InvalidRealmForTokenOwnerRecord.into());
-    }
-
-    Ok(token_owner_record_data)
-}
-
-/// Deserializes TokenOwnerRecord account and  asserts it belongs to the given realm and is for the given governing mint
+/// Deserializes TokenOwnerRecord account and checks that its PDA matches the given realm and governing mint
 pub fn get_token_owner_record_data_for_realm_and_governing_mint(
     program_id: &Pubkey,
     token_owner_record_info: &AccountInfo,
     realm: &Pubkey,
     governing_token_mint: &Pubkey,
 ) -> Result<TokenOwnerRecord, ProgramError> {
-    let token_owner_record_data =
-        get_token_owner_record_data_for_realm(program_id, token_owner_record_info, realm)?;
+    let token_owner_record_data = get_token_owner_record_data(program_id, token_owner_record_info)?;
 
     if token_owner_record_data.governing_token_mint != *governing_token_mint {
         return Err(GovernanceError::InvalidGoverningMintForTokenOwnerRecord.into());
+    }
+
+    if token_owner_record_data.realm != *realm {
+        return Err(GovernanceError::InvalidRealmForTokenOwnerRecord.into());
     }
 
     Ok(token_owner_record_data)
@@ -221,7 +185,6 @@ mod test {
             governance_delegate: Some(Pubkey::new_unique()),
             unrelinquished_votes_count: 1,
             total_votes_count: 1,
-            reserved: [0; 8],
         };
 
         let size = get_packed_len::<TokenOwnerRecord>();

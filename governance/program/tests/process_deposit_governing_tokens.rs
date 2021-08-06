@@ -16,24 +16,27 @@ async fn test_deposit_initial_community_tokens() {
     let realm_cookie = governance_test.with_realm().await;
 
     // Act
-    let voter_record_cookie = governance_test
-        .with_initial_community_token_deposit(&realm_cookie)
+    let token_owner_record_cookie = governance_test
+        .with_community_token_deposit(&realm_cookie)
         .await;
 
     // Assert
 
-    let voter_record = governance_test
-        .get_voter_record_account(&voter_record_cookie.address)
+    let token_owner_record = governance_test
+        .get_token_owner_record_account(&token_owner_record_cookie.address)
         .await;
 
-    assert_eq!(voter_record_cookie.account, voter_record);
+    assert_eq!(token_owner_record_cookie.account, token_owner_record);
 
     let source_account = governance_test
-        .get_token_account(&voter_record_cookie.token_source)
+        .get_token_account(&token_owner_record_cookie.token_source)
         .await;
 
     assert_eq!(
-        voter_record_cookie.token_source_amount - voter_record_cookie.account.token_deposit_amount,
+        token_owner_record_cookie.token_source_amount
+            - token_owner_record_cookie
+                .account
+                .governing_token_deposit_amount,
         source_account.amount
     );
 
@@ -41,7 +44,10 @@ async fn test_deposit_initial_community_tokens() {
         .get_token_account(&realm_cookie.community_token_holding_account)
         .await;
 
-    assert_eq!(voter_record.token_deposit_amount, holding_account.amount);
+    assert_eq!(
+        token_owner_record.governing_token_deposit_amount,
+        holding_account.amount
+    );
 }
 
 #[tokio::test]
@@ -53,23 +59,26 @@ async fn test_deposit_initial_council_tokens() {
     let council_token_holding_account = realm_cookie.council_token_holding_account.unwrap();
 
     // Act
-    let voter_record_cookie = governance_test
-        .with_initial_council_token_deposit(&realm_cookie)
+    let token_owner_record_cookie = governance_test
+        .with_council_token_deposit(&realm_cookie)
         .await;
 
     // Assert
-    let voter_record = governance_test
-        .get_voter_record_account(&voter_record_cookie.address)
+    let token_owner_record = governance_test
+        .get_token_owner_record_account(&token_owner_record_cookie.address)
         .await;
 
-    assert_eq!(voter_record_cookie.account, voter_record);
+    assert_eq!(token_owner_record_cookie.account, token_owner_record);
 
     let source_account = governance_test
-        .get_token_account(&voter_record_cookie.token_source)
+        .get_token_account(&token_owner_record_cookie.token_source)
         .await;
 
     assert_eq!(
-        voter_record_cookie.token_source_amount - voter_record_cookie.account.token_deposit_amount,
+        token_owner_record_cookie.token_source_amount
+            - token_owner_record_cookie
+                .account
+                .governing_token_deposit_amount,
         source_account.amount
     );
 
@@ -77,7 +86,10 @@ async fn test_deposit_initial_council_tokens() {
         .get_token_account(&council_token_holding_account)
         .await;
 
-    assert_eq!(voter_record.token_deposit_amount, holding_account.amount);
+    assert_eq!(
+        token_owner_record.governing_token_deposit_amount,
+        holding_account.amount
+    );
 }
 
 #[tokio::test]
@@ -86,24 +98,36 @@ async fn test_deposit_subsequent_community_tokens() {
     let mut governance_test = GovernanceProgramTest::start_new().await;
     let realm_cookie = governance_test.with_realm().await;
 
-    let voter_record_cookie = governance_test
-        .with_initial_community_token_deposit(&realm_cookie)
+    let token_owner_record_cookie = governance_test
+        .with_community_token_deposit(&realm_cookie)
         .await;
 
     let deposit_amount = 5;
-    let total_deposit_amount = voter_record_cookie.account.token_deposit_amount + deposit_amount;
+    let total_deposit_amount = token_owner_record_cookie
+        .account
+        .governing_token_deposit_amount
+        + deposit_amount;
+
+    governance_test.context.warp_to_slot(5).unwrap();
 
     // Act
     governance_test
-        .with_community_token_deposit(&realm_cookie, &voter_record_cookie, deposit_amount)
+        .with_subsequent_community_token_deposit(
+            &realm_cookie,
+            &token_owner_record_cookie,
+            deposit_amount,
+        )
         .await;
 
     // Assert
-    let voter_record = governance_test
-        .get_voter_record_account(&voter_record_cookie.address)
+    let token_owner_record = governance_test
+        .get_token_owner_record_account(&token_owner_record_cookie.address)
         .await;
 
-    assert_eq!(total_deposit_amount, voter_record.token_deposit_amount);
+    assert_eq!(
+        total_deposit_amount,
+        token_owner_record.governing_token_deposit_amount
+    );
 
     let holding_account = governance_test
         .get_token_account(&realm_cookie.community_token_holding_account)
@@ -120,24 +144,36 @@ async fn test_deposit_subsequent_council_tokens() {
 
     let council_token_holding_account = realm_cookie.council_token_holding_account.unwrap();
 
-    let voter_record_cookie = governance_test
-        .with_initial_council_token_deposit(&realm_cookie)
+    let token_owner_record_cookie = governance_test
+        .with_council_token_deposit(&realm_cookie)
         .await;
 
     let deposit_amount = 5;
-    let total_deposit_amount = voter_record_cookie.account.token_deposit_amount + deposit_amount;
+    let total_deposit_amount = token_owner_record_cookie
+        .account
+        .governing_token_deposit_amount
+        + deposit_amount;
+
+    governance_test.context.warp_to_slot(5).unwrap();
 
     // Act
     governance_test
-        .with_council_token_deposit(&realm_cookie, &voter_record_cookie, deposit_amount)
+        .with_subsequent_council_token_deposit(
+            &realm_cookie,
+            &token_owner_record_cookie,
+            deposit_amount,
+        )
         .await;
 
     // Assert
-    let voter_record = governance_test
-        .get_voter_record_account(&voter_record_cookie.address)
+    let token_owner_record = governance_test
+        .get_token_owner_record_account(&token_owner_record_cookie.address)
         .await;
 
-    assert_eq!(total_deposit_amount, voter_record.token_deposit_amount);
+    assert_eq!(
+        total_deposit_amount,
+        token_owner_record.governing_token_deposit_amount
+    );
 
     let holding_account = governance_test
         .get_token_account(&council_token_holding_account)
@@ -168,11 +204,12 @@ async fn test_deposit_initial_community_tokens_with_owner_must_sign_error() {
         .await;
 
     let mut instruction = deposit_governing_tokens(
+        &governance_test.program_id,
         &realm_cookie.address,
         &token_source.pubkey(),
         &token_owner.pubkey(),
         &transfer_authority.pubkey(),
-        &governance_test.payer.pubkey(),
+        &governance_test.context.payer.pubkey(),
         &realm_cookie.account.community_mint,
     );
 
@@ -213,11 +250,12 @@ async fn test_deposit_initial_community_tokens_with_invalid_owner_error() {
         .await;
 
     let instruction = deposit_governing_tokens(
+        &governance_test.program_id,
         &realm_cookie.address,
         &token_source.pubkey(),
         &invalid_owner.pubkey(),
         &transfer_authority.pubkey(),
-        &governance_test.payer.pubkey(),
+        &governance_test.context.payer.pubkey(),
         &realm_cookie.account.community_mint,
     );
 

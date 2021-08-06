@@ -6,11 +6,7 @@ use solana_program::pubkey::Pubkey;
 use solana_program_test::tokio;
 
 use program_test::*;
-use spl_governance::{
-    error::GovernanceError,
-    instruction::Vote,
-    state::enums::{ProposalState, VoteThresholdPercentage},
-};
+use spl_governance::{error::GovernanceError, instruction::Vote, state::enums::ProposalState};
 
 #[tokio::test]
 async fn test_finalize_vote_to_succeeded() {
@@ -20,9 +16,10 @@ async fn test_finalize_vote_to_succeeded() {
     let realm_cookie = governance_test.with_realm().await;
     let governed_account_cookie = governance_test.with_governed_account().await;
 
-    let mut governance_config = governance_test.get_default_governance_config();
+    let mut governance_config =
+        governance_test.get_default_governance_config(&realm_cookie, &governed_account_cookie);
 
-    governance_config.vote_threshold_percentage = VoteThresholdPercentage::YesVote(40);
+    governance_config.yes_vote_threshold_percentage = 40;
 
     let mut account_governance_cookie = governance_test
         .with_account_governance_using_config(
@@ -59,15 +56,14 @@ async fn test_finalize_vote_to_succeeded() {
 
     assert_eq!(ProposalState::Voting, proposal_account.state);
 
-    // Advance timestamp past max_voting_time
+    // Advance slot past max_voting_time
+    let vote_expired_at_slot = account_governance_cookie.account.config.max_voting_time
+        + proposal_account.voting_at.unwrap()
+        + 1;
     governance_test
-        .advance_clock_past_timestamp(
-            account_governance_cookie.account.config.max_voting_time as i64
-                + proposal_account.voting_at.unwrap(),
-        )
-        .await;
-
-    let clock = governance_test.get_clock().await;
+        .context
+        .warp_to_slot(vote_expired_at_slot)
+        .unwrap();
 
     // Act
 
@@ -84,20 +80,8 @@ async fn test_finalize_vote_to_succeeded() {
 
     assert_eq!(proposal_account.state, ProposalState::Succeeded);
     assert_eq!(
-        Some(clock.unix_timestamp),
+        Some(vote_expired_at_slot),
         proposal_account.voting_completed_at
-    );
-
-    assert_eq!(Some(210), proposal_account.governing_token_mint_vote_supply);
-
-    assert_eq!(
-        Some(
-            account_governance_cookie
-                .account
-                .config
-                .vote_threshold_percentage
-        ),
-        proposal_account.vote_threshold_percentage
     );
 }
 
@@ -140,13 +124,14 @@ async fn test_finalize_vote_to_defeated() {
 
     assert_eq!(ProposalState::Voting, proposal_account.state);
 
-    // Advance clock past max_voting_time
+    // Advance slot past max_voting_time
+    let vote_expired_at_slot = account_governance_cookie.account.config.max_voting_time
+        + proposal_account.voting_at.unwrap()
+        + 1;
     governance_test
-        .advance_clock_past_timestamp(
-            account_governance_cookie.account.config.max_voting_time as i64
-                + proposal_account.voting_at.unwrap(),
-        )
-        .await;
+        .context
+        .warp_to_slot(vote_expired_at_slot)
+        .unwrap();
 
     // Act
 

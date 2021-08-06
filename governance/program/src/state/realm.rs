@@ -7,12 +7,12 @@ use solana_program::{
 };
 
 use crate::{
-    id,
-    tools::account::{assert_is_valid_account, deserialize_account, AccountMaxSize},
+    error::GovernanceError,
+    tools::account::{assert_is_valid_account, get_account_data, AccountMaxSize},
     PROGRAM_AUTHORITY_SEED,
 };
 
-use super::enums::GovernanceAccountType;
+use crate::state::enums::GovernanceAccountType;
 
 /// Governance Realm Account
 /// Account PDA seeds" ['governance', name]
@@ -40,14 +40,38 @@ impl IsInitialized for Realm {
     }
 }
 
+impl Realm {
+    /// Asserts the given mint is either Community or Council mint of the Realm
+    pub fn assert_is_valid_governing_token_mint(
+        &self,
+        governing_token_mint: &Pubkey,
+    ) -> Result<(), ProgramError> {
+        if self.community_mint == *governing_token_mint {
+            return Ok(());
+        }
+
+        if self.council_mint == Some(*governing_token_mint) {
+            return Ok(());
+        }
+
+        Err(GovernanceError::InvalidGoverningTokenMint.into())
+    }
+}
+
 /// Checks whether realm account exists, is initialized and  owned by Governance program
-pub fn assert_is_valid_realm(realm_info: &AccountInfo) -> Result<(), ProgramError> {
-    assert_is_valid_account(realm_info, GovernanceAccountType::Realm, &id())
+pub fn assert_is_valid_realm(
+    program_id: &Pubkey,
+    realm_info: &AccountInfo,
+) -> Result<(), ProgramError> {
+    assert_is_valid_account(realm_info, GovernanceAccountType::Realm, program_id)
 }
 
 /// Deserializes account and checks owner program
-pub fn deserialize_realm(realm_info: &AccountInfo) -> Result<Realm, ProgramError> {
-    deserialize_account::<Realm>(realm_info, &id())
+pub fn get_realm_data(
+    program_id: &Pubkey,
+    realm_info: &AccountInfo,
+) -> Result<Realm, ProgramError> {
+    get_account_data::<Realm>(realm_info, program_id)
 }
 
 /// Returns Realm PDA seeds
@@ -56,8 +80,8 @@ pub fn get_realm_address_seeds(name: &str) -> [&[u8]; 2] {
 }
 
 /// Returns Realm PDA address
-pub fn get_realm_address(name: &str) -> Pubkey {
-    Pubkey::find_program_address(&get_realm_address_seeds(&name), &id()).0
+pub fn get_realm_address(program_id: &Pubkey, name: &str) -> Pubkey {
+    Pubkey::find_program_address(&get_realm_address_seeds(&name), program_id).0
 }
 
 /// Returns Realm Token Holding PDA seeds
@@ -74,12 +98,13 @@ pub fn get_governing_token_holding_address_seeds<'a>(
 
 /// Returns Realm Token Holding PDA address
 pub fn get_governing_token_holding_address(
+    program_id: &Pubkey,
     realm: &Pubkey,
     governing_token_mint: &Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
         &get_governing_token_holding_address_seeds(realm, governing_token_mint),
-        &id(),
+        program_id,
     )
     .0
 }

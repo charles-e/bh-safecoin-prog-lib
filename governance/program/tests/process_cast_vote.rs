@@ -5,11 +5,7 @@ mod program_test;
 use solana_program_test::tokio;
 
 use program_test::*;
-use spl_governance::{
-    error::GovernanceError,
-    instruction::Vote,
-    state::enums::{ProposalState, VoteThresholdPercentage},
-};
+use spl_governance::{error::GovernanceError, instruction::Vote, state::enums::ProposalState};
 
 #[tokio::test]
 async fn test_cast_vote() {
@@ -32,8 +28,6 @@ async fn test_cast_vote() {
         .with_signed_off_proposal(&token_owner_record_cookie, &mut account_governance_cookie)
         .await
         .unwrap();
-
-    let clock = governance_test.get_clock().await;
 
     // Act
     let vote_record_cookie = governance_test
@@ -60,21 +54,7 @@ async fn test_cast_vote() {
     );
 
     assert_eq!(proposal_account.state, ProposalState::Succeeded);
-    assert_eq!(
-        proposal_account.voting_completed_at,
-        Some(clock.unix_timestamp)
-    );
-
-    assert_eq!(Some(100), proposal_account.governing_token_mint_vote_supply);
-    assert_eq!(
-        Some(
-            account_governance_cookie
-                .account
-                .config
-                .vote_threshold_percentage
-        ),
-        proposal_account.vote_threshold_percentage
-    );
+    assert_eq!(proposal_account.voting_completed_at, Some(1));
 
     let token_owner_record = governance_test
         .get_token_owner_record_account(&token_owner_record_cookie.address)
@@ -452,9 +432,10 @@ async fn test_cast_vote_with_threshold_below_50_and_vote_not_tipped() {
     let realm_cookie = governance_test.with_realm().await;
     let governed_account_cookie = governance_test.with_governed_account().await;
 
-    let mut governance_config = governance_test.get_default_governance_config();
+    let mut governance_config =
+        governance_test.get_default_governance_config(&realm_cookie, &governed_account_cookie);
 
-    governance_config.vote_threshold_percentage = VoteThresholdPercentage::YesVote(40);
+    governance_config.yes_vote_threshold_percentage = 40;
 
     let mut account_governance_cookie = governance_test
         .with_account_governance_using_config(
@@ -520,12 +501,13 @@ async fn test_cast_vote_with_voting_time_expired_error() {
         .get_proposal_account(&proposal_cookie.address)
         .await;
 
-    let vote_expired_at = proposal_account.voting_at.unwrap()
-        + account_governance_cookie.account.config.max_voting_time as i64;
-
+    let vote_expired_at_slot = account_governance_cookie.account.config.max_voting_time
+        + proposal_account.voting_at.unwrap()
+        + 1;
     governance_test
-        .advance_clock_past_timestamp(vote_expired_at)
-        .await;
+        .context
+        .warp_to_slot(vote_expired_at_slot)
+        .unwrap();
 
     // Act
 
@@ -571,7 +553,7 @@ async fn test_cast_vote_with_cast_twice_error() {
         .await
         .unwrap();
 
-    governance_test.advance_clock().await;
+    governance_test.context.warp_to_slot(5).unwrap();
 
     // Act
     let err = governance_test

@@ -12,8 +12,7 @@ use solana_program::{
 };
 
 use crate::state::{
-    enums::{InstructionExecutionStatus, ProposalState},
-    governance::get_governance_data,
+    enums::ProposalState, governance::get_governance_data,
     proposal::get_proposal_data_for_governance,
     proposal_instruction::get_proposal_instruction_data_for_proposal,
 };
@@ -40,8 +39,7 @@ pub fn process_execute_instruction(program_id: &Pubkey, accounts: &[AccountInfo]
         proposal_info.key,
     )?;
 
-    proposal_data
-        .assert_can_execute_instruction(&proposal_instruction_data, clock.unix_timestamp)?;
+    proposal_data.assert_can_execute_instruction(&proposal_instruction_data, clock.slot)?;
 
     // Execute instruction with Governance PDA as signer
     let instruction = Instruction::from(&proposal_instruction_data.instruction);
@@ -55,13 +53,13 @@ pub fn process_execute_instruction(program_id: &Pubkey, accounts: &[AccountInfo]
 
     invoke_signed(
         &instruction,
-        instruction_account_infos,
+        &instruction_account_infos,
         &[&governance_seeds[..]],
     )?;
 
     // Update proposal and instruction accounts
     if proposal_data.state == ProposalState::Succeeded {
-        proposal_data.executing_at = Some(clock.unix_timestamp);
+        proposal_data.executing_at = Some(clock.slot);
         proposal_data.state = ProposalState::Executing;
     }
 
@@ -70,20 +68,16 @@ pub fn process_execute_instruction(program_id: &Pubkey, accounts: &[AccountInfo]
         .checked_add(1)
         .unwrap();
 
-    // Checking for Executing and ExecutingWithErrors states because instruction can still be executed after being flagged with error
-    // The check for instructions_executed_count ensures Proposal can't be transitioned to Completed state from ExecutingWithErrors
-    if (proposal_data.state == ProposalState::Executing
-        || proposal_data.state == ProposalState::ExecutingWithErrors)
+    if proposal_data.state == ProposalState::Executing
         && proposal_data.instructions_executed_count == proposal_data.instructions_count
     {
-        proposal_data.closed_at = Some(clock.unix_timestamp);
+        proposal_data.closed_at = Some(clock.slot);
         proposal_data.state = ProposalState::Completed;
     }
 
     proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;
 
-    proposal_instruction_data.executed_at = Some(clock.unix_timestamp);
-    proposal_instruction_data.execution_status = InstructionExecutionStatus::Success;
+    proposal_instruction_data.executed_at = Some(clock.slot);
     proposal_instruction_data.serialize(&mut *proposal_instruction_info.data.borrow_mut())?;
 
     Ok(())
