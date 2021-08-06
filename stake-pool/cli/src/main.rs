@@ -22,7 +22,7 @@ use {
     },
     solana_sdk::{
         commitment_config::CommitmentConfig,
-        native_token::{self, Sol},
+        native_token::{self, Safe},
         signature::{Keypair, Signer},
         system_instruction,
         transaction::Transaction,
@@ -72,8 +72,8 @@ fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(),
         Err(format!(
             "Fee payer, {}, has insufficient balance: {} required, {} available",
             config.fee_payer.pubkey(),
-            Sol(required_balance),
-            Sol(balance)
+            Safe(required_balance),
+            Safe(balance)
         )
         .into())
     } else {
@@ -641,7 +641,7 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
         println!(
             "Validator Vote Account: {}\tBalance: {}\tLast Update Epoch: {}{}",
             validator.vote_account_address,
-            Sol(validator.stake_lamports()),
+            Safe(validator.stake_lamports()),
             validator.last_update_epoch,
             if validator.last_update_epoch != epoch_info.epoch {
                 " [UPDATE REQUIRED]"
@@ -653,7 +653,7 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
 
     println!(
         "Total Pool Stake: {}{}",
-        Sol(stake_pool.total_stake_lamports),
+        Safe(stake_pool.total_stake_lamports),
         if stake_pool.last_update_epoch != epoch_info.epoch {
             " [UPDATE REQUIRED]"
         } else {
@@ -684,10 +684,10 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
                 "Stake Account: {}\tVote Account: {}\t{}",
                 pubkey,
                 stake_state.delegation().expect("delegation").voter_pubkey,
-                Sol(stake_lamports)
+                Safe(stake_lamports)
             );
         }
-        println!("Total Stake Account Balance: {}", Sol(total_stake_lamports));
+        println!("Total Stake Account Balance: {}", Safe(total_stake_lamports));
 
         if pool_mint.supply != stake_pool.pool_token_supply {
             println!(
@@ -915,7 +915,7 @@ fn command_withdraw(
         println!(
             "Withdrawing from account {}, amount {}, {} pool tokens",
             withdraw_account.address,
-            Sol(sol_withdraw_amount),
+            Safe(sol_withdraw_amount),
             spl_token::amount_to_ui_amount(withdraw_account.pool_amount, pool_mint.decimals),
         );
 

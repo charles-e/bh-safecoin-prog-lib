@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 
-//! An Uniswap-like program for the Solana blockchain.
+//! An Uniswap-like program for the Safecoin blockchain.
 
 pub mod constraints;
 pub mod curve;

@@ -30,7 +30,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 ```
 
-Install the Solana command-line tools:
+Install the Safecoin command-line tools:
 
 ```bash
 curl -sSf https://raw.githubusercontent.com/solana-labs/solana/v1.4.2/install/solana-install-init.sh | sh -s - v1.4.2
@@ -53,7 +53,7 @@ cd themis/client_ristretto
 cargo build --example tps
 ```
 
-### Configure the default Solana wallet
+### Configure the default Safecoin wallet
 
 Point to the testnet cluster (default is mainnet-beta):
 

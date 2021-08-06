@@ -2,13 +2,13 @@
 title: Token Program
 ---
 
-A Token program on the Solana blockchain.
+A Token program on the Safecoin blockchain.
 
 This program defines a common implementation for Fungible and Non Fungible tokens.
 
 ## Background
 
-Solana's programming model and the definitions of the Solana terms used in this
+Safecoin's programming model and the definitions of the Safecoin terms used in this
 document are available at:
 
 - https://docs.solana.com/apps
@@ -63,7 +63,7 @@ Keypair Path: ${HOME}/.config/solana/id.json
 
 #### Cluster RPC URL
 
-See [Solana clusters](https://docs.solana.com/clusters) for cluster-specific RPC URLs
+See [Safecoin clusters](https://docs.solana.com/clusters) for cluster-specific RPC URLs
 ```
 solana config set --url https://api.devnet.solana.com
 ```
@@ -613,9 +613,9 @@ Account, which means that the total supply of a particular token type is equal
 to the balances of all the associated Accounts.
 
 It's important to note that the `InitializeMint` instruction does not require
-the Solana account being initialized also be a signer. The `InitializeMint`
+the Safecoin account being initialized also be a signer. The `InitializeMint`
 instruction should be atomically processed with the system instruction that
-creates the Solana account by including both instructions in the same
+creates the Safecoin account by including both instructions in the same
 transaction.
 
 Once a Mint is initialized, the `mint_authority` can create new tokens using the
@@ -638,9 +638,9 @@ An Account's owner may transfer ownership of an account to another using the
 `SetAuthority` instruction.
 
 It's important to note that the `InitializeAccount` instruction does not require
-the Solana account being initialized also be a signer. The `InitializeAccount`
+the Safecoin account being initialized also be a signer. The `InitializeAccount`
 instruction should be atomically processed with the system instruction that
-creates the Solana account by including both instructions in the same
+creates the Safecoin account by including both instructions in the same
 transaction.
 
 ### Transferring tokens
@@ -682,9 +682,9 @@ the set of N public keys that are valid and the number M of those N that must be
 present as instruction signers for the authority to be legitimate.
 
 It's important to note that the `InitializeMultisig` instruction does not
-require the Solana account being initialized also be a signer. The
+require the Safecoin account being initialized also be a signer. The
 `InitializeMultisig` instruction should be atomically processed with the system
-instruction that creates the Solana account by including both instructions in
+instruction that creates the Safecoin account by including both instructions in
 the same transaction.
 
 ### Freezing accounts
@@ -710,7 +710,7 @@ Accounts containing wrapped SAFE are associated with a specific Mint called the
 These accounts have a few unique behaviors
 
 - `InitializeAccount` sets the balance of the initialized Account to the SAFE
-  balance of the Solana account being initialized, resulting in a token balance
+  balance of the Safecoin account being initialized, resulting in a token balance
   equal to the SAFE balance.
 - Transfers to and from not only modify the token balance but also transfer an
   equal amount of SAFE from the source account to the destination account.
@@ -722,14 +722,14 @@ The Native Mint supply will always report 0, regardless of how much SAFE is curr
 ### Rent-exemption
 
 To ensure a reliable calculation of supply, a consistency valid Mint, and
-consistently valid Multisig accounts all Solana accounts holding an Account,
+consistently valid Multisig accounts all Safecoin accounts holding an Account,
 Mint, or Multisig must contain enough SAFE to be considered [rent
 exempt](https://docs.solana.com/implemented-proposals/rent)
 
 ### Closing accounts
 
 An account may be closed using the `CloseAccount` instruction. When closing an
-Account, all remaining SAFE will be transferred to another Solana account
+Account, all remaining SAFE will be transferred to another Safecoin account
 (doesn't have to be associated with the Token Program). Non-native Accounts must
 have a balance of zero to be closed.
 

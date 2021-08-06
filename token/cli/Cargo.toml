@@ -1,5 +1,5 @@
 [package]
-authors = ["Solana Maintainers <maintainers@solana.foundation>"]
+authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
 description = "SPL-Token Command-line Utility"
 edition = "2018"
 homepage = "https://spl.solana.com/token"
@@ -12,14 +12,14 @@ version = "2.0.11"
 clap = "2.33.3"
 console = "0.14.0"
 serde_json = "1.0.62"
-solana-account-decoder = "=1.6.11"
-solana-clap-utils = "=1.6.11"
-solana-cli-config = "=1.6.11"
-solana-cli-output = "=1.6.11"
-solana-client = "=1.6.11"
-solana-logger = "=1.6.11"
-solana-remote-wallet = "=1.6.11"
-solana-sdk = "=1.6.11"
+solana-account-decoder = "=1.6.16"
+solana-clap-utils = "=1.6.16"
+solana-cli-config = "=1.6.16"
+solana-cli-output = "=1.6.16"
+solana-client = "=1.6.16"
+solana-logger = "=1.6.16"
+solana-remote-wallet = "=1.6.16"
+safecoin-sdk = "=1.6.16"
 spl-token = { version = "3.1", path="../program", features = [ "no-entrypoint" ] }
 spl-associated-token-account = { version = "1.0", path="../../associated-token-account/program", features = [ "no-entrypoint" ] }
 spl-memo = { version = "3.0.1", path="../../memo/program", features = ["no-entrypoint"] }

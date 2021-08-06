@@ -1,6 +1,6 @@
 [package]
 name = "spl-name-service"
-description = "Solana Program Library Name Service"
+description = "Safecoin Program Library Name Service"
 version = "0.1.0"
 repository = "https://github.com/solana-labs/safecoin-program-library"
 authors = ["lcchy <lucas@bonfida.com>"]
@@ -14,15 +14,15 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-safecoin-program = "1.6.11"
+safecoin-program = "1.6.16"
 num-traits = "0.2"
-borsh = "0.8.1"
+borsh = "0.9.1"
 num-derive = "0.3.3"
 thiserror = "1.0.24"
 
 [dev-dependencies]
-safecoin-program-test = "1.6.11"
-solana-sdk = "1.6.11"
+safecoin-program-test = "1.6.16"
+safecoin-sdk = "1.6.16"
 
 [lib]
 crate-type = ["cdylib", "lib"]

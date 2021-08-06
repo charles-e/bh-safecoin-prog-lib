@@ -2,7 +2,7 @@
 title: Feature Proposal Program
 ---
 
-The Feature Proposal Program provides a workflow for activation of Solana
+The Feature Proposal Program provides a workflow for activation of Safecoin
 network features through community vote based on validator stake weight.
 
 Community voting is accomplished using [SPL Tokens](token.md).  Tokens are
@@ -13,19 +13,19 @@ threshold is met the feature is activated.
 
 ## Background
 
-The Solana validator software supports runtime feature activation through the
+The Safecoin validator software supports runtime feature activation through the
 built-in `Feature` program.  This program ensures that features are activated
 simultaneously across all validators to avoid divergent behavior that would
 cause hard forks or otherwise break consensus.
 
 The
 [feature](https://docs.rs/safecoin-program/latest/solana_program/feature/index.html)
-and [feature_set](https://docs.rs/solana-sdk/latest/solana_sdk/feature_set/index.html)
+and [feature_set](https://docs.rs/safecoin-sdk/latest/solana_sdk/feature_set/index.html)
 Rust modules are the primitives for this facility, and the `solana feature`
 command-line subcommands allow for easy feature status inspection and feature
 activation.
 
-The `solana feature activate` workflow was designed for use by the core Solana
+The `solana feature activate` workflow was designed for use by the core Safecoin
 developers to allow for low-overhead addition of non-controversial network
 features over time.
 
@@ -58,7 +58,7 @@ This section describes the life cycle of a feature proposal.
 
 ### Implement the Feature
 The first step is to conceive of the new feature and realize it in the
-Solana code base, working with the core Solana developers at https://github.com/solana-labs/solana.
+Safecoin code base, working with the core Safecoin developers at https://github.com/solana-labs/solana.
 
 During the implementation, a *feature id* will be required to identity the new
 feature in the code base to avoid the new functionality until its activation.
@@ -90,7 +90,7 @@ only possible by the Feature Proposal Program.
 
 ### Initiate the Feature Proposal
 
-After the feature is implemented and deployed to the Solana cluster,
+After the feature is implemented and deployed to the Safecoin cluster,
 the *feature id* will be visible in `solana feature status` and the *feature
 proposer* may initiate the community proposal process.
 

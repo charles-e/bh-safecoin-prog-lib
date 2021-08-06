@@ -1,8 +1,8 @@
 [package]
 name = "spl-example-logging"
 version = "1.0.0"
-description = "Solana Program Library Logging Example"
-authors = ["Solana Maintainers <maintainers@solana.foundation>"]
+description = "Safecoin Program Library Logging Example"
+authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
 repository = "https://github.com/solana-labs/safecoin-program-library"
 license = "Apache-2.0"
 edition = "2018"
@@ -13,11 +13,11 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-safecoin-program = "1.6.11"
+safecoin-program = "1.6.16"
 
 [dev-dependencies]
-safecoin-program-test = "1.6.11"
-solana-sdk = "1.6.11"
+safecoin-program-test = "1.6.16"
+safecoin-sdk = "1.6.16"
 
 [lib]
 crate-type = ["cdylib", "lib"]

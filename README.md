@@ -4,12 +4,12 @@
 https://travis-ci.org/solana-labs/safecoin-program-library.svg?branch=master
 [travis-url]: https://travis-ci.org/solana-labs/safecoin-program-library
 
-# Solana Program Library
+# Safecoin Program Library
 
-The Solana Program Library (SPL) is a collection of on-chain programs targeting
+The Safecoin Program Library (SPL) is a collection of on-chain programs targeting
 the [Sealevel parallel
 runtime](https://medium.com/solana-labs/sealevel-parallel-processing-thousands-of-smart-contracts-d814b378192).
-These programs are tested against Solana's implementation of Sealevel,
+These programs are tested against Safecoin's implementation of Sealevel,
 solana-runtime, and deployed to its mainnet.  As others implement Sealevel, we
 will graciously accept patches to ensure the programs here are portable across
 all implementations.
@@ -21,7 +21,7 @@ Full documentation is available at https://spl.solana.com
 ### Environment Setup
 
 1. Install the latest Rust stable from https://rustup.rs/
-2. Install Solana v1.6.1 or later from https://docs.solana.com/cli/install-solana-cli-tools
+2. Install Safecoin v1.6.1 or later from https://docs.solana.com/cli/install-solana-cli-tools
 3. Install the `libudev` development package for your distribution (`libudev-dev` on Debian-derived distros, `libudev-devel` on Redhat-derived).
 
 ### Build
@@ -31,7 +31,7 @@ The normal cargo build is available for building programs against your host mach
 $ cargo build
 ```
 
-To build a specific program, such as SPL Token, for the Solana BPF target:
+To build a specific program, such as SPL Token, for the Safecoin BPF target:
 ```
 $ cd token/program
 $ cargo build-bpf

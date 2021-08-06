@@ -50,7 +50,7 @@ solana-remote-wallet = {path = "$solana_dir/remote-wallet" }
 safecoin-program = { path = "$solana_dir/sdk/program" }
 safecoin-program-test = { path = "$solana_dir/program-test" }
 solana-runtime = { path = "$solana_dir/runtime" }
-solana-sdk = { path = "$solana_dir/sdk" }
+safecoin-sdk = { path = "$solana_dir/sdk" }
 solana-stake-program = { path = "$solana_dir/programs/stake" }
 solana-transaction-status = { path = "$solana_dir/transaction-status" }
 solana-vote-program = { path = "$solana_dir/programs/vote" }

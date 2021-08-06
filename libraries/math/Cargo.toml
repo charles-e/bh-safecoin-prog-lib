@@ -1,8 +1,8 @@
 [package]
 name = "spl-math"
 version = "0.1.0"
-description = "Solana Program Library Math"
-authors = ["Solana Maintainers <maintainers@solana.foundation>"]
+description = "Safecoin Program Library Math"
+authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
 repository = "https://github.com/solana-labs/safecoin-program-library"
 license = "Apache-2.0"
 edition = "2018"
@@ -12,18 +12,18 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-borsh = "0.8"
-borsh-derive = "0.8.1"
+borsh = "0.9.1"
+borsh-derive = "0.9.1"
 num-derive = "0.3"
 num-traits = "0.2"
-safecoin-program = "1.6.11"
+safecoin-program = "1.6.16"
 thiserror = "1.0"
 uint = "0.8"
 
 [dev-dependencies]
 proptest = "1.0.0"
-safecoin-program-test = "1.6.11"
-solana-sdk = "1.6.11"
+safecoin-program-test = "1.6.16"
+safecoin-sdk = "1.6.16"
 
 [lib]
 crate-type = ["cdylib", "lib"]

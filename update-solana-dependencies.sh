@@ -30,7 +30,7 @@ crates=(
   safecoin-program-test
   solana-remote-wallet
   solana-runtime
-  solana-sdk
+  safecoin-sdk
   solana-stake-program
   solana-transaction-status
   solana-vote-program

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "SPL Token Lending JavaScript API",
   "license": "MIT",
-  "author": "Solana Maintainers <maintainers@solana.foundation>",
+  "author": "Safecoin Maintainers <maintainers@solana.foundation>",
   "repository": {
     "type": "git",
     "url": "https://github.com/solana-labs/safecoin-program-library"

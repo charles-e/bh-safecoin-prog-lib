@@ -73,7 +73,7 @@ on hand to fully manage the pool stakes.
 
 ## Background
 
-Solana's programming model and the definitions of the Solana terms used in this
+Safecoin's programming model and the definitions of the Safecoin terms used in this
 document are available at:
 
 - https://docs.solana.com/apps
@@ -113,7 +113,7 @@ Keypair Path: ${HOME}/.config/solana/id.json
 
 #### Cluster RPC URL
 
-See [Solana clusters](https://docs.solana.com/clusters) for cluster-specific RPC URLs
+See [Safecoin clusters](https://docs.solana.com/clusters) for cluster-specific RPC URLs
 ```sh
 solana config set --url https://api.devnet.solana.com
 ```
@@ -239,7 +239,7 @@ In order to accommodate large numbers of user deposits into the stake pool, the
 stake pool only manages one stake account per validator. To add a new validator
 to the stake pool, we first create a validator-associated stake account.
 
-Looking at [validators.app](https://www.validators.app/) or other Solana validator
+Looking at [validators.app](https://www.validators.app/) or other Safecoin validator
 lists, we choose some validators at random and start with identity
 `8SQEcP4FaYQySktNQeyxF3w8pvArx3oMEh7fPrzkN9pu` on vote account
 `2HUKQz7W2nXZSwrdX5RkfS2rLU4j1QZLjdGCHcoUKFh3`. Let's create a validator stake account
@@ -270,7 +270,7 @@ NOTE: These stake accounts have not been added to the stake pool yet. Stake pool
 only accept deposits from fully delegated (warmed-up) stake accounts, so we must
 first delegate these stakes.
 
-We can see the status of stake account using the Solana command-line utility.
+We can see the status of stake account using the Safecoin command-line utility.
 
 ```sh
 $ solana stake-account FYQB64aEzSmECvnG8RVvdAXBxRnzrLvcA3R22aGH2hUN
@@ -283,9 +283,9 @@ Withdraw Authority: 4SnSuUtJGKvk2GYpBwmEsWG53zTurVM8yXGsoiZQyMJn
 
 The stake pool creates these special staking accounts with 1 SAFE as a minimum
 delegation. The stake and withdraw authorities are the keypair configured
-with the `--config` flag, using the Solana CLI default key. More information
-about the Solana CLI can be found on the
-[Solana Docs](https://docs.solana.com/running-validator/validator-start#configure-solana-cli).
+with the `--config` flag, using the Safecoin CLI default key. More information
+about the Safecoin CLI can be found on the
+[Safecoin Docs](https://docs.solana.com/running-validator/validator-start#configure-solana-cli).
 
 We must delegate these stake accounts to the vote account specified on creation.
 
@@ -318,7 +318,7 @@ Signature: 3N1K89rGV9gWueTTrPGTDBwKAp8BikQhKHMFoREw98Q1piXFeZSSxqfnRQexrfAZQfrpY
 Users can start depositing their activated stakes into the stake pool, as
 long as they are delegated to the same vote account, which was
 `FYQB64aEzSmECvnG8RVvdAXBxRnzrLvcA3R22aGH2hUN` in this example.  You can also
-double-check that at any time using the Solana command-line utility.
+double-check that at any time using the Safecoin command-line utility.
 
 ```sh
 $ solana stake-account FYQB64aEzSmECvnG8RVvdAXBxRnzrLvcA3R22aGH2hUN
@@ -701,7 +701,7 @@ epoch after activation for your stake account to match up with the stake pool's 
 
 ### Transaction sizes
 
-The Solana transaction processor has two important limitations:
+The Safecoin transaction processor has two important limitations:
 
 * size of the overall transaction, limited to roughly 1 MTU / packet
 * computation budget per instruction
