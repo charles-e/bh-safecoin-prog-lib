@@ -28,8 +28,8 @@ crates=(
   solana-core
   solana-logger
   solana-notifier
-  solana-program
-  solana-program-test
+  safecoin-program
+  safecoin-program-test
   solana-remote-wallet
   solana-runtime
   solana-sdk

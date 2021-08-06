@@ -19,7 +19,7 @@ simultaneously across all validators to avoid divergent behavior that would
 cause hard forks or otherwise break consensus.
 
 The
-[feature](https://docs.rs/solana-program/latest/solana_program/feature/index.html)
+[feature](https://docs.rs/safecoin-program/latest/solana_program/feature/index.html)
 and [feature_set](https://docs.rs/solana-sdk/latest/solana_sdk/feature_set/index.html)
 Rust modules are the primitives for this facility, and the `safecoin feature`
 command-line subcommands allow for easy feature status inspection and feature
@@ -35,7 +35,7 @@ when appropriate.
 
 ## Source
 The Feature Proposal Program's source is available on
-[github](https://github.com/solana-labs/solana-program-library)
+[github](https://github.com/solana-labs/safecoin-program-library)
 
 ## Interface
 The Feature Proposal Program is written in Rust and available on [crates.io](https://crates.io/crates/spl-feature-proposal) and [docs.rs](https://docs.rs/spl-feature-proposal).

@@ -29,7 +29,7 @@ members = [
 exclude = [
   "themis/client_ristretto",
   "themis/program_ristretto",
-  "token/perf-monitor", # TODO: Rework perf-monitor to use solana-program-test, avoiding the need to link directly with the BPF VM
+  "token/perf-monitor", # TODO: Rework perf-monitor to use safecoin-program-test, avoiding the need to link directly with the BPF VM
 ]
 
 [profile.dev]

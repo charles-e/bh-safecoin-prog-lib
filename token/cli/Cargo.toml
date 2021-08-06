@@ -5,7 +5,7 @@ edition = "2018"
 homepage = "https://spl.solana.com/token"
 license = "Apache-2.0"
 name = "spl-token-cli"
-repository = "https://github.com/solana-labs/solana-program-library"
+repository = "https://github.com/solana-labs/safecoin-program-library"
 version = "2.0.14"
 
 [dependencies]

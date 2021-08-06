@@ -6,7 +6,7 @@ module.exports = {
   baseUrl: "/",
   favicon: "img/favicon.ico",
   organizationName: "solana-labs", // Usually your GitHub org/user name.
-  projectName: "solana-program-library", // Usually your repo name.
+  projectName: "safecoin-program-library", // Usually your repo name.
   themeConfig: {
     navbar: {
       logo: {
@@ -27,7 +27,7 @@ module.exports = {
         },
 
         {
-          href: "https://github.com/solana-labs/solana-program-library",
+          href: "https://github.com/solana-labs/safecoin-program-library",
           label: "GitHub",
           position: "right",
         },
@@ -58,7 +58,7 @@ module.exports = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/solana-labs/solana-program-library",
+              href: "https://github.com/solana-labs/safecoin-program-library",
             },
           ],
         },

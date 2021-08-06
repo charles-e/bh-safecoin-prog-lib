@@ -82,7 +82,7 @@ document are available at:
 ## Source
 
 The Stake Pool Program's source is available on
-[github](https://github.com/solana-labs/solana-program-library).
+[github](https://github.com/solana-labs/safecoin-program-library).
 
 ## Command-line Utility
 

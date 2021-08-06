@@ -42,8 +42,8 @@ export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 Clone this git repo:
 
 ```bash
-git clone https://github.com/solana-labs/solana-program-library.git
-cd solana-program-library
+git clone https://github.com/solana-labs/safecoin-program-library.git
+cd safecoin-program-library
 ```
 
 Build the demo client:

@@ -3,7 +3,7 @@ name = "spl-feature-proposal-cli"
 version = "1.2.0"
 description = "SPL Feature Proposal Command-line Utility"
 authors = ["Solana Maintainers <maintainers@solana.foundation>"]
-repository = "https://github.com/solana-labs/solana-program-library"
+repository = "https://github.com/solana-labs/safecoin-program-library"
 license = "Apache-2.0"
 edition = "2018"
 

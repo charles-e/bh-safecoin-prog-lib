@@ -14,7 +14,7 @@ testnet, and mainnet-beta:
 | Fee Owner | `HfoTxFR1Tm6kGmWgYWD6J7YHVy1UwqSULUGVLXkJqaKN` |
 
 Check out
-[program repository](https://github.com/solana-labs/solana-program-library/tree/master/token-swap)
+[program repository](https://github.com/solana-labs/safecoin-program-library/tree/master/token-swap)
 for more developer information.
 
 ## Overview
@@ -47,12 +47,12 @@ document are available at:
 ## Source
 
 The Token Swap Program's source is available on
-[github](https://github.com/solana-labs/solana-program-library).
+[github](https://github.com/solana-labs/safecoin-program-library).
 
 ## Interface
 
 [JavaScript
-bindings](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/js/client/token-swap.js)
+bindings](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/js/client/token-swap.js)
 are available that support loading the Token Swap Program on to a chain and
 issuing instructions.
 
@@ -63,7 +63,7 @@ Example user interface built and maintained by Serum team is available
 
 The following explains the instructions available in the Token Swap Program.
 Note that each instruction has a simple code example that can be found in the
-[end-to-end tests](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/js/cli/token-swap-test.js).
+[end-to-end tests](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/js/cli/token-swap-test.js).
 
 ### Creating a new token swap pool
 
@@ -150,7 +150,7 @@ from the user's account by the program.
 
 The Token Swap Program is completely customizable for any possible trading curve
 that implements the
-[CurveCalculator](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/calculator.rs)
+[CurveCalculator](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/calculator.rs)
 trait.  If you would like to implement a new automated market maker, it may be 
 as easy as forking the Token Swap Program and implementing a new curve.  The
 following curves are all provided out of the box for reference.
@@ -158,7 +158,7 @@ following curves are all provided out of the box for reference.
 ### Constant product
 
 The [constant product
-curve](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/constant_product.rs)
+curve](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/constant_product.rs)
 is the well-known Uniswap and Balancer style curve that preserves an invariant
 on all swaps, expressed as the product of the quantity of token A and token B
 in the swap.
@@ -197,7 +197,7 @@ whitepaper](https://balancer.finance/whitepaper/).
 
 ### Constant price
 
-The [constant price curve](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/constant_price.rs)
+The [constant price curve](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/constant_price.rs)
 is a simple curve that always maintains the price of token A with respect to
 token B.  At initialization, the swap creator sets the cost for 1 token B in
 terms of token A. For example, if the price is set to 17, 17 token A will always
@@ -217,7 +217,7 @@ expensive.
 
 ### Stable (under construction)
 
-The [stable curve](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/stable.rs)
+The [stable curve](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/stable.rs)
 from [curve.fi](https://www.curve.fi/), has a different shape to prioritize 
 "stable" trading, meaning prices that stay constant through trading. Most 
 importantly, prices don't change as quickly as the constant product curve, so a
@@ -235,7 +235,7 @@ and a more complete version can be found at the
 
 ### Offset
 
-The [offset curve](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/offset.rs)
+The [offset curve](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/offset.rs)
 can be seen as a combination of the constant price and constant product curve.
 It follows the constant product curve dynamics, but allows for the pool
 creator to set an "offset" on one side. The invariant for the curve is:
@@ -287,9 +287,9 @@ crate, we test specific mathematical properties of curves, specifically to avoid
 leaking value on any trades, deposits, or withdrawals.  It is out of scope of
 this document to explain property testing, but the specific property tests for
 the Token Swap Program can be found in the
-[curves](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/constant_product.rs)
+[curves](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/constant_product.rs)
 and
-[math](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/src/curve/math.rs)
+[math](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/src/curve/math.rs)
 portions of the repo.
 
 ### Fuzzing
@@ -299,5 +299,5 @@ test all possible inputs to the Token Swap Program, ensuring that the program
 does not crash unexpectedly or leak tokens.  It is out of scope of this document
 to explain fuzzing, but the specific implementation for the program can be found
 in the [instruction fuzz
-tests](https://github.com/solana-labs/solana-program-library/blob/master/token-swap/program/fuzz/src/instructions.rs)
+tests](https://github.com/solana-labs/safecoin-program-library/blob/master/token-swap/program/fuzz/src/instructions.rs)
 of the repo.

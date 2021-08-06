@@ -1,8 +1,8 @@
 [![Build status][travis-image]][travis-url]
 
 [travis-image]:
-https://travis-ci.org/solana-labs/solana-program-library.svg?branch=master
-[travis-url]: https://travis-ci.org/solana-labs/solana-program-library
+https://travis-ci.org/solana-labs/safecoin-program-library.svg?branch=master
+[travis-url]: https://travis-ci.org/solana-labs/safecoin-program-library
 
 # Solcoin Program Library
 
@@ -84,7 +84,7 @@ master. Once a program is tested and deemed ready for release:
 
 Program tags are of the form `<program>-vX.Y.Z`.
 Create the new tag at the version-bump commit and push to the
-solana-program-library repository, eg:
+safecoin-program-library repository, eg:
 
 ```
 $ git tag token-v1.0.0 b24bfe7
@@ -93,7 +93,7 @@ $ git push upstream --tags
 
 ### Publish Github release
 
-  * Go to [GitHub Releases UI](https://github.com/solana-labs/solana-program-library/releases)
+  * Go to [GitHub Releases UI](https://github.com/solana-labs/safecoin-program-library/releases)
   * Click "Draft new release", and enter the new tag in the "Tag version" box.
   * Title the release "SPL <Program> vX.Y.Z", complete the description, and attach the `spl_<program>.so` binary
   * Click "Publish release"

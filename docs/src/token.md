@@ -17,17 +17,17 @@ document are available at:
 ## Source
 
 The Token Program's source is available on
-[github](https://github.com/solana-labs/solana-program-library)
+[github](https://github.com/solana-labs/safecoin-program-library)
 
 ## Interface
 
 The Token Program is written in Rust and available on [crates.io](https://crates.io/crates/spl-token) and [docs.rs](https://docs.rs/spl-token).
 
 Auto-generated C bindings are also available
-[here](https://github.com/solana-labs/solana-program-library/blob/master/token/program/inc/token.h)
+[here](https://github.com/solana-labs/safecoin-program-library/blob/master/token/program/inc/token.h)
 
 [JavaScript
-bindings](https://github.com/solana-labs/solana-program-library/blob/master/token/js/client/token.js)
+bindings](https://github.com/solana-labs/safecoin-program-library/blob/master/token/js/client/token.js)
 are available that support loading the Token Program on to a chain and issue
 instructions.
 
@@ -593,9 +593,9 @@ curl http://api.mainnet-beta.safecoin.org -X POST -H "Content-Type: application/
 ```
 
 The `"dataSize": 165` filter selects all [Token
-Account](https://github.com/solana-labs/solana-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L86-L106)s,
+Account](https://github.com/solana-labs/safecoin-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L86-L106)s,
 and then the `"memcmp": ...` filter selects based on the
-[mint](https://github.com/solana-labs/solana-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L88)
+[mint](https://github.com/solana-labs/safecoin-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L88)
 address within each token account.
 
 ### Finding all token accounts for a wallet
@@ -628,9 +628,9 @@ curl http://api.mainnet-beta.safecoin.org -X POST -H "Content-Type: application/
 ```
 
 The `"dataSize": 165` filter selects all [Token
-Account](https://github.com/solana-labs/solana-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L86-L106)s,
+Account](https://github.com/solana-labs/safecoin-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L86-L106)s,
 and then the `"memcmp": ...` filter selects based on the
-[owner](https://github.com/solana-labs/solana-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L90)
+[owner](https://github.com/solana-labs/safecoin-program-library/blob/08d9999f997a8bf38719679be9d572f119d0d960/token/program/src/state.rs#L90)
 address within each token account.
 
 ## Operational overview

@@ -5,7 +5,7 @@ edition = "2018"
 homepage = "https://spl.solana.com/stake-pool"
 license = "Apache-2.0"
 name = "spl-stake-pool-cli"
-repository = "https://github.com/solana-labs/solana-program-library"
+repository = "https://github.com/solana-labs/safecoin-program-library"
 version = "0.4.0"
 
 [dependencies]
@@ -17,7 +17,7 @@ solana-clap-utils = "=1.7.7"
 solana-cli-config = "=1.7.7"
 solana-client = "=1.7.7"
 solana-logger = "=1.7.7"
-solana-program = "=1.7.7"
+safecoin-program = "=1.7.7"
 solana-remote-wallet = "=1.7.7"
 solana-sdk = "=1.7.7"
 spl-associated-token-account = { version = "1.0", path="../../associated-token-account/program", features = [ "no-entrypoint" ] }

@@ -3,7 +3,7 @@ name = "spl-example-logging"
 version = "1.0.0"
 description = "Solcoin Program Library Logging Example"
 authors = ["Solana Maintainers <maintainers@solana.foundation>"]
-repository = "https://github.com/solana-labs/solana-program-library"
+repository = "https://github.com/solana-labs/safecoin-program-library"
 license = "Apache-2.0"
 edition = "2018"
 publish = false
@@ -13,10 +13,10 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-solana-program = "1.7.7"
+safecoin-program = "1.7.7"
 
 [dev-dependencies]
-solana-program-test = "1.7.7"
+safecoin-program-test = "1.7.7"
 solana-sdk = "1.7.7"
 
 [lib]

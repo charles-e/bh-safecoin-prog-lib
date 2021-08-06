@@ -5,7 +5,7 @@ edition = "2018"
 homepage = "https://spl.solana.com/token-lending"
 license = "Apache-2.0"
 name = "spl-token-lending-cli"
-repository = "https://github.com/solana-labs/solana-program-library"
+repository = "https://github.com/solana-labs/safecoin-program-library"
 version = "0.1.0"
 
 [dependencies]
@@ -15,7 +15,7 @@ solana-cli-config = "1.7.7"
 solana-client = "1.7.7"
 solana-logger = "1.7.7"
 solana-sdk = "1.7.7"
-solana-program = "1.7.7"
+safecoin-program = "1.7.7"
 spl-token-lending = { path="../program", features = [ "no-entrypoint" ] }
 spl-token = { path="../../token/program", features = [ "no-entrypoint" ]  }
 
