@@ -3,10 +3,9 @@
 mod helpers;
 
 use {
+    borsh::BorshDeserialize,
     helpers::*,
-    solana_program::{
-        borsh::try_from_slice_unchecked, instruction::InstructionError, pubkey::Pubkey,
-    },
+    solana_program::{instruction::InstructionError, pubkey::Pubkey},
     solana_program_test::*,
     solana_sdk::{
         signature::{Keypair, Signer},
@@ -76,7 +75,7 @@ async fn success() {
         &stake_pool_accounts.stake_pool.pubkey(),
     )
     .await;
-    let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool.data.as_slice()).unwrap();
+    let stake_pool = StakePool::try_from_slice(&stake_pool.data.as_slice()).unwrap();
     assert_eq!(pre_balance, stake_pool.total_stake_lamports);
 
     let pre_token_supply = get_token_supply(
@@ -138,7 +137,7 @@ async fn success() {
         &stake_pool_accounts.stake_pool.pubkey(),
     )
     .await;
-    let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool.data.as_slice()).unwrap();
+    let stake_pool = StakePool::try_from_slice(&stake_pool.data.as_slice()).unwrap();
     assert_eq!(post_balance, stake_pool.total_stake_lamports);
 
     let actual_fee = get_token_balance(
@@ -222,32 +221,6 @@ async fn fail_with_wrong_pool_fee_account() {
         }
         _ => panic!("Wrong error occurs while try to update pool balance with wrong validator stake list account"),
     }
-}
-
-#[tokio::test]
-async fn fail_with_wrong_reserve() {
-    let (mut banks_client, payer, recent_blockhash) = program_test().start().await;
-    let mut stake_pool_accounts = StakePoolAccounts::new();
-    stake_pool_accounts
-        .initialize_stake_pool(&mut banks_client, &payer, &recent_blockhash, 1)
-        .await
-        .unwrap();
-
-    let wrong_reserve_stake = Keypair::new();
-    stake_pool_accounts.reserve_stake = wrong_reserve_stake;
-    let error = stake_pool_accounts
-        .update_stake_pool_balance(&mut banks_client, &payer, &recent_blockhash)
-        .await
-        .unwrap()
-        .unwrap();
-
-    assert_eq!(
-        error,
-        TransactionError::InstructionError(
-            0,
-            InstructionError::Custom(StakePoolError::InvalidProgramAddress as u32),
-        )
-    );
 }
 
 #[tokio::test]

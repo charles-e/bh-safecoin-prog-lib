@@ -28,7 +28,8 @@ async fn test_success() {
     // limit to track compute unit increase
     test.set_bpf_compute_max_units(2_000);
 
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
     let (mut banks_client, payer, recent_blockhash) = test.start().await;
 
     let new_owner = Pubkey::new_unique();
@@ -62,7 +63,8 @@ async fn test_invalid_owner() {
         processor!(process_instruction),
     );
 
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
     let (mut banks_client, payer, recent_blockhash) = test.start().await;
 
     let invalid_owner = Keypair::new();
@@ -100,7 +102,8 @@ async fn test_owner_not_signer() {
         processor!(process_instruction),
     );
 
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
     let (mut banks_client, payer, recent_blockhash) = test.start().await;
 
     let new_owner = Pubkey::new_unique();

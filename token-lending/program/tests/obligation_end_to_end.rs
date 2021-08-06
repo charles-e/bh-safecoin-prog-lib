@@ -53,16 +53,15 @@ async fn test_success() {
     let obligation_keypair = Keypair::new();
     let obligation_pubkey = obligation_keypair.pubkey();
 
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let mut reserve_config = TEST_RESERVE_CONFIG;
     reserve_config.loan_to_value_ratio = 50;
 
-    let sol_oracle = add_sol_oracle(&mut test);
     let sol_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             user_liquidity_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
@@ -74,12 +73,9 @@ async fn test_success() {
         },
     );
 
-    let usdc_mint = add_usdc_mint(&mut test);
-    let usdc_oracle = add_usdc_oracle(&mut test);
     let usdc_test_reserve = add_reserve(
         &mut test,
         &lending_market,
-        &usdc_oracle,
         &user_accounts_owner,
         AddReserveArgs {
             user_liquidity_amount: FEE_AMOUNT,
@@ -126,7 +122,7 @@ async fn test_success() {
             refresh_reserve(
                 spl_token_lending::id(),
                 sol_test_reserve.pubkey,
-                sol_oracle.price_pubkey,
+                sol_test_reserve.liquidity_oracle_pubkey,
             ),
             // 3
             approve(
@@ -157,11 +153,7 @@ async fn test_success() {
                 vec![sol_test_reserve.pubkey],
             ),
             // 6
-            refresh_reserve(
-                spl_token_lending::id(),
-                usdc_test_reserve.pubkey,
-                usdc_oracle.price_pubkey,
-            ),
+            refresh_reserve(spl_token_lending::id(), usdc_test_reserve.pubkey, None),
             // 7
             borrow_obligation_liquidity(
                 spl_token_lending::id(),
@@ -176,11 +168,7 @@ async fn test_success() {
                 Some(usdc_test_reserve.liquidity_host_pubkey),
             ),
             // 8
-            refresh_reserve(
-                spl_token_lending::id(),
-                usdc_test_reserve.pubkey,
-                usdc_oracle.price_pubkey,
-            ),
+            refresh_reserve(spl_token_lending::id(), usdc_test_reserve.pubkey, None),
             // 9
             refresh_obligation(
                 spl_token_lending::id(),

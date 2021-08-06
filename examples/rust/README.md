@@ -1,3 +1,4 @@
+
 # Program examples written in Rust
 
 The examples in this directory demonstrate various Solana program mechanisms.

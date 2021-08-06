@@ -1,8 +1,7 @@
 //! Governance Account
 
 use crate::{
-    error::GovernanceError, state::enums::GovernanceAccountType, tools::account::get_account_data,
-    tools::account::AccountMaxSize,
+    error::GovernanceError, id, state::enums::GovernanceAccountType, tools::account::AccountMaxSize,
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
@@ -10,7 +9,7 @@ use solana_program::{
     pubkey::Pubkey,
 };
 
-use crate::state::realm::assert_is_valid_realm;
+use super::realm::assert_is_valid_realm;
 
 /// Governance config
 #[repr(C)]
@@ -22,11 +21,9 @@ pub struct GovernanceConfig {
     /// Account governed by this Governance. It can be for example Program account, Mint account or Token Account
     pub governed_account: Pubkey,
 
-    /// Voting threshold of Yes votes in % required to tip the vote
+    /// Voting threshold in % required to tip the vote
     /// It's the percentage of tokens out of the entire pool of governance tokens eligible to vote
-    // Note: If the threshold is below or equal to 50% then an even split of votes ex: 50:50 or 40:40 is always resolved as Defeated
-    // In other words +1 vote tie breaker is required to have successful vote
-    pub yes_vote_threshold_percentage: u8,
+    pub vote_threshold_percentage: u8,
 
     /// Minimum number of tokens a governance token owner must possess to be able to create a proposal
     pub min_tokens_to_create_proposal: u16,
@@ -49,7 +46,7 @@ pub struct Governance {
     pub config: GovernanceConfig,
 
     /// Running count of proposals
-    pub proposals_count: u32,
+    pub proposal_count: u32,
 }
 
 impl AccountMaxSize for Governance {}
@@ -59,33 +56,6 @@ impl IsInitialized for Governance {
         self.account_type == GovernanceAccountType::AccountGovernance
             || self.account_type == GovernanceAccountType::ProgramGovernance
     }
-}
-
-impl Governance {
-    /// Returns Governance PDA seeds
-    pub fn get_governance_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
-        let seeds = match self.account_type {
-            GovernanceAccountType::AccountGovernance => get_account_governance_address_seeds(
-                &self.config.realm,
-                &self.config.governed_account,
-            ),
-            GovernanceAccountType::ProgramGovernance => get_program_governance_address_seeds(
-                &self.config.realm,
-                &self.config.governed_account,
-            ),
-            _ => return Err(GovernanceError::InvalidAccountType.into()),
-        };
-
-        Ok(seeds)
-    }
-}
-
-/// Deserializes account and checks owner program
-pub fn get_governance_data(
-    program_id: &Pubkey,
-    governance_info: &AccountInfo,
-) -> Result<Governance, ProgramError> {
-    get_account_data::<Governance>(governance_info, program_id)
 }
 
 /// Returns ProgramGovernance PDA seeds
@@ -104,13 +74,12 @@ pub fn get_program_governance_address_seeds<'a>(
 
 /// Returns ProgramGovernance PDA address
 pub fn get_program_governance_address<'a>(
-    program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_program: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
         &get_program_governance_address_seeds(realm, governed_program),
-        program_id,
+        &id(),
     )
     .0
 }
@@ -129,20 +98,18 @@ pub fn get_account_governance_address_seeds<'a>(
 
 /// Returns AccountGovernance PDA address
 pub fn get_account_governance_address<'a>(
-    program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_account: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
         &get_account_governance_address_seeds(realm, governed_account),
-        program_id,
+        &id(),
     )
     .0
 }
 
 /// Validates governance config
 pub fn assert_is_valid_governance_config(
-    program_id: &Pubkey,
     governance_config: &GovernanceConfig,
     realm_info: &AccountInfo,
 ) -> Result<(), ProgramError> {
@@ -150,10 +117,10 @@ pub fn assert_is_valid_governance_config(
         return Err(GovernanceError::InvalidGovernanceConfig.into());
     }
 
-    assert_is_valid_realm(program_id, realm_info)?;
+    assert_is_valid_realm(realm_info)?;
 
-    if governance_config.yes_vote_threshold_percentage < 1
-        || governance_config.yes_vote_threshold_percentage > 100
+    if governance_config.vote_threshold_percentage < 50
+        || governance_config.vote_threshold_percentage > 100
     {
         return Err(GovernanceError::InvalidGovernanceConfig.into());
     }

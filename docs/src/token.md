@@ -65,7 +65,7 @@ Keypair Path: ${HOME}/.config/solana/id.json
 
 See [Solana clusters](https://docs.solana.com/clusters) for cluster-specific RPC URLs
 ```
-solana config set --url https://api.devnet.solana.com
+solana config set --url https://devnet.solana.com
 ```
 
 #### Default Keypair
@@ -208,7 +208,7 @@ Tokens may be transferred to a specific recipient token account.  The recipient
 token account must already exist and be of the same Token type.
 
 ```
-$ spl-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM /path/to/auxiliary_keypair.json
+$ spl-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 Creating account CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ
 Signature: 4yPWj22mbyLu5mhfZ5WATNfYzTt5EQ7LGzryxM7Ufu7QCVjTE7czZdEBqdKR7vjKsfAqsBdjU58NJvXrTqCXvfWW
 ```
@@ -834,13 +834,7 @@ The sender's wallet must not require that the recipient's main wallet address
 hold a balance before allowing the transfer.
 
 ### Registry for token details
-At the moment there exist two solutions for Token Mint registries:
-
-* hard coded addresses in the wallet or dapp
-* [spl-token-registry](https://www.npmjs.com/package/@solana/spl-token-registry)
-package, maintained at [https://github.com/solana-labs/token-list](https://github.com/solana-labs/token-list)
-
-**A decentralized solution is in progress.**
+At the moment Token Mint addresses need to be hard coded by each wallet.  **Improving this situation is a work in progress.**
 
 ### Garbage Collecting Ancillary Token Accounts
 Wallets should empty ancillary token accounts as quickly as practical by
@@ -870,7 +864,7 @@ The `spl-token gc` command provides an example implementation of this cleanup pr
 
 
 ### Token Vesting Contract:
-This program allows you to lock arbitrary SPL tokens and release the locked tokens with a determined unlock schedule. An `unlock schedule` is made of a `unix timestamp` and a token `amount`, when initializing a vesting contract, the creator can pass an array of `unlock schedule` with an arbitrary size giving the creator of the contract complete control of how the tokens unlock over time.
+This program allows you to lock arbitrary SPL tokens and release the locked tokens with a determined unlock schedule. An `unlock schedule` is made of a `unix timestamp` and a token `amount`, when initializing a vesting contract, the creator can pass an array of `unlock schedule` with an arbitrary size giving the creator of the contract complete control of how the tokens unlock over time. 
 
 Unlocking works by pushing a permissionless crank on the contract that moves the tokens to the pre-specified address. The recipient address of a vesting contract can be modified by the owner of the current recipient key, meaning that vesting contract locked tokens can be traded.
 

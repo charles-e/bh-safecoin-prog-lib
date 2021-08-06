@@ -30,7 +30,6 @@ export const LendingMarketLayout: typeof BufferLayout.Structure = BufferLayout.s
     Layout.publicKey("owner"),
     Layout.publicKey("quoteTokenMint"),
     Layout.publicKey("tokenProgramId"),
-    Layout.publicKey("oracleProgramId"),
     BufferLayout.blob(128, "padding"),
   ]
 );
@@ -119,14 +118,14 @@ export class LendingMarket {
         isSigner: false,
         isWritable: true,
       },
-      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
       {
-        pubkey: lendingMarket.tokenProgramId,
+        pubkey: lendingMarket.quoteTokenMint,
         isSigner: false,
         isWritable: false,
       },
+      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
       {
-        pubkey: new Account().publicKey, // TODO use the oracle program id
+        pubkey: lendingMarket.tokenProgramId,
         isSigner: false,
         isWritable: false,
       },
@@ -135,7 +134,6 @@ export class LendingMarket {
     const commandDataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
       Layout.publicKey("owner"),
-      Layout.publicKey("quoteCurrency"),
     ]);
     let data = Buffer.alloc(1024);
     {
@@ -143,7 +141,6 @@ export class LendingMarket {
         {
           instruction: 0, // InitLendingMarket instruction
           owner: lendingMarket.owner.toBuffer(),
-          quoteCurrency: lendingMarket.quoteTokenMint.toBuffer(),
         },
         data
       );

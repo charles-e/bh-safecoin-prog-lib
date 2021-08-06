@@ -16,14 +16,14 @@ borsh = "0.8"
 borsh-derive = "0.8.1"
 num-derive = "0.3"
 num-traits = "0.2"
-safecoin-program = "1.6.11"
+safecoin-program = "1.6.7"
 thiserror = "1.0"
 uint = "0.8"
 
 [dev-dependencies]
-proptest = "1.0.0"
-safecoin-program-test = "1.6.11"
-solana-sdk = "1.6.11"
+proptest = "0.10"
+safecoin-program-test = "1.6.7"
+solana-sdk = "1.6.7"
 
 [lib]
 crate-type = ["cdylib", "lib"]

@@ -26,7 +26,8 @@ async fn test_success() {
     test.set_bpf_compute_max_units(8_000);
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let (mut banks_client, payer, _recent_blockhash) = test.start().await;
     let obligation = TestObligation::init(
@@ -53,7 +54,8 @@ async fn test_already_initialized() {
     test.set_bpf_compute_max_units(13_000);
 
     let user_accounts_owner = Keypair::new();
-    let lending_market = add_lending_market(&mut test);
+    let usdc_mint = add_usdc_mint(&mut test);
+    let lending_market = add_lending_market(&mut test, usdc_mint.pubkey);
 
     let usdc_obligation = add_obligation(
         &mut test,

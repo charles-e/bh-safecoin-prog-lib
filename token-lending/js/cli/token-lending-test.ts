@@ -38,7 +38,6 @@ export async function createLendingMarket(): Promise<void> {
     TOKEN_PROGRAM_ID
   );
 
-  console.log("creating lending market");
   const lendingMarketAccount = new Account();
   await LendingMarket.create({
     connection,
