@@ -3834,15 +3834,6 @@ dependencies = [
  "spl-token 3.1.1",
 ]
 
-[[package]]
-name = "spl-associated-token-account"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4adc47eebe5d2b662cbaaba1843719c28a67e5ec5d0460bc3ca60900a51f74e2"
-dependencies = [
- "solana-program",
- "spl-token 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "spl-binary-oracle-pair"
