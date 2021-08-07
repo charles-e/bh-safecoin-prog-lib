@@ -1,5 +1,5 @@
 {
-  "name": "@solana/spl-token-swap",
+  "name": "@solana/safe-token-swap",
   "version": "0.1.0",
   "description": "SPL Token Swap JavaScript API",
   "license": "MIT",
@@ -35,7 +35,7 @@
     "build": "tsc && tsc -p tsconfig.browser.json && npm run generate:flow",
     "prepare": "npm run build",
     "start": "ts-node cli/main.ts",
-    "start-with-test-validator": "start-server-and-test 'solana-test-validator --bpf-program SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8 ../../target/deploy/spl_token_swap.so --reset --quiet' http://localhost:8328/health start",
+    "start-with-test-validator": "start-server-and-test 'solana-test-validator --bpf-program SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8 ../../target/deploy/safe_token_swap.so --reset --quiet' http://localhost:8328/health start",
     "lint": "npm run pretty && eslint .",
     "lint:fix": "npm run pretty:fix && eslint . --fix",
     "generate:flow": "flowgen dist/index.d.ts -o dist/module.flow.js",
@@ -58,7 +58,7 @@
     "mkdirp": "1.0.4"
   },
   "devDependencies": {
-    "@solana/spl-token": "0.1.5",
+    "@solana/safe-token": "0.1.5",
     "@types/bn.js": "^5.1.0",
     "eslint": "^7.9.0",
     "eslint-plugin-import": "^2.22.0",

@@ -714,7 +714,7 @@ pub fn update_stake_pool_balance(
         AccountMeta::new(*manager_fee_account, false),
         AccountMeta::new(*stake_pool_mint, false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
-        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(safe_token::id(), false),
     ];
     Instruction {
         program_id: *program_id,

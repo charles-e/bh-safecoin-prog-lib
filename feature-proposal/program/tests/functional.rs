@@ -62,7 +62,7 @@ async fn test_basic() {
 
     // Confirm mint account state
     let mint = banks_client
-        .get_packed_account_data::<spl_token::state::Mint>(mint_address)
+        .get_packed_account_data::<safe_token::state::Mint>(mint_address)
         .await
         .unwrap();
     assert_eq!(mint.supply, 42);
@@ -72,7 +72,7 @@ async fn test_basic() {
 
     // Confirm distributor token account state
     let distributor_token = banks_client
-        .get_packed_account_data::<spl_token::state::Account>(distributor_token_address)
+        .get_packed_account_data::<safe_token::state::Account>(distributor_token_address)
         .await
         .unwrap();
     assert_eq!(distributor_token.amount, 42);
@@ -82,7 +82,7 @@ async fn test_basic() {
 
     // Confirm acceptance token account state
     let acceptance_token = banks_client
-        .get_packed_account_data::<spl_token::state::Account>(acceptance_token_address)
+        .get_packed_account_data::<safe_token::state::Account>(acceptance_token_address)
         .await
         .unwrap();
     assert_eq!(acceptance_token.amount, 0);
@@ -116,8 +116,8 @@ async fn test_basic() {
 
     // Transfer tokens to the acceptance account
     let mut transaction = Transaction::new_with_payer(
-        &[spl_token::instruction::transfer(
-            &spl_token::id(),
+        &[safe_token::instruction::transfer(
+            &safe_token::id(),
             &distributor_token_address,
             &acceptance_token_address,
             &feature_proposal.pubkey(),

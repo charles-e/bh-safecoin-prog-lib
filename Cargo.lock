@@ -3203,7 +3203,7 @@ dependencies = [
  "solana-sdk",
  "solana-stake-program",
  "solana-vote-program",
- "spl-token 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "safe-token 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror",
  "zstd",
 ]
@@ -3759,7 +3759,7 @@ dependencies = [
  "solana-vote-program",
  "spl-associated-token-account 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "spl-memo 3.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "spl-token 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "safe-token 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror",
 ]
 
@@ -3831,7 +3831,7 @@ dependencies = [
  "safecoin-program",
  "safecoin-program-test",
  "safecoin-sdk",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
 ]
 
 
@@ -3846,7 +3846,7 @@ dependencies = [
  "safecoin-program",
  "safecoin-program-test",
  "safecoin-sdk",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
  "thiserror",
  "uint",
 ]
@@ -3905,7 +3905,7 @@ dependencies = [
  "safecoin-program",
  "safecoin-program-test",
  "safecoin-sdk",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
 ]
 
 [[package]]
@@ -3938,7 +3938,7 @@ dependencies = [
  "safecoin-sdk",
  "serde",
  "serde_derive",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
  "thiserror",
 ]
 
@@ -4031,7 +4031,7 @@ dependencies = [
  "serde_derive",
  "solana-vote-program",
  "spl-math",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
  "thiserror",
 ]
 
@@ -4054,11 +4054,11 @@ dependencies = [
  "solana-logger",
  "spl-associated-token-account 1.0.2",
  "spl-stake-pool",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
 ]
 
 [[package]]
-name = "spl-token"
+name = "safe-token"
 version = "3.1.1"
 dependencies = [
  "arrayref",
@@ -4071,7 +4071,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "spl-token"
+name = "safe-token"
 version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbfa8fd791aeb4d7ad5fedb7872478de9f4e8b4fcb02dfd9e7f2f9ae3f3ddd73"
@@ -4085,7 +4085,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "spl-token-cli"
+name = "safe-token-cli"
 version = "2.0.11"
 dependencies = [
  "clap",
@@ -4101,11 +4101,11 @@ dependencies = [
  "solana-remote-wallet",
  "spl-associated-token-account 1.0.2",
  "spl-memo 3.0.1",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
 ]
 
 [[package]]
-name = "spl-token-lending"
+name = "safe-token-lending"
 version = "0.1.0"
 dependencies = [
  "arrayref",
@@ -4121,13 +4121,13 @@ dependencies = [
  "safecoin-sdk",
  "serde",
  "serde_yaml",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
  "thiserror",
  "uint",
 ]
 
 [[package]]
-name = "spl-token-swap"
+name = "safe-token-swap"
 version = "2.1.0"
 dependencies = [
  "arbitrary 1.0.1",
@@ -4141,20 +4141,20 @@ dependencies = [
  "safecoin-sdk",
  "sim",
  "spl-math",
- "spl-token 3.1.1",
+ "safe-token 3.1.1",
  "thiserror",
 ]
 
 [[package]]
-name = "spl-token-swap-fuzz"
+name = "safe-token-swap-fuzz"
 version = "0.0.1"
 dependencies = [
  "arbitrary 1.0.1",
  "honggfuzz",
  "safecoin-program",
  "spl-math",
- "spl-token 3.1.1",
- "spl-token-swap",
+ "safe-token 3.1.1",
+ "safe-token-swap",
 ]
 
 [[package]]
@@ -4318,8 +4318,8 @@ version = "0.1.0"
 dependencies = [
  "safecoin-sdk",
  "spl-memo 3.0.1",
- "spl-token 3.1.1",
- "spl-token-swap",
+ "safe-token 3.1.1",
+ "safe-token-swap",
 ]
 
 [[package]]

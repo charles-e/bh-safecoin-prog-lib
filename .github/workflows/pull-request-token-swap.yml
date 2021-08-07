@@ -71,7 +71,7 @@ jobs:
 
       - name: Move production version for upload
         run: |
-          mv target/deploy-production/spl_token_swap.so target/deploy/spl_token_swap_production.so
+          mv target/deploy-production/safe_token_swap.so target/deploy/safe_token_swap_production.so
 
       - name: Upload programs
         uses: actions/upload-artifact@v2

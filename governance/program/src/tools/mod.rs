@@ -2,6 +2,6 @@
 
 pub mod account;
 
-pub mod spl_token;
+pub mod safe_token;
 
 pub mod bpf_loader_upgradeable;

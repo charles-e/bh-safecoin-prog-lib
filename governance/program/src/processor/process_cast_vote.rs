@@ -19,7 +19,7 @@ use crate::{
         token_owner_record::get_token_owner_record_data_for_realm_and_governing_mint,
         vote_record::{get_vote_record_address_seeds, VoteRecord},
     },
-    tools::{account::create_and_serialize_account_signed, spl_token::get_spl_token_mint_supply},
+    tools::{account::create_and_serialize_account_signed, safe_token::get_safe_token_mint_supply},
 };
 
 use borsh::BorshSerialize;
@@ -102,7 +102,7 @@ pub fn process_cast_vote(
         }
     };
 
-    let governing_token_supply = get_spl_token_mint_supply(&governing_token_mint_info)?;
+    let governing_token_supply = get_safe_token_mint_supply(&governing_token_mint_info)?;
     proposal_data.try_tip_vote(governing_token_supply, &governance_data.config, clock.slot);
 
     proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;

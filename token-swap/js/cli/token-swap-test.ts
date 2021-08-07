@@ -5,7 +5,7 @@ import {
   SystemProgram,
   Transaction,
 } from '@safecoin/web3.js';
-import {AccountLayout, Token, TOKEN_PROGRAM_ID} from '@solana/spl-token';
+import {AccountLayout, Token, TOKEN_PROGRAM_ID} from '@solana/safe-token';
 
 import {TokenSwap, CurveType, TOKEN_SWAP_PROGRAM_ID} from '../src';
 import {sendAndConfirmTransaction} from '../src/util/send-and-confirm-transaction';

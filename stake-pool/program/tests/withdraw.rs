@@ -22,7 +22,7 @@ use {
         borsh::try_from_slice_unchecked, error::StakePoolError, id, instruction,
         minimum_stake_lamports, stake_program, state,
     },
-    spl_token::error::TokenError,
+    safe_token::error::TokenError,
 };
 
 async fn setup() -> (
@@ -245,7 +245,7 @@ async fn fail_with_wrong_stake_program() {
         AccountMeta::new(deposit_info.pool_account.pubkey(), false),
         AccountMeta::new(stake_pool_accounts.pool_mint.pubkey(), false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
-        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(safe_token::id(), false),
         AccountMeta::new_readonly(wrong_stake_program, false),
     ];
     let instruction = Instruction {

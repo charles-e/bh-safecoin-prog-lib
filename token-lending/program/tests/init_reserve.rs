@@ -10,7 +10,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::{Transaction, TransactionError},
 };
-use spl_token_lending::{
+use safe_token_lending::{
     error::LendingError,
     instruction::init_reserve,
     processor::process_instruction,
@@ -20,8 +20,8 @@ use spl_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "spl_token_lending",
-        spl_token_lending::id(),
+        "safe_token_lending",
+        safe_token_lending::id(),
         processor!(process_instruction),
     );
 
@@ -38,7 +38,7 @@ async fn test_success() {
 
     let sol_user_liquidity_account = create_and_mint_to_token_account(
         &mut banks_client,
-        spl_token::native_mint::id(),
+        safe_token::native_mint::id(),
         None,
         &payer,
         user_accounts_owner.pubkey(),
@@ -53,7 +53,7 @@ async fn test_success() {
         &sol_oracle,
         RESERVE_AMOUNT,
         TEST_RESERVE_CONFIG,
-        spl_token::native_mint::id(),
+        safe_token::native_mint::id(),
         sol_user_liquidity_account,
         &payer,
         &user_accounts_owner,
@@ -80,8 +80,8 @@ async fn test_success() {
 #[tokio::test]
 async fn test_already_initialized() {
     let mut test = ProgramTest::new(
-        "spl_token_lending",
-        spl_token_lending::id(),
+        "safe_token_lending",
+        safe_token_lending::id(),
         processor!(process_instruction),
     );
 
@@ -109,7 +109,7 @@ async fn test_already_initialized() {
 
     let mut transaction = Transaction::new_with_payer(
         &[init_reserve(
-            spl_token_lending::id(),
+            safe_token_lending::id(),
             42,
             usdc_test_reserve.config,
             usdc_test_reserve.user_liquidity_pubkey,
@@ -148,8 +148,8 @@ async fn test_already_initialized() {
 #[tokio::test]
 async fn test_invalid_fees() {
     let mut test = ProgramTest::new(
-        "spl_token_lending",
-        spl_token_lending::id(),
+        "safe_token_lending",
+        safe_token_lending::id(),
         processor!(process_instruction),
     );
 
@@ -163,7 +163,7 @@ async fn test_invalid_fees() {
 
     let sol_user_liquidity_account = create_and_mint_to_token_account(
         &mut banks_client,
-        spl_token::native_mint::id(),
+        safe_token::native_mint::id(),
         None,
         &payer,
         user_accounts_owner.pubkey(),
@@ -188,7 +188,7 @@ async fn test_invalid_fees() {
                 &sol_oracle,
                 RESERVE_AMOUNT,
                 config,
-                spl_token::native_mint::id(),
+                safe_token::native_mint::id(),
                 sol_user_liquidity_account,
                 &payer,
                 &user_accounts_owner,
@@ -219,7 +219,7 @@ async fn test_invalid_fees() {
                 &sol_oracle,
                 RESERVE_AMOUNT,
                 config,
-                spl_token::native_mint::id(),
+                safe_token::native_mint::id(),
                 sol_user_liquidity_account,
                 &payer,
                 &user_accounts_owner,

@@ -312,7 +312,7 @@ pub fn create_realm(
         AccountMeta::new(community_token_holding_address, false),
         AccountMeta::new_readonly(*payer, true),
         AccountMeta::new_readonly(system_program::id(), false),
-        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(safe_token::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
@@ -359,7 +359,7 @@ pub fn deposit_governing_tokens(
         AccountMeta::new(token_owner_record_address, false),
         AccountMeta::new_readonly(*payer, true),
         AccountMeta::new_readonly(system_program::id(), false),
-        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(safe_token::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
@@ -393,7 +393,7 @@ pub fn withdraw_governing_tokens(
         AccountMeta::new(*governing_token_destination, false),
         AccountMeta::new_readonly(*governing_token_owner, true),
         AccountMeta::new(token_owner_record_address, false),
-        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(safe_token::id(), false),
     ];
 
     let instruction = GovernanceInstruction::WithdrawGoverningTokens {};

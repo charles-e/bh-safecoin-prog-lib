@@ -1,5 +1,5 @@
 {
-  "name": "@solana/spl-token-lending",
+  "name": "@solana/safe-token-lending",
   "version": "0.1.0",
   "description": "SPL Token Lending JavaScript API",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "build": "rollup -c rollup.config.ts",
     "build:program": "cargo build-bpf --manifest-path ../program/Cargo.toml",
     "start": "ts-node cli/main.ts",
-    "start-with-test-validator": "start-server-and-test 'solana-test-validator --bpf-program LendZqTs7gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi ../../target/deploy/spl_token_lending.so --reset --quiet' http://localhost:8328/health start",
+    "start-with-test-validator": "start-server-and-test 'solana-test-validator --bpf-program LendZqTs7gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi ../../target/deploy/safe_token_lending.so --reset --quiet' http://localhost:8328/health start",
     "lint": "eslint --ext .ts {cli,client}/* && prettier --check \"{cli,client}/**/*.ts\"",
     "lint:fix": "eslint --ext .ts {cli,client}/* --fix && prettier --write \"{cli,client}/**/*.ts\"",
     "cluster:localnet": "rm -f .env",
@@ -34,7 +34,7 @@
     "cluster:mainnet-beta": "cp cluster-mainnet-beta.env .env"
   },
   "dependencies": {
-    "@solana/spl-token": "0.1.5",
+    "@solana/safe-token": "0.1.5",
     "@safecoin/web3.js": "^1.16.1",
     "bn.js": "^5.2.0",
     "mkdirp": "^1.0.4"

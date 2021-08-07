@@ -25,7 +25,7 @@ fn program_test(token_mint_address: Pubkey) -> ProgramTest {
     pc.add_account_with_file_data(
         token_mint_address,
         1461600,
-        spl_token::id(),
+        safe_token::id(),
         "token-mint-data.bin",
     );
 
@@ -45,7 +45,7 @@ async fn test_associated_token_address() {
     let (mut banks_client, payer, recent_blockhash) =
         program_test(token_mint_address).start().await;
     let rent = banks_client.get_rent().await.unwrap();
-    let expected_token_account_balance = rent.minimum_balance(spl_token::state::Account::LEN);
+    let expected_token_account_balance = rent.minimum_balance(safe_token::state::Account::LEN);
 
     // Associated account does not exist
     assert_eq!(
@@ -75,9 +75,9 @@ async fn test_associated_token_address() {
         .expect("associated_account not none");
     assert_eq!(
         associated_account.data.len(),
-        spl_token::state::Account::LEN
+        safe_token::state::Account::LEN
     );
-    assert_eq!(associated_account.owner, spl_token::id());
+    assert_eq!(associated_account.owner, safe_token::id());
     assert_eq!(associated_account.lamports, expected_token_account_balance);
 }
 
@@ -91,7 +91,7 @@ async fn test_create_with_a_lamport() {
     let (mut banks_client, payer, recent_blockhash) =
         program_test(token_mint_address).start().await;
     let rent = banks_client.get_rent().await.unwrap();
-    let expected_token_account_balance = rent.minimum_balance(spl_token::state::Account::LEN);
+    let expected_token_account_balance = rent.minimum_balance(safe_token::state::Account::LEN);
 
     // Transfer 1 lamport into `associated_token_address` before creating it
     let mut transaction = Transaction::new_with_payer(
@@ -144,7 +144,7 @@ async fn test_create_with_excess_lamports() {
     let (mut banks_client, payer, recent_blockhash) =
         program_test(token_mint_address).start().await;
     let rent = banks_client.get_rent().await.unwrap();
-    let expected_token_account_balance = rent.minimum_balance(spl_token::state::Account::LEN);
+    let expected_token_account_balance = rent.minimum_balance(safe_token::state::Account::LEN);
 
     // Transfer 1 lamport into `associated_token_address` before creating it
     let mut transaction = Transaction::new_with_payer(

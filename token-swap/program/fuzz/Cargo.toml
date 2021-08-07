@@ -1,5 +1,5 @@
 [package]
-name = "spl-token-swap-fuzz"
+name = "safe-token-swap-fuzz"
 version = "0.0.1"
 description = "Safecoin Program Library Token Swap Fuzzer"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
@@ -13,8 +13,8 @@ honggfuzz = { version = "0.5.52" }
 arbitrary = { version = "1.0.1", features = ["derive"] }
 safecoin-program = "1.6.16"
 spl-math = { version = "0.1", path = "../../../libraries/math", features = [ "no-entrypoint" ] }
-spl-token = { version = "3.1", path = "../../../token/program", features = [ "no-entrypoint" ] }
-spl-token-swap = { path = "..", features = ["fuzz", "no-entrypoint"] }
+safe-token = { version = "3.1", path = "../../../token/program", features = [ "no-entrypoint" ] }
+safe-token-swap = { path = "..", features = ["fuzz", "no-entrypoint"] }
 
 [[bin]]
 name = "token-swap-instructions"

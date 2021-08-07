@@ -12,7 +12,7 @@ import {
   SYSVAR_RENT_PUBKEY,
   sendAndConfirmTransaction,
 } from "@safecoin/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/safe-token";
 import * as BufferLayout from "buffer-layout";
 import * as Layout from "./layout";
 

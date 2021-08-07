@@ -21,7 +21,7 @@ The Token Program's source is available on
 
 ## Interface
 
-The Token Program is written in Rust and available on [crates.io](https://crates.io/crates/spl-token) and [docs.rs](https://docs.rs/spl-token).
+The Token Program is written in Rust and available on [crates.io](https://crates.io/crates/safe-token) and [docs.rs](https://docs.rs/safe-token).
 
 Auto-generated C bindings are also available
 [here](https://github.com/solana-labs/safecoin-program-library/blob/master/token/program/inc/token.h)
@@ -36,17 +36,17 @@ convention around wallet address to token account mapping and funding.
 
 ## Command-line Utility
 
-The `spl-token` command-line utility can be used to experiment with SPL
+The `safe-token` command-line utility can be used to experiment with SPL
 tokens.  Once you have [Rust installed](https://rustup.rs/), run:
 ```sh
-$ cargo install spl-token-cli
+$ cargo install safe-token-cli
 ```
 
-Run `spl-token --help` for a full description of available commands.
+Run `safe-token --help` for a full description of available commands.
 
 ### Configuration
 
-The `spl-token` configuration is shared with the `solana` command-line tool.
+The `safe-token` configuration is shared with the `solana` command-line tool.
 
 #### Current Configuration
 
@@ -95,36 +95,36 @@ solana airdrop 1
 ### Example: Creating your own fungible token
 
 ```sh
-$ spl-token create-token
+$ safe-token create-token
 Creating token AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 Signature: 47hsLFxWRCg8azaZZPSnQR8DNTRsGyPNfUK7jqyzgt7wf9eag3nSnewqoZrVZHKm8zt3B6gzxhr91gdQ5qYrsRG4
 ```
 
 The unique identifier of the token is `AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM`.
 
-Tokens when initially created by `spl-token` have no supply:
+Tokens when initially created by `safe-token` have no supply:
 ```sh
-spl-token supply AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+safe-token supply AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 0
 ```
 
 Let's mint some.  First create an account to hold a balance of the new
 `AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM` token:
 ```sh
-$ spl-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+$ safe-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 Creating account 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi
 Signature: 42Sa5eK9dMEQyvD9GMHuKxXf55WLZ7tfjabUKDhNoZRAxj9MsnN7omriWMEHXLea3aYpjZ862qocRLVikvkHkyfy
 ```
 
 `7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi` is now an empty account:
 ```sh
-$ spl-token balance AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+$ safe-token balance AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 0
 ```
 
 Mint 100 tokens into the account:
 ```sh
-$ spl-token mint AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 100
+$ safe-token mint AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 100
 Minting 100 tokens
   Token: AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
   Recipient: 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi
@@ -133,16 +133,16 @@ Signature: 41mARH42fPkbYn1mvQ6hYLjmJtjW98NXwd6pHqEYg9p8RnuoUsMxVd16RkStDHEzcS2sf
 
 The token `supply` and account `balance` now reflect the result of minting:
 ```sh
-$ spl-token supply AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+$ safe-token supply AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 100
-$ spl-token balance AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+$ safe-token balance AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
 100
 ```
 
 ### Example: View all Tokens that you own
 
 ```sh
-$ spl-token accounts
+$ safe-token accounts
 Token                                         Balance
 ------------------------------------------------------------
 7e2X5oeAAJyUTi4PfSGXFLGhyPw2H8oELm1mx87ZCgwF  84
@@ -154,14 +154,14 @@ AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM  1    (Aux-2*)
 ### Example: Wrapping SAFE in a Token
 
 ```sh
-$ spl-token wrap 1
+$ safe-token wrap 1
 Wrapping 1 SAFE into GJTxcnA5Sydy8YRhqvHxbQ5QNsPyRKvzguodQEaShJje
 Signature: 4f4s5QVMKisLS6ihZcXXPbiBAzjnvkBcp2A7KKER7k9DwJ4qjbVsQBKv2rAyBumXC1gLn8EJQhwWkybE4yJGnw2Y
 ```
 
 To unwrap the Token back to SAFE:
 ```
-$ spl-token unwrap GJTxcnA5Sydy8YRhqvHxbQ5QNsPyRKvzguodQEaShJje
+$ safe-token unwrap GJTxcnA5Sydy8YRhqvHxbQ5QNsPyRKvzguodQEaShJje
 Unwrapping GJTxcnA5Sydy8YRhqvHxbQ5QNsPyRKvzguodQEaShJje
   Amount: 1 SAFE
   Recipient: vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
@@ -169,13 +169,13 @@ Signature: f7opZ86ZHKGvkJBQsJ8Pk81v8F3v1VUfyd4kFs4CABmfTnSZK5BffETznUU3tEWvzibgK
 ```
 
 ### Example: Transferring tokens to another user
-First the receiver uses `spl-token create-account` to create their associated
+First the receiver uses `safe-token create-account` to create their associated
 token account for the Token type.  Then the receiver obtains their wallet
 address by running `solana address` and provides it to the sender.
 
 The sender then runs:
 ```
-$ spl-token transfer AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 50 vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
+$ safe-token transfer AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 50 vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
 Transfer 50 tokens
   Sender: 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi
   Recipient: vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
@@ -193,7 +193,7 @@ The receiver obtains their wallet address by running `solana address` and provid
 The sender then runs to fund the receiver's associated token account, at the
 sender's expense, and then transfers 50 tokens into it:
 ```
-$ spl-token transfer --fund-recipient AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 50 vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
+$ safe-token transfer --fund-recipient AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM 50 vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
 Transfer 50 tokens
   Sender: 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi
   Recipient: vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
@@ -208,19 +208,19 @@ Tokens may be transferred to a specific recipient token account.  The recipient
 token account must already exist and be of the same Token type.
 
 ```
-$ spl-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM /path/to/auxiliary_keypair.json
+$ safe-token create-account AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM /path/to/auxiliary_keypair.json
 Creating account CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ
 Signature: 4yPWj22mbyLu5mhfZ5WATNfYzTt5EQ7LGzryxM7Ufu7QCVjTE7czZdEBqdKR7vjKsfAqsBdjU58NJvXrTqCXvfWW
 ```
 ```
-$ spl-token accounts AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM -v
+$ safe-token accounts AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM -v
 Account                                       Token                                         Balance
 --------------------------------------------------------------------------------------------------------
 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi  AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM  100
 CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ  AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM  0    (Aux-1*)
 ```
 ```
-$ spl-token transfer 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi 50 CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ
+$ safe-token transfer 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi 50 CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ
 Transfer 50 tokens
   Sender: 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi
   Recipient: CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ
@@ -228,7 +228,7 @@ Transfer 50 tokens
 Signature: 5a3qbvoJQnTAxGPHCugibZTbSu7xuTgkxvF4EJupRjRXGgZZrnWFmKzfEzcqKF2ogCaF4QKVbAtuFx7xGwrDUcGd
 ```
 ```
-$ spl-token accounts AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM -v
+$ safe-token accounts AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM -v
 Account                                       Token                                         Balance
 --------------------------------------------------------------------------------------------------------
 7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi  AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM  50
@@ -239,21 +239,21 @@ CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ  AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe
 
 Create the token type with nine decimal places,
 ```
-$ spl-token create-token --decimals 9
+$ safe-token create-token --decimals 9
 Creating token 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
 Signature: 4kz82JUey1B9ki1McPW7NYv1NqPKCod6WNptSkYqtuiEsQb9exHaktSAHJJsm4YxuGNW4NugPJMFX9ee6WA2dXts
 ```
 
 then create an account to hold tokens of this new type:
 ```
-$ spl-token create-account 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
+$ safe-token create-account 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
 Creating account 7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM
 Signature: sjChze6ecaRtvuQVZuwURyg6teYeiH8ZwT6UTuFNKjrdayQQ3KNdPB7d2DtUZ6McafBfEefejHkJ6MWQEfVHLtC
 ```
 
 Now mint only one token into the account,
 ```
-$ spl-token mint 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z 1 7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM
+$ safe-token mint 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z 1 7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM
 Minting 1 tokens
   Token: 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
   Recipient: 7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM
@@ -262,7 +262,7 @@ Signature: 2Kzg6ZArQRCRvcoKSiievYy3sfPqGV91Whnz6SeimhJQXKBTYQf3E54tWg3zPpYLbcDex
 
 and disable future minting:
 ```
-$ spl-token authorize 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z mint --disable
+$ safe-token authorize 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z mint --disable
 Updating 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
   Current mint authority: vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg
   New mint authority: disabled
@@ -273,7 +273,7 @@ Now the `7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM` account holds the
 one and only `559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z` token:
 
 ```
-$ spl-token account-info 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
+$ safe-token account-info 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
 
 Address: 7KqpRwzkkeweW5jQoETyLzhvs9rcCj9dVQ1MnzudirsM
 Balance: 1
@@ -285,13 +285,13 @@ Close authority: (not set)
 ```
 
 ```
-$ spl-token supply 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
+$ safe-token supply 559u4Tdr9umKwft3yHMsnAxohhzkFnUBPAFtibwuZD9z
 1
 ```
 
 ### Multisig usage
 
-The main difference in `spl-token` command line usage when referencing multisig
+The main difference in `safe-token` command line usage when referencing multisig
 accounts is in specifying the `--owner` argument. Typically the signer specified
 by this argument directly provides a signature granting its authority, but in
 the multisig case it just points to the address of the multisig account.
@@ -300,13 +300,13 @@ Signatures are then provided by the multisig signer-set members specified by the
 
 Multisig accounts can be used for any authority on an SPL Token mint or token
 account.
-- Mint account mint authority: `spl-token mint ...`, `spl-token authorize ... mint ...`
-- Mint account freeze authority: `spl-token freeze ...`, `spl-token thaw ...`,
-`spl-token authorize ... freeze ...`
-- Token account owner authority: `spl-token transfer ...`, `spl-token approve ...`,
-`spl-token revoke ...`, `spl-token burn ...`, `spl-token wrap ...`,
-`spl-token unwrap ...`, `spl-token authorize ... owner ...`
-- Token account close authority: `spl-token close ...`, `spl-token authorize ... close ...`
+- Mint account mint authority: `safe-token mint ...`, `safe-token authorize ... mint ...`
+- Mint account freeze authority: `safe-token freeze ...`, `safe-token thaw ...`,
+`safe-token authorize ... freeze ...`
+- Token account owner authority: `safe-token transfer ...`, `safe-token approve ...`,
+`safe-token revoke ...`, `safe-token burn ...`, `safe-token wrap ...`,
+`safe-token unwrap ...`, `safe-token authorize ... owner ...`
+- Token account close authority: `safe-token close ...`, `safe-token authorize ... close ...`
 
 ### Example: Mint with multisig authority
 
@@ -329,7 +329,7 @@ signer-2.json: DhkUfKgfZ8CF6PAGKwdABRL1VqkeNrTSRx8LZfpPFVNY
 signer-3.json: D7ssXHrZJjfpZXsmDf8RwfPxe1BMMMmP1CtmX3WojPmG
 ```
 
-Now the multisig account can be created with the `spl-token create-multisig`
+Now the multisig account can be created with the `safe-token create-multisig`
 subcommand. Its first positional argument is the minimum number of signers (`M`)
 that must sign a transaction affecting a token/mint account that is controlled
 by this multisig account. The remaining positional arguments are the public keys
@@ -340,7 +340,7 @@ must sign all transactions.
 NOTE: SPL Token Multisig accounts are limited to a signer-set of eleven signers
 (1 <= `N` <= 11) and minimum signers must be no more than `N` (1 <= `M` <= `N`)
 ```
-$ spl-token create-multisig 2 BzWpkuRrwXHq4SSSFHa8FJf6DRQy4TaeoXnkA89vTgHZ \
+$ safe-token create-multisig 2 BzWpkuRrwXHq4SSSFHa8FJf6DRQy4TaeoXnkA89vTgHZ \
 DhkUfKgfZ8CF6PAGKwdABRL1VqkeNrTSRx8LZfpPFVNY D7ssXHrZJjfpZXsmDf8RwfPxe1BMMMmP1CtmX3WojPmG
 Creating 2/3 multisig 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re
 Signature: 2FN4KXnczAz33SAxwsuevqrD1BvikP6LUhLie5Lz4ETt594X8R7yvMZzZW2zjmFLPsLQNHsRuhQeumExHbnUGC9A
@@ -349,18 +349,18 @@ Signature: 2FN4KXnczAz33SAxwsuevqrD1BvikP6LUhLie5Lz4ETt594X8R7yvMZzZW2zjmFLPsLQN
 Next create the token mint and receiving accounts
 [as previously described](#example-creating-your-own-fungible-token)
 ```
-$ spl-token create-token
+$ safe-token create-token
 Creating token 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o
 Signature: 3n6zmw3hS5Hyo5duuhnNvwjAbjzC42uzCA3TTsrgr9htUonzDUXdK1d8b8J77XoeSherqWQM8mD8E1TMYCpksS2r
 
-$ spl-token create-account 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o
+$ safe-token create-account 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o
 Creating account EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC
 Signature: 5mVes7wjE7avuFqzrmSCWneKBQyPAjasCLYZPNSkmqmk2YFosYWAP9hYSiZ7b7NKpV866x5gwyKbbppX3d8PcE9s
 ```
 
 Then set the mint account's minting authority to the multisig account
 ```
-$ spl-token authorize 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o mint 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re
+$ safe-token authorize 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o mint 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re
 Updating 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o
   Current mint authority: 5hbZyJ3KRuFvdy5QBxvE9KwK17hzkAUkQHZTxPbiWffE
   New mint authority: 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re
@@ -370,7 +370,7 @@ Signature: yy7dJiTx1t7jvLPCRX5RQWxNRNtFwvARSfbMJG94QKEiNS4uZcp3GhhjnMgZ1CaWMWe4j
 To demonstrate that the mint account is now under control of the multisig
 account, attempting to mint with one multisig signer fails
 ```
-$ spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+$ safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer signer-1.json
 Minting 1 tokens
@@ -381,7 +381,7 @@ RPC response error -32002: Transaction simulation failed: Error processing Instr
 
 But repeating with a second multisig signer, succeeds
 ```
-spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer signer-1.json \
 --multisig-signer signer-2.json
@@ -423,7 +423,7 @@ NOTE: The argument to the `--blockhash` parameter is the "Nonce blockhash:" fiel
 the designated durable nonce account.
 
 ```
-$ spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+$ safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer BzWpkuRrwXHq4SSSFHa8FJf6DRQy4TaeoXnkA89vTgHZ \
 --multisig-signer DhkUfKgfZ8CF6PAGKwdABRL1VqkeNrTSRx8LZfpPFVNY \
@@ -447,7 +447,7 @@ Absent Signers (Pubkey):
 Next each offline signer executes the template command, replacing each instance
 of their public key with the corresponding keypair.
 ```
-spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer signer-1.json \
 --multisig-signer DhkUfKgfZ8CF6PAGKwdABRL1VqkeNrTSRx8LZfpPFVNY \
@@ -470,7 +470,7 @@ Absent Signers (Pubkey):
 ```
 
 ```
-$ spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+$ safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer BzWpkuRrwXHq4SSSFHa8FJf6DRQy4TaeoXnkA89vTgHZ \
 --multisig-signer signer-2.json \
@@ -502,7 +502,7 @@ and `--nonce-authority ...` in this example)
 the `--mint-decimals ...` argument as it will be queried from the cluster
 1. Adds the offline signatures to the template command via the `--signer` argument
 ```
-$ spl-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
+$ safe-token mint 4VNVRJetwapjwYU8jf4qPgaCeD76wyz8DuNj8yMCQ62o 1 EX8zyi2ZQUuoYtXd4MKmyHYLTjqFdWeuoTHcsTdJcKHC \
 --owner 46ed77fd4WTN144q62BwjU2B3ogX3Xmmc8PT5Z3Xc2re \
 --multisig-signer BzWpkuRrwXHq4SSSFHa8FJf6DRQy4TaeoXnkA89vTgHZ \
 --multisig-signer DhkUfKgfZ8CF6PAGKwdABRL1VqkeNrTSRx8LZfpPFVNY \
@@ -806,7 +806,7 @@ For each recipient wallet addresses, send a transaction containing:
 ### Ancillary Token Accounts
 At any time ownership of an existing SPL Token account may be assigned to the
 user.  One way to accomplish this is with the
-`spl-token authorize <TOKEN_ADDRESS> owner <USER_ADDRESS>` command.  Wallets
+`safe-token authorize <TOKEN_ADDRESS> owner <USER_ADDRESS>` command.  Wallets
 should be prepared to gracefully manage token accounts that they themselves did
 not create for the user.
 
@@ -837,7 +837,7 @@ hold a balance before allowing the transfer.
 At the moment there exist two solutions for Token Mint registries:
 
 * hard coded addresses in the wallet or dapp
-* [spl-token-registry](https://www.npmjs.com/package/@solana/spl-token-registry)
+* [safe-token-registry](https://www.npmjs.com/package/@solana/safe-token-registry)
 package, maintained at [https://github.com/solana-labs/token-list](https://github.com/solana-labs/token-list)
 
 **A decentralized solution is in progress.**
@@ -866,7 +866,7 @@ If adding one or more of clean up instructions cause the transaction to exceed
 the maximum allowed transaction size, remove those extra clean up instructions.
 They can be cleaned up during the next send operation.
 
-The `spl-token gc` command provides an example implementation of this cleanup process.
+The `safe-token gc` command provides an example implementation of this cleanup process.
 
 
 ### Token Vesting Contract:

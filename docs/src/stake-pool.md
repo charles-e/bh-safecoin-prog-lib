@@ -537,7 +537,7 @@ tokens.  We can double-check our stake pool account using the SPL token
 command-line utility.
 
 ```sh
-$ spl-token balance 34XMHa3JUPv46ftU4dGHvemZ9oKVjnciRePYMcX3rjEF
+$ safe-token balance 34XMHa3JUPv46ftU4dGHvemZ9oKVjnciRePYMcX3rjEF
 0.024058966
 ```
 

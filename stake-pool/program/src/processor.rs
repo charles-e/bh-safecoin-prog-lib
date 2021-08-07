@@ -29,7 +29,7 @@ use {
         system_instruction, system_program,
         sysvar::Sysvar,
     },
-    spl_token::state::Mint,
+    safe_token::state::Mint,
 };
 
 /// Deserialize the stake state from AccountInfo
@@ -333,7 +333,7 @@ impl Processor {
         )
     }
 
-    /// Issue a spl_token `Burn` instruction.
+    /// Issue a safe_token `Burn` instruction.
     #[allow(clippy::too_many_arguments)]
     fn token_burn<'a>(
         token_program: AccountInfo<'a>,
@@ -342,7 +342,7 @@ impl Processor {
         authority: AccountInfo<'a>,
         amount: u64,
     ) -> Result<(), ProgramError> {
-        let ix = spl_token::instruction::burn(
+        let ix = safe_token::instruction::burn(
             token_program.key,
             burn_account.key,
             mint.key,
@@ -354,7 +354,7 @@ impl Processor {
         invoke(&ix, &[burn_account, mint, authority, token_program])
     }
 
-    /// Issue a spl_token `MintTo` instruction.
+    /// Issue a safe_token `MintTo` instruction.
     #[allow(clippy::too_many_arguments)]
     fn token_mint_to<'a>(
         stake_pool: &Pubkey,
@@ -370,7 +370,7 @@ impl Processor {
         let authority_signature_seeds = [&me_bytes[..32], authority_type, &[bump_seed]];
         let signers = &[&authority_signature_seeds[..]];
 
-        let ix = spl_token::instruction::mint_to(
+        let ix = safe_token::instruction::mint_to(
             token_program.key,
             mint.key,
             destination.key,
@@ -466,7 +466,7 @@ impl Processor {
         }
 
         if *pool_mint_info.key
-            != spl_token::state::Account::unpack_from_slice(&manager_fee_info.data.borrow())?.mint
+            != safe_token::state::Account::unpack_from_slice(&manager_fee_info.data.borrow())?.mint
         {
             return Err(StakePoolError::WrongAccountMint.into());
         }
@@ -1906,7 +1906,7 @@ impl Processor {
         stake_pool.check_manager(manager_info)?;
 
         if stake_pool.pool_mint
-            != spl_token::state::Account::unpack_from_slice(&new_manager_fee_info.data.borrow())?
+            != safe_token::state::Account::unpack_from_slice(&new_manager_fee_info.data.borrow())?
                 .mint
         {
             return Err(StakePoolError::WrongAccountMint.into());

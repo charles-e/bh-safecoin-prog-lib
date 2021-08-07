@@ -1,5 +1,5 @@
 /**
- * Flow Library definition for spl-token
+ * Flow Library definition for safe-token
  *
  * This file is manually maintained
  */
@@ -10,7 +10,7 @@ import {Layout} from 'buffer-layout';
 import {Connection, PublicKey, TransactionInstruction} from '@safecoin/web3.js';
 import type {Signer, TransactionSignature} from '@safecoin/web3.js';
 
-declare module '@solana/spl-token' {
+declare module '@solana/safe-token' {
   declare export var TOKEN_PROGRAM_ID;
   declare export var ASSOCIATED_TOKEN_PROGRAM_ID;
   declare export class u64 extends BN {

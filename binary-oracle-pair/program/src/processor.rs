@@ -19,7 +19,7 @@ use solana_program::{
     rent::Rent,
     sysvar::Sysvar,
 };
-use spl_token::state::{Account, Mint};
+use safe_token::state::{Account, Mint};
 
 /// Program state handler.
 pub struct Processor {}
@@ -52,7 +52,7 @@ impl Processor {
             let signers = &[&authority_signature_seeds[..]];
 
             invoke_signed(
-                &spl_token::instruction::transfer(
+                &safe_token::instruction::transfer(
                     token_program_id.key,
                     source_account.key,
                     destination_account.key,
@@ -71,7 +71,7 @@ impl Processor {
             )
         } else {
             invoke(
-                &spl_token::instruction::transfer(
+                &safe_token::instruction::transfer(
                     token_program_id.key,
                     source_account.key,
                     destination_account.key,
@@ -105,7 +105,7 @@ impl Processor {
         let signers = &[&authority_signature_seeds[..]];
 
         invoke_signed(
-            &spl_token::instruction::mint_to(
+            &safe_token::instruction::mint_to(
                 token_program_id.key,
                 mint_account.key,
                 destination_account.key,
@@ -142,7 +142,7 @@ impl Processor {
             let signers = &[&authority_signature_seeds[..]];
 
             invoke_signed(
-                &spl_token::instruction::burn(
+                &safe_token::instruction::burn(
                     token_program_id.key,
                     source_account.key,
                     mint_account.key,
@@ -161,7 +161,7 @@ impl Processor {
             )
         } else {
             invoke(
-                &spl_token::instruction::burn(
+                &safe_token::instruction::burn(
                     token_program_id.key,
                     source_account.key,
                     mint_account.key,
@@ -241,7 +241,7 @@ impl Processor {
         }
 
         invoke(
-            &spl_token::instruction::initialize_account(
+            &safe_token::instruction::initialize_account(
                 token_program_info.key,
                 deposit_account_info.key,
                 deposit_token_mint_info.key,
@@ -258,8 +258,8 @@ impl Processor {
         )?;
 
         invoke(
-            &spl_token::instruction::initialize_mint(
-                &spl_token::id(),
+            &safe_token::instruction::initialize_mint(
+                &safe_token::id(),
                 token_pass_mint_info.key,
                 authority_info.key,
                 None,
@@ -274,8 +274,8 @@ impl Processor {
         )?;
 
         invoke(
-            &spl_token::instruction::initialize_mint(
-                &spl_token::id(),
+            &safe_token::instruction::initialize_mint(
+                &safe_token::id(),
                 token_fail_mint_info.key,
                 authority_info.key,
                 None,

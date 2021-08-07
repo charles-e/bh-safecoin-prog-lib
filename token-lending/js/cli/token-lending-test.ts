@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import { Account, Connection } from "@safecoin/web3.js";
-import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Token, TOKEN_PROGRAM_ID } from "@solana/safe-token";
 
 import { LENDING_PROGRAM_ID, LendingMarket } from "../client";
 import { newAccountWithLamports } from "../client/util/new-account-with-lamports";

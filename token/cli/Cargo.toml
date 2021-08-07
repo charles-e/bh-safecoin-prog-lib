@@ -4,7 +4,7 @@ description = "SPL-Token Command-line Utility"
 edition = "2018"
 homepage = "https://spl.solana.com/token"
 license = "Apache-2.0"
-name = "spl-token-cli"
+name = "safe-token-cli"
 repository = "https://github.com/solana-labs/safecoin-program-library"
 version = "2.0.11"
 
@@ -20,10 +20,10 @@ solana-client = "=1.6.16"
 solana-logger = "=1.6.16"
 solana-remote-wallet = "=1.6.16"
 safecoin-sdk = "=1.6.16"
-spl-token = { version = "3.1", path="../program", features = [ "no-entrypoint" ] }
+safe-token = { version = "3.1", path="../program", features = [ "no-entrypoint" ] }
 spl-associated-token-account = { version = "1.0", path="../../associated-token-account/program", features = [ "no-entrypoint" ] }
 spl-memo = { version = "3.0.1", path="../../memo/program", features = ["no-entrypoint"] }
 
 [[bin]]
-name = "spl-token"
+name = "safe-token"
 path = "src/main.rs"

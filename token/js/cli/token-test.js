@@ -121,7 +121,7 @@ async function GetPrograms(connection: Connection): Promise<void> {
 
     programId = await loadProgram(
       connection,
-      '../../target/deploy/spl_token.so',
+      '../../target/deploy/safe_token.so',
     );
     associatedProgramId = await loadProgram(
       connection,

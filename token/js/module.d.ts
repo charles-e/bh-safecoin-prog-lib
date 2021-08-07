@@ -1,4 +1,4 @@
-declare module '@solana/spl-token' {
+declare module '@solana/safe-token' {
   import {Buffer} from 'buffer';
   import {Layout} from 'buffer-layout';
   import {

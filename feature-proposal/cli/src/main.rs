@@ -336,7 +336,7 @@ fn process_propose(
     println!();
     println!("Distribute the proposal tokens to all validators by running:");
     println!(
-        "    $ solana-tokens distribute-spl-tokens \
+        "    $ solana-tokens distribute-safe-tokens \
                   --from {} \
                   --input-csv {} \
                   --db-path db.{} \
@@ -347,7 +347,7 @@ fn process_propose(
         &feature_proposal_keypair.pubkey().to_string()[..8]
     );
     println!(
-        "    $ solana-tokens spl-token-balances \
+        "    $ solana-tokens safe-token-balances \
                  --mint {} --input-csv {}",
         mint_address, distribution_file
     );
@@ -358,12 +358,12 @@ fn process_propose(
         the proposal by first looking up their token account address:"
     );
     println!(
-        "    $ spl-token --owner ~/validator-keypair.json accounts {}",
+        "    $ safe-token --owner ~/validator-keypair.json accounts {}",
         mint_address
     );
     println!("and then submit their vote by running:");
     println!(
-        "    $ spl-token --owner ~/validator-keypair.json transfer <TOKEN_ACCOUNT_ADDRESS> ALL {}",
+        "    $ safe-token --owner ~/validator-keypair.json transfer <TOKEN_ACCOUNT_ADDRESS> ALL {}",
         acceptance_token_address
     );
     println!();

@@ -1,5 +1,5 @@
 [package]
-name = "spl_token_perf_monitor"
+name = "safe_token_perf_monitor"
 version = "0.0.1"
 description = "SPL Token performance monitor"
 authors = ["Safecoin Maintainers <maintainers@solana.com>"]
@@ -9,7 +9,7 @@ edition = "2018"
 
 [dev-dependencies]
 rand = { version = "0.7.0"}
-spl-token = { path = "../program", features = [ "no-entrypoint" ] }
+safe-token = { path = "../program", features = [ "no-entrypoint" ] }
 solana-runtime = "1.6.16"
 safecoin-sdk = "1.6.16"
 solana-bpf-loader-program = "1.6.16"
