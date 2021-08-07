@@ -10,7 +10,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use safe_token::instruction::approve;
-use safe_token_lending::{
+use spl_token_id_lending::{
     instruction::deposit_obligation_collateral, processor::process_instruction,
     state::INITIAL_COLLATERAL_RATIO,
 };
@@ -18,8 +18,8 @@ use safe_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -79,7 +79,7 @@ async fn test_success() {
             )
             .unwrap(),
             deposit_obligation_collateral(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 SAFE_DEPOSIT_AMOUNT_LAMPORTS,
                 sol_test_reserve.user_collateral_pubkey,
                 sol_test_reserve.collateral_supply_pubkey,

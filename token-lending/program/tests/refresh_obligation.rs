@@ -9,9 +9,9 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use safe_token_lending::math::{Rate, TryAdd, TryMul};
-use safe_token_lending::state::SLOTS_PER_YEAR;
-use safe_token_lending::{
+use spl_token_id_lending::math::{Rate, TryAdd, TryMul};
+use spl_token_id_lending::state::SLOTS_PER_YEAR;
+use spl_token_id_lending::{
     instruction::{refresh_obligation, refresh_reserve},
     math::{Decimal, TryDiv},
     processor::process_instruction,
@@ -21,8 +21,8 @@ use safe_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -108,17 +108,17 @@ async fn test_success() {
     let mut transaction = Transaction::new_with_payer(
         &[
             refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 usdc_test_reserve.pubkey,
                 usdc_oracle.price_pubkey,
             ),
             refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 sol_test_reserve.pubkey,
                 sol_oracle.price_pubkey,
             ),
             refresh_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 test_obligation.pubkey,
                 vec![sol_test_reserve.pubkey, usdc_test_reserve.pubkey],
             ),

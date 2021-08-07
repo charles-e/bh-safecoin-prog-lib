@@ -15,7 +15,7 @@ use crate::{
         realm::{get_governing_token_holding_address_seeds, get_realm_address_seeds, Realm},
     },
     tools::{
-        account::create_and_serialize_account_signed, safe_token::create_safe_token_account_signed,
+        account::create_and_serialize_account_signed, safe_token::create_spl_token_id_account_signed,
     },
 };
 
@@ -32,7 +32,7 @@ pub fn process_create_realm(
     let governance_token_holding_info = next_account_info(account_info_iter)?; // 2
     let payer_info = next_account_info(account_info_iter)?; // 3
     let system_info = next_account_info(account_info_iter)?; // 4
-    let safe_token_info = next_account_info(account_info_iter)?; // 5
+    let spl_token_id_info = next_account_info(account_info_iter)?; // 5
 
     let rent_sysvar_info = next_account_info(account_info_iter)?; // 6
     let rent = &Rent::from_account_info(rent_sysvar_info)?;
@@ -41,7 +41,7 @@ pub fn process_create_realm(
         return Err(GovernanceError::RealmAlreadyExists.into());
     }
 
-    create_safe_token_account_signed(
+    create_spl_token_id_account_signed(
         payer_info,
         governance_token_holding_info,
         &get_governing_token_holding_address_seeds(realm_info.key, governance_token_mint_info.key),
@@ -49,7 +49,7 @@ pub fn process_create_realm(
         realm_info,
         program_id,
         system_info,
-        safe_token_info,
+        spl_token_id_info,
         rent_sysvar_info,
         rent,
     )?;
@@ -60,7 +60,7 @@ pub fn process_create_realm(
     {
         let council_token_holding_info = next_account_info(account_info_iter)?; //8
 
-        create_safe_token_account_signed(
+        create_spl_token_id_account_signed(
             payer_info,
             council_token_holding_info,
             &get_governing_token_holding_address_seeds(realm_info.key, council_token_mint_info.key),
@@ -68,7 +68,7 @@ pub fn process_create_realm(
             realm_info,
             program_id,
             system_info,
-            safe_token_info,
+            spl_token_id_info,
             rent_sysvar_info,
             rent,
         )?;

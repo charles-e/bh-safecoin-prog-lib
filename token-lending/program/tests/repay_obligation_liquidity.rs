@@ -10,8 +10,8 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use safe_token::instruction::approve;
-use safe_token_lending::instruction::refresh_obligation;
-use safe_token_lending::{
+use spl_token_id_lending::instruction::refresh_obligation;
+use spl_token_id_lending::{
     instruction::repay_obligation_liquidity, processor::process_instruction,
     state::INITIAL_COLLATERAL_RATIO,
 };
@@ -19,8 +19,8 @@ use safe_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -104,12 +104,12 @@ async fn test_success() {
             )
             .unwrap(),
             refresh_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 test_obligation.pubkey,
                 vec![sol_test_reserve.pubkey, usdc_test_reserve.pubkey],
             ),
             repay_obligation_liquidity(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 USDC_BORROW_AMOUNT_FRACTIONAL,
                 usdc_test_reserve.user_liquidity_pubkey,
                 usdc_test_reserve.liquidity_supply_pubkey,

@@ -16,7 +16,7 @@ use safe_token::{
     instruction::approve,
     state::{Account as Token, AccountState, Mint},
 };
-use safe_token_lending::{
+use spl_token_id_lending::{
     instruction::{
         borrow_obligation_liquidity, deposit_reserve_liquidity, init_lending_market,
         init_obligation, init_reserve, liquidate_obligation, refresh_reserve,
@@ -90,7 +90,7 @@ impl AddPacked for ProgramTest {
 pub fn add_lending_market(test: &mut ProgramTest) -> TestLendingMarket {
     let lending_market_pubkey = Pubkey::new_unique();
     let (lending_market_authority, bump_seed) =
-        Pubkey::find_program_address(&[lending_market_pubkey.as_ref()], &safe_token_lending::id());
+        Pubkey::find_program_address(&[lending_market_pubkey.as_ref()], &spl_token_id_lending::id());
 
     let lending_market_owner =
         read_keypair_file("tests/fixtures/lending_market_owner.json").unwrap();
@@ -108,7 +108,7 @@ pub fn add_lending_market(test: &mut ProgramTest) -> TestLendingMarket {
             token_program_id: safe_token::id(),
             oracle_program_id,
         }),
-        &safe_token_lending::id(),
+        &spl_token_id_lending::id(),
     );
 
     TestLendingMarket {
@@ -199,7 +199,7 @@ pub fn add_obligation(
         obligation_pubkey,
         u32::MAX as u64,
         &obligation,
-        &safe_token_lending::id(),
+        &spl_token_id_lending::id(),
     );
 
     TestObligation {
@@ -367,7 +367,7 @@ pub fn add_reserve(
         reserve_pubkey,
         u32::MAX as u64,
         &reserve,
-        &safe_token_lending::id(),
+        &spl_token_id_lending::id(),
     );
 
     let amount = if let COption::Some(rent_reserve) = is_native {
@@ -481,7 +481,7 @@ impl TestLendingMarket {
         let lending_market_pubkey = lending_market_keypair.pubkey();
         let (lending_market_authority, _bump_seed) = Pubkey::find_program_address(
             &[&lending_market_pubkey.to_bytes()[..32]],
-            &safe_token_lending::id(),
+            &spl_token_id_lending::id(),
         );
 
         let rent = banks_client.get_rent().await.unwrap();
@@ -492,10 +492,10 @@ impl TestLendingMarket {
                     &lending_market_pubkey,
                     rent.minimum_balance(LendingMarket::LEN),
                     LendingMarket::LEN as u64,
-                    &safe_token_lending::id(),
+                    &spl_token_id_lending::id(),
                 ),
                 init_lending_market(
-                    safe_token_lending::id(),
+                    spl_token_id_lending::id(),
                     lending_market_owner.pubkey(),
                     QUOTE_CURRENCY,
                     lending_market_pubkey,
@@ -526,7 +526,7 @@ impl TestLendingMarket {
     ) {
         let mut transaction = Transaction::new_with_payer(
             &[refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 reserve.pubkey,
                 reserve.liquidity_oracle_pubkey,
             )],
@@ -560,7 +560,7 @@ impl TestLendingMarket {
                 )
                 .unwrap(),
                 deposit_reserve_liquidity(
-                    safe_token_lending::id(),
+                    spl_token_id_lending::id(),
                     liquidity_amount,
                     reserve.user_liquidity_pubkey,
                     reserve.user_collateral_pubkey,
@@ -610,7 +610,7 @@ impl TestLendingMarket {
                 )
                 .unwrap(),
                 liquidate_obligation(
-                    safe_token_lending::id(),
+                    spl_token_id_lending::id(),
                     liquidity_amount,
                     repay_reserve.user_liquidity_pubkey,
                     withdraw_reserve.user_collateral_pubkey,
@@ -649,7 +649,7 @@ impl TestLendingMarket {
 
         let mut transaction = Transaction::new_with_payer(
             &[borrow_obligation_liquidity(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 liquidity_amount,
                 borrow_reserve.liquidity_supply_pubkey,
                 borrow_reserve.user_liquidity_pubkey,
@@ -795,10 +795,10 @@ impl TestReserve {
                     &reserve_pubkey,
                     rent.minimum_balance(Reserve::LEN),
                     Reserve::LEN as u64,
-                    &safe_token_lending::id(),
+                    &spl_token_id_lending::id(),
                 ),
                 init_reserve(
-                    safe_token_lending::id(),
+                    spl_token_id_lending::id(),
                     liquidity_amount,
                     config,
                     user_liquidity_pubkey,
@@ -934,10 +934,10 @@ impl TestObligation {
                     &obligation_keypair.pubkey(),
                     rent.minimum_balance(Obligation::LEN),
                     Obligation::LEN as u64,
-                    &safe_token_lending::id(),
+                    &spl_token_id_lending::id(),
                 ),
                 init_obligation(
-                    safe_token_lending::id(),
+                    spl_token_id_lending::id(),
                     obligation.pubkey,
                     lending_market.pubkey,
                     user_accounts_owner.pubkey(),

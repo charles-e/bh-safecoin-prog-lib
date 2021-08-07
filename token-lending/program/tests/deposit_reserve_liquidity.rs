@@ -5,13 +5,13 @@ mod helpers;
 use helpers::*;
 use solana_program_test::*;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair};
-use safe_token_lending::processor::process_instruction;
+use spl_token_id_lending::processor::process_instruction;
 
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 

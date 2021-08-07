@@ -11,15 +11,15 @@ use solana_sdk::{
     transaction::{Transaction, TransactionError},
 };
 use safe_token::solana_program::instruction::InstructionError;
-use safe_token_lending::{
+use spl_token_id_lending::{
     error::LendingError, instruction::flash_loan, processor::process_instruction,
 };
 
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -85,7 +85,7 @@ async fn test_success() {
 
     let mut transaction = Transaction::new_with_payer(
         &[flash_loan(
-            safe_token_lending::id(),
+            spl_token_id_lending::id(),
             FLASH_LOAN_AMOUNT,
             usdc_test_reserve.liquidity_supply_pubkey,
             program_owned_token_account,
@@ -141,8 +141,8 @@ async fn test_success() {
 #[tokio::test]
 async fn test_failure() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -196,7 +196,7 @@ async fn test_failure() {
 
     let mut transaction = Transaction::new_with_payer(
         &[flash_loan(
-            safe_token_lending::id(),
+            spl_token_id_lending::id(),
             FLASH_LOAN_AMOUNT,
             usdc_test_reserve.liquidity_supply_pubkey,
             program_owned_token_account,

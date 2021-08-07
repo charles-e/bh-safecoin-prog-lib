@@ -38,7 +38,7 @@ pub fn process_instruction(
             let acceptance_token_info = next_account_info(account_info_iter)?;
             let feature_id_info = next_account_info(account_info_iter)?;
             let system_program_info = next_account_info(account_info_iter)?;
-            let safe_token_program_info = next_account_info(account_info_iter)?;
+            let spl_token_id_program_info = next_account_info(account_info_iter)?;
             let rent_sysvar_info = next_account_info(account_info_iter)?;
             let rent = &Rent::from_account_info(rent_sysvar_info)?;
 
@@ -140,7 +140,7 @@ pub fn process_instruction(
                 )?,
                 &[
                     mint_info.clone(),
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                     rent_sysvar_info.clone(),
                 ],
             )?;
@@ -172,7 +172,7 @@ pub fn process_instruction(
                 )?,
                 &[
                     distributor_token_info.clone(),
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                     rent_sysvar_info.clone(),
                     feature_proposal_info.clone(),
                     mint_info.clone(),
@@ -206,7 +206,7 @@ pub fn process_instruction(
                 )?,
                 &[
                     acceptance_token_info.clone(),
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                     rent_sysvar_info.clone(),
                     feature_proposal_info.clone(),
                     mint_info.clone(),
@@ -222,7 +222,7 @@ pub fn process_instruction(
                     &[],
                 )?,
                 &[
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                     acceptance_token_info.clone(),
                     feature_proposal_info.clone(),
                 ],
@@ -237,7 +237,7 @@ pub fn process_instruction(
                     &[],
                 )?,
                 &[
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                     acceptance_token_info.clone(),
                     feature_proposal_info.clone(),
                 ],
@@ -258,7 +258,7 @@ pub fn process_instruction(
                 &[
                     mint_info.clone(),
                     distributor_token_info.clone(),
-                    safe_token_program_info.clone(),
+                    spl_token_id_program_info.clone(),
                 ],
                 &[&mint_signer_seeds],
             )?;

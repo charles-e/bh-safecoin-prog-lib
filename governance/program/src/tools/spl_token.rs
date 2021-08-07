@@ -18,7 +18,7 @@ use crate::error::GovernanceError;
 
 /// Creates and initializes SPL token account with PDA using the provided PDA seeds
 #[allow(clippy::too_many_arguments)]
-pub fn create_safe_token_account_signed<'a>(
+pub fn create_spl_token_id_account_signed<'a>(
     payer_info: &AccountInfo<'a>,
     token_account_info: &AccountInfo<'a>,
     token_account_address_seeds: &[&[u8]],
@@ -26,7 +26,7 @@ pub fn create_safe_token_account_signed<'a>(
     token_account_owner_info: &AccountInfo<'a>,
     program_id: &Pubkey,
     system_info: &AccountInfo<'a>,
-    safe_token_info: &AccountInfo<'a>,
+    spl_token_id_info: &AccountInfo<'a>,
     rent_sysvar_info: &AccountInfo<'a>,
     rent: &Rent,
 ) -> Result<(), ProgramError> {
@@ -78,7 +78,7 @@ pub fn create_safe_token_account_signed<'a>(
             token_account_info.clone(),
             token_account_owner_info.clone(),
             token_mint_info.clone(),
-            safe_token_info.clone(),
+            spl_token_id_info.clone(),
             rent_sysvar_info.clone(),
         ],
     )?;
@@ -92,7 +92,7 @@ pub fn transfer_safe_tokens<'a>(
     destination_info: &AccountInfo<'a>,
     authority_info: &AccountInfo<'a>,
     amount: u64,
-    safe_token_info: &AccountInfo<'a>,
+    spl_token_id_info: &AccountInfo<'a>,
 ) -> ProgramResult {
     let transfer_instruction = safe_token::instruction::transfer(
         &safe_token::id(),
@@ -107,7 +107,7 @@ pub fn transfer_safe_tokens<'a>(
     invoke(
         &transfer_instruction,
         &[
-            safe_token_info.clone(),
+            spl_token_id_info.clone(),
             authority_info.clone(),
             source_info.clone(),
             destination_info.clone(),
@@ -125,7 +125,7 @@ pub fn transfer_safe_tokens_signed<'a>(
     authority_seeds: &[&[u8]],
     program_id: &Pubkey,
     amount: u64,
-    safe_token_info: &AccountInfo<'a>,
+    spl_token_id_info: &AccountInfo<'a>,
 ) -> ProgramResult {
     let (authority_address, bump_seed) = Pubkey::find_program_address(authority_seeds, program_id);
 
@@ -155,7 +155,7 @@ pub fn transfer_safe_tokens_signed<'a>(
     invoke_signed(
         &transfer_instruction,
         &[
-            safe_token_info.clone(),
+            spl_token_id_info.clone(),
             authority_info.clone(),
             source_info.clone(),
             destination_info.clone(),
@@ -167,7 +167,7 @@ pub fn transfer_safe_tokens_signed<'a>(
 }
 
 /// Asserts the given account_info represents a valid SPL Token account which is initialized and belongs to safe_token program
-pub fn assert_is_valid_safe_token_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
+pub fn assert_is_valid_spl_token_id_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
     if account_info.data_is_empty() {
         return Err(GovernanceError::SplTokenAccountNotInitialized.into());
     }
@@ -184,7 +184,7 @@ pub fn assert_is_valid_safe_token_account(account_info: &AccountInfo) -> Result<
 }
 
 /// Asserts the given mint_info represents a valid SPL Token Mint account  which is initialized and belongs to safe_token program
-pub fn assert_is_valid_safe_token_mint(mint_info: &AccountInfo) -> Result<(), ProgramError> {
+pub fn assert_is_valid_spl_token_id_mint(mint_info: &AccountInfo) -> Result<(), ProgramError> {
     if mint_info.data_is_empty() {
         return Err(GovernanceError::SplTokenMintNotInitialized.into());
     }
@@ -202,8 +202,8 @@ pub fn assert_is_valid_safe_token_mint(mint_info: &AccountInfo) -> Result<(), Pr
 
 /// Computationally cheap method to get amount from a token account
 /// It reads amount without deserializing full account data
-pub fn get_safe_token_amount(token_account_info: &AccountInfo) -> Result<u64, ProgramError> {
-    assert_is_valid_safe_token_account(token_account_info)?;
+pub fn get_spl_token_id_amount(token_account_info: &AccountInfo) -> Result<u64, ProgramError> {
+    assert_is_valid_spl_token_id_account(token_account_info)?;
 
     // TokeAccount layout:   mint(32), owner(32), amount(8), ...
     let data = token_account_info.try_borrow_data()?;
@@ -213,8 +213,8 @@ pub fn get_safe_token_amount(token_account_info: &AccountInfo) -> Result<u64, Pr
 
 /// Computationally cheap method to get mint from a token account
 /// It reads mint without deserializing full account data
-pub fn get_safe_token_mint(token_account_info: &AccountInfo) -> Result<Pubkey, ProgramError> {
-    assert_is_valid_safe_token_account(token_account_info)?;
+pub fn get_spl_token_id_mint(token_account_info: &AccountInfo) -> Result<Pubkey, ProgramError> {
+    assert_is_valid_spl_token_id_account(token_account_info)?;
 
     // TokeAccount layout:   mint(32), owner(32), amount(8), ...
     let data = token_account_info.try_borrow_data()?;
@@ -224,8 +224,8 @@ pub fn get_safe_token_mint(token_account_info: &AccountInfo) -> Result<Pubkey, P
 
 /// Computationally cheap method to get owner from a token account
 /// It reads owner without deserializing full account data
-pub fn get_safe_token_owner(token_account_info: &AccountInfo) -> Result<Pubkey, ProgramError> {
-    assert_is_valid_safe_token_account(token_account_info)?;
+pub fn get_spl_token_id_owner(token_account_info: &AccountInfo) -> Result<Pubkey, ProgramError> {
+    assert_is_valid_spl_token_id_account(token_account_info)?;
 
     // TokeAccount layout:   mint(32), owner(32), amount(8)
     let data = token_account_info.try_borrow_data()?;
@@ -234,8 +234,8 @@ pub fn get_safe_token_owner(token_account_info: &AccountInfo) -> Result<Pubkey, 
 }
 
 /// Computationally cheap method to just get supply from a mint without unpacking the whole object
-pub fn get_safe_token_mint_supply(mint_info: &AccountInfo) -> Result<u64, ProgramError> {
-    assert_is_valid_safe_token_mint(mint_info)?;
+pub fn get_spl_token_id_mint_supply(mint_info: &AccountInfo) -> Result<u64, ProgramError> {
+    assert_is_valid_spl_token_id_mint(mint_info)?;
     // In token program, 36, 8, 1, 1 is the layout, where the first 8 is supply u64.
     // so we start at 36.
     let data = mint_info.try_borrow_data().unwrap();

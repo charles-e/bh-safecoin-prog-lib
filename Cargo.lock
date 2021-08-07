@@ -2785,6 +2785,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "safe-memo"
+version = "3.0.1"
+dependencies = [
+ "safecoin-program",
+ "safecoin-program-test",
+ "safecoin-sdk",
+]
+
+[[package]]
 name = "safe-token"
 version = "3.1.1"
 dependencies = [
@@ -2804,6 +2813,7 @@ dependencies = [
  "clap",
  "console 0.14.1",
  "safe-associated-token-account",
+ "safe-memo",
  "safe-token",
  "safecoin-sdk",
  "serde_json",
@@ -2814,7 +2824,6 @@ dependencies = [
  "solana-client",
  "solana-logger",
  "solana-remote-wallet",
- "safe-memo 3.0.1",
 ]
 
 [[package]]
@@ -3428,7 +3437,7 @@ dependencies = [
  "solana-stake-program",
  "solana-transaction-status",
  "solana-vote-program",
- "safe-memo 3.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spl-memo",
 ]
 
 [[package]]
@@ -3522,7 +3531,7 @@ dependencies = [
  "solana-metrics",
  "solana-sdk",
  "solana-version",
- "safe-memo 3.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spl-memo",
  "thiserror",
  "tokio 1.9.0",
 ]
@@ -3854,7 +3863,7 @@ dependencies = [
  "solana-stake-program",
  "solana-vote-program",
  "spl-associated-token-account",
- "safe-memo 3.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spl-memo",
  "spl-token",
  "thiserror",
 ]
@@ -4054,16 +4063,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "safe-memo"
-version = "3.0.1"
-dependencies = [
- "safecoin-program",
- "safecoin-program-test",
- "safecoin-sdk",
-]
-
-[[package]]
-name = "safe-memo"
+name = "spl-memo"
 version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd0dc6f70db6bacea7ff25870b016a65ba1d1b6013536f08e4fd79a8f9005325"
@@ -4325,10 +4325,10 @@ dependencies = [
 name = "test-client"
 version = "0.1.0"
 dependencies = [
+ "safe-memo",
  "safe-token",
  "safe-token-swap",
  "safecoin-sdk",
- "safe-memo 3.0.1",
 ]
 
 [[package]]

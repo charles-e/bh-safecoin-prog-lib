@@ -3,7 +3,7 @@ use {
     honggfuzz::fuzz,
     spl_math::precise_number::PreciseNumber,
     safe_token::error::TokenError,
-    safe_token_swap::{
+    spl_token_id_swap::{
         curve::{
             base::{CurveType, SwapCurve},
             calculator::TradeDirection,
@@ -19,7 +19,7 @@ use {
             WithdrawSingleTokenTypeExactAmountOut,
         },
     },
-    safe_token_swap_fuzz::{
+    spl_token_id_swap_fuzz::{
         native_account_data::NativeAccountData,
         native_token::{get_token_balance, transfer},
         native_token_swap::NativeTokenSwap,

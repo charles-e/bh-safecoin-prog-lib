@@ -4,7 +4,7 @@ use crate::native_account_data::NativeAccountData;
 use crate::native_processor::do_process_instruction;
 use crate::native_token;
 
-use safe_token_swap::{
+use spl_token_id_swap::{
     curve::{base::SwapCurve, fees::Fees},
     instruction::{
         self, DepositAllTokenTypes, DepositSingleTokenTypeExactAmountIn, Swap,
@@ -50,10 +50,10 @@ impl NativeTokenSwap {
         let mut user_account = NativeAccountData::new(0, system_program::id());
         user_account.is_signer = true;
         let mut swap_account =
-            NativeAccountData::new(SwapVersion::LATEST_LEN, safe_token_swap::id());
+            NativeAccountData::new(SwapVersion::LATEST_LEN, spl_token_id_swap::id());
         let (authority_key, nonce) = Pubkey::find_program_address(
             &[&swap_account.key.to_bytes()[..]],
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
         );
         let mut authority_account = create_program_account(authority_key);
         let mut token_program_account = create_program_account(safe_token::id());
@@ -77,7 +77,7 @@ impl NativeTokenSwap {
         );
 
         let init_instruction = instruction::initialize(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &swap_account.key,
             &authority_account.key,
@@ -171,7 +171,7 @@ impl NativeTokenSwap {
         )
         .unwrap();
         let swap_instruction = instruction::swap(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,
@@ -232,7 +232,7 @@ impl NativeTokenSwap {
         .unwrap();
 
         let swap_instruction = instruction::swap(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,
@@ -318,7 +318,7 @@ impl NativeTokenSwap {
         }
 
         let deposit_instruction = instruction::deposit_all_token_types(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,
@@ -384,7 +384,7 @@ impl NativeTokenSwap {
         .unwrap();
 
         let withdraw_instruction = instruction::withdraw_all_token_types(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,
@@ -451,7 +451,7 @@ impl NativeTokenSwap {
         }
 
         let deposit_instruction = instruction::deposit_single_token_type_exact_amount_in(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,
@@ -514,7 +514,7 @@ impl NativeTokenSwap {
         .unwrap();
 
         let withdraw_instruction = instruction::withdraw_single_token_type_exact_amount_out(
-            &safe_token_swap::id(),
+            &spl_token_id_swap::id(),
             &safe_token::id(),
             &self.swap_account.key,
             &self.authority_account.key,

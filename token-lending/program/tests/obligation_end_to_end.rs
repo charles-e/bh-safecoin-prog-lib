@@ -12,7 +12,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use safe_token::{instruction::approve, solana_program::program_pack::Pack};
-use safe_token_lending::{
+use spl_token_id_lending::{
     instruction::{
         borrow_obligation_liquidity, deposit_obligation_collateral, init_obligation,
         refresh_obligation, refresh_reserve, repay_obligation_liquidity,
@@ -26,8 +26,8 @@ use safe_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -113,18 +113,18 @@ async fn test_success() {
                 &obligation_keypair.pubkey(),
                 rent.minimum_balance(Obligation::LEN),
                 Obligation::LEN as u64,
-                &safe_token_lending::id(),
+                &spl_token_id_lending::id(),
             ),
             // 1
             init_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 obligation_pubkey,
                 lending_market.pubkey,
                 user_accounts_owner_pubkey,
             ),
             // 2
             refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 sol_test_reserve.pubkey,
                 sol_oracle.price_pubkey,
             ),
@@ -140,7 +140,7 @@ async fn test_success() {
             .unwrap(),
             // 4
             deposit_obligation_collateral(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 SAFE_DEPOSIT_AMOUNT_LAMPORTS,
                 sol_test_reserve.user_collateral_pubkey,
                 sol_test_reserve.collateral_supply_pubkey,
@@ -152,19 +152,19 @@ async fn test_success() {
             ),
             // 5
             refresh_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 obligation_pubkey,
                 vec![sol_test_reserve.pubkey],
             ),
             // 6
             refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 usdc_test_reserve.pubkey,
                 usdc_oracle.price_pubkey,
             ),
             // 7
             borrow_obligation_liquidity(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 USDC_BORROW_AMOUNT_FRACTIONAL,
                 usdc_test_reserve.liquidity_supply_pubkey,
                 usdc_test_reserve.user_liquidity_pubkey,
@@ -177,13 +177,13 @@ async fn test_success() {
             ),
             // 8
             refresh_reserve(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 usdc_test_reserve.pubkey,
                 usdc_oracle.price_pubkey,
             ),
             // 9
             refresh_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 obligation_pubkey,
                 vec![sol_test_reserve.pubkey, usdc_test_reserve.pubkey],
             ),
@@ -199,7 +199,7 @@ async fn test_success() {
             .unwrap(),
             // 11
             repay_obligation_liquidity(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 USDC_REPAY_AMOUNT_FRACTIONAL,
                 usdc_test_reserve.user_liquidity_pubkey,
                 usdc_test_reserve.liquidity_supply_pubkey,
@@ -210,13 +210,13 @@ async fn test_success() {
             ),
             // 12
             refresh_obligation(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 obligation_pubkey,
                 vec![sol_test_reserve.pubkey],
             ),
             // 13
             withdraw_obligation_collateral(
-                safe_token_lending::id(),
+                spl_token_id_lending::id(),
                 SAFE_DEPOSIT_AMOUNT_LAMPORTS,
                 sol_test_reserve.collateral_supply_pubkey,
                 sol_test_reserve.user_collateral_pubkey,

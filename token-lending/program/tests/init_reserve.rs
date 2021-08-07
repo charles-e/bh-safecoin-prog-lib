@@ -10,7 +10,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::{Transaction, TransactionError},
 };
-use safe_token_lending::{
+use spl_token_id_lending::{
     error::LendingError,
     instruction::init_reserve,
     processor::process_instruction,
@@ -20,8 +20,8 @@ use safe_token_lending::{
 #[tokio::test]
 async fn test_success() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -80,8 +80,8 @@ async fn test_success() {
 #[tokio::test]
 async fn test_already_initialized() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 
@@ -109,7 +109,7 @@ async fn test_already_initialized() {
 
     let mut transaction = Transaction::new_with_payer(
         &[init_reserve(
-            safe_token_lending::id(),
+            spl_token_id_lending::id(),
             42,
             usdc_test_reserve.config,
             usdc_test_reserve.user_liquidity_pubkey,
@@ -148,8 +148,8 @@ async fn test_already_initialized() {
 #[tokio::test]
 async fn test_invalid_fees() {
     let mut test = ProgramTest::new(
-        "safe_token_lending",
-        safe_token_lending::id(),
+        "spl_token_id_lending",
+        spl_token_id_lending::id(),
         processor!(process_instruction),
     );
 

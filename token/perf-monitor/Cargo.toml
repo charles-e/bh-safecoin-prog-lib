@@ -1,5 +1,5 @@
 [package]
-name = "safe_token_perf_monitor"
+name = "spl_token_id_perf_monitor"
 version = "0.0.1"
 description = "SPL Token performance monitor"
 authors = ["Safecoin Maintainers <maintainers@solana.com>"]

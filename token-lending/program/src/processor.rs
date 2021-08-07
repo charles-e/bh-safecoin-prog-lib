@@ -341,7 +341,7 @@ fn process_init_reserve(
     let collateral_amount = reserve.deposit_liquidity(liquidity_amount)?;
     Reserve::pack(reserve, &mut reserve_info.data.borrow_mut())?;
 
-    safe_token_init_account(TokenInitializeAccountParams {
+    spl_token_id_init_account(TokenInitializeAccountParams {
         account: reserve_liquidity_supply_info.clone(),
         mint: reserve_liquidity_mint_info.clone(),
         owner: lending_market_authority_info.clone(),
@@ -349,7 +349,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_init_account(TokenInitializeAccountParams {
+    spl_token_id_init_account(TokenInitializeAccountParams {
         account: reserve_liquidity_fee_receiver_info.clone(),
         mint: reserve_liquidity_mint_info.clone(),
         owner: lending_market_authority_info.clone(),
@@ -357,7 +357,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_init_mint(TokenInitializeMintParams {
+    spl_token_id_init_mint(TokenInitializeMintParams {
         mint: reserve_collateral_mint_info.clone(),
         authority: lending_market_authority_info.key,
         rent: rent_info.clone(),
@@ -365,7 +365,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_init_account(TokenInitializeAccountParams {
+    spl_token_id_init_account(TokenInitializeAccountParams {
         account: reserve_collateral_supply_info.clone(),
         mint: reserve_collateral_mint_info.clone(),
         owner: lending_market_authority_info.clone(),
@@ -373,7 +373,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_init_account(TokenInitializeAccountParams {
+    spl_token_id_init_account(TokenInitializeAccountParams {
         account: destination_collateral_info.clone(),
         mint: reserve_collateral_mint_info.clone(),
         owner: user_transfer_authority_info.clone(),
@@ -381,7 +381,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: reserve_liquidity_supply_info.clone(),
         amount: liquidity_amount,
@@ -390,7 +390,7 @@ fn process_init_reserve(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_mint_to(TokenMintToParams {
+    spl_token_id_mint_to(TokenMintToParams {
         mint: reserve_collateral_mint_info.clone(),
         destination: destination_collateral_info.clone(),
         amount: collateral_amount,
@@ -506,7 +506,7 @@ fn process_deposit_reserve_liquidity(
     reserve.last_update.mark_stale();
     Reserve::pack(reserve, &mut reserve_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: reserve_liquidity_supply_info.clone(),
         amount: liquidity_amount,
@@ -515,7 +515,7 @@ fn process_deposit_reserve_liquidity(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_mint_to(TokenMintToParams {
+    spl_token_id_mint_to(TokenMintToParams {
         mint: reserve_collateral_mint_info.clone(),
         destination: destination_collateral_info.clone(),
         amount: collateral_amount,
@@ -606,7 +606,7 @@ fn process_redeem_reserve_collateral(
     reserve.last_update.mark_stale();
     Reserve::pack(reserve, &mut reserve_info.data.borrow_mut())?;
 
-    safe_token_burn(TokenBurnParams {
+    spl_token_id_burn(TokenBurnParams {
         mint: reserve_collateral_mint_info.clone(),
         source: source_collateral_info.clone(),
         amount: collateral_amount,
@@ -615,7 +615,7 @@ fn process_redeem_reserve_collateral(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: reserve_liquidity_supply_info.clone(),
         destination: destination_liquidity_info.clone(),
         amount: liquidity_amount,
@@ -892,7 +892,7 @@ fn process_deposit_obligation_collateral(
     obligation.last_update.mark_stale();
     Obligation::pack(obligation, &mut obligation_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_collateral_info.clone(),
         destination: destination_collateral_info.clone(),
         amount: collateral_amount,
@@ -1045,7 +1045,7 @@ fn process_withdraw_obligation_collateral(
     obligation.last_update.mark_stale();
     Obligation::pack(obligation, &mut obligation_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_collateral_info.clone(),
         destination: destination_collateral_info.clone(),
         amount: withdraw_amount,
@@ -1196,7 +1196,7 @@ fn process_borrow_obligation_liquidity(
                 .checked_sub(host_fee)
                 .ok_or(LendingError::MathOverflow)?;
 
-            safe_token_transfer(TokenTransferParams {
+            spl_token_id_transfer(TokenTransferParams {
                 source: source_liquidity_info.clone(),
                 destination: host_fee_receiver_info.clone(),
                 amount: host_fee,
@@ -1207,7 +1207,7 @@ fn process_borrow_obligation_liquidity(
         }
     }
     if owner_fee > 0 {
-        safe_token_transfer(TokenTransferParams {
+        spl_token_id_transfer(TokenTransferParams {
             source: source_liquidity_info.clone(),
             destination: borrow_reserve_liquidity_fee_receiver_info.clone(),
             amount: owner_fee,
@@ -1217,7 +1217,7 @@ fn process_borrow_obligation_liquidity(
         })?;
     }
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: destination_liquidity_info.clone(),
         amount: receive_amount,
@@ -1321,7 +1321,7 @@ fn process_repay_obligation_liquidity(
     obligation.last_update.mark_stale();
     Obligation::pack(obligation, &mut obligation_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: destination_liquidity_info.clone(),
         amount: repay_amount,
@@ -1504,7 +1504,7 @@ fn process_liquidate_obligation(
     obligation.last_update.mark_stale();
     Obligation::pack(obligation, &mut obligation_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: repay_reserve_liquidity_supply_info.clone(),
         amount: repay_amount,
@@ -1513,7 +1513,7 @@ fn process_liquidate_obligation(
         token_program: token_program_id.clone(),
     })?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: withdraw_reserve_collateral_supply_info.clone(),
         destination: destination_collateral_info.clone(),
         amount: withdraw_amount,
@@ -1632,7 +1632,7 @@ fn process_flash_loan(
     reserve.liquidity.borrow(flash_loan_amount_decimal)?;
     Reserve::pack(reserve, &mut reserve_info.data.borrow_mut())?;
 
-    safe_token_transfer(TokenTransferParams {
+    spl_token_id_transfer(TokenTransferParams {
         source: source_liquidity_info.clone(),
         destination: destination_liquidity_info.clone(),
         amount: flash_loan_amount,
@@ -1676,7 +1676,7 @@ fn process_flash_loan(
         owner_fee = owner_fee
             .checked_sub(host_fee)
             .ok_or(LendingError::MathOverflow)?;
-        safe_token_transfer(TokenTransferParams {
+        spl_token_id_transfer(TokenTransferParams {
             source: source_liquidity_info.clone(),
             destination: host_fee_receiver_info.clone(),
             amount: host_fee,
@@ -1687,7 +1687,7 @@ fn process_flash_loan(
     }
 
     if owner_fee > 0 {
-        safe_token_transfer(TokenTransferParams {
+        spl_token_id_transfer(TokenTransferParams {
             source: source_liquidity_info.clone(),
             destination: reserve_liquidity_fee_receiver_info.clone(),
             amount: owner_fee,
@@ -1820,7 +1820,7 @@ fn get_pyth_price(pyth_price_info: &AccountInfo, clock: &Clock) -> Result<Decima
 
 /// Issue a safe_token `InitializeAccount` instruction.
 #[inline(always)]
-fn safe_token_init_account(params: TokenInitializeAccountParams<'_>) -> ProgramResult {
+fn spl_token_id_init_account(params: TokenInitializeAccountParams<'_>) -> ProgramResult {
     let TokenInitializeAccountParams {
         account,
         mint,
@@ -1840,7 +1840,7 @@ fn safe_token_init_account(params: TokenInitializeAccountParams<'_>) -> ProgramR
 
 /// Issue a safe_token `InitializeMint` instruction.
 #[inline(always)]
-fn safe_token_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramResult {
+fn spl_token_id_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramResult {
     let TokenInitializeMintParams {
         mint,
         rent,
@@ -1861,7 +1861,7 @@ fn safe_token_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramRes
 
 /// Issue a safe_token `Transfer` instruction.
 #[inline(always)]
-fn safe_token_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
+fn spl_token_id_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
     let TokenTransferParams {
         source,
         destination,
@@ -1886,7 +1886,7 @@ fn safe_token_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
 }
 
 /// Issue a safe_token `MintTo` instruction.
-fn safe_token_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
+fn spl_token_id_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
     let TokenMintToParams {
         mint,
         destination,
@@ -1912,7 +1912,7 @@ fn safe_token_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
 
 /// Issue a safe_token `Burn` instruction.
 #[inline(always)]
-fn safe_token_burn(params: TokenBurnParams<'_, '_>) -> ProgramResult {
+fn spl_token_id_burn(params: TokenBurnParams<'_, '_>) -> ProgramResult {
     let TokenBurnParams {
         mint,
         source,
