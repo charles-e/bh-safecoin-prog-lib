@@ -9,10 +9,10 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::{Transaction, TransactionError},
 };
-use spl_memo::*;
+use safe_memo::*;
 
 fn program_test() -> ProgramTest {
-    ProgramTest::new("spl_memo", id(), processor!(processor::process_instruction))
+    ProgramTest::new("safe_memo", id(), processor!(processor::process_instruction))
 }
 
 #[tokio::test]

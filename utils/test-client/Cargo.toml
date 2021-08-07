@@ -9,6 +9,6 @@ edition = "2018"
 
 [dependencies]
 safecoin-sdk = "1.6.16"
-spl-memo = { path = "../../memo/program", features = [ "no-entrypoint" ] }
+safe-memo = { path = "../../memo/program", features = [ "no-entrypoint" ] }
 safe-token = { path = "../../token/program", features = [ "no-entrypoint" ] }
 safe-token-swap = { path = "../../token-swap/program", features = [ "no-entrypoint" ] }

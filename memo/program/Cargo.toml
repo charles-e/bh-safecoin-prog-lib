@@ -1,5 +1,5 @@
 [package]
-name = "spl-memo"
+name = "safe-memo"
 version = "3.0.1"
 description = "Safecoin Program Library Memo"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]

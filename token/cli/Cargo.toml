@@ -22,7 +22,7 @@ solana-remote-wallet = "=1.6.16"
 safecoin-sdk = "=1.6.16"
 safe-token = { version = "3.1", path="../program", features = [ "no-entrypoint" ] }
 safe-associated-token-account = { version = "1.0", path="../../associated-token-account/program", features = [ "no-entrypoint" ] }
-spl-memo = { version = "3.0.1", path="../../memo/program", features = ["no-entrypoint"] }
+safe-memo = { version = "3.0.1", path="../../memo/program", features = ["no-entrypoint"] }
 
 [[bin]]
 name = "safe-token"

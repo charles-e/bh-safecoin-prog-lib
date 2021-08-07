@@ -25,8 +25,8 @@ The Memo Program's source is available on
 ## Interface
 
 The on-chain Memo Program is written in Rust and available on crates.io as
-[spl-memo](https://crates.io/crates/spl-memo) and
-[docs.rs](https://docs.rs/spl-memo).
+[safe-memo](https://crates.io/crates/safe-memo) and
+[docs.rs](https://docs.rs/safe-memo).
 
 The crate provides a `build_memo()` method to easily create a properly
 constructed Instruction.

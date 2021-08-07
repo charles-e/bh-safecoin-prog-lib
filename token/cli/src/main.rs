@@ -293,7 +293,7 @@ fn command_create_token(
         )?,
     ];
     if let Some(text) = memo {
-        instructions.push(spl_memo::build_memo(text.as_bytes(), &[&config.fee_payer]));
+        instructions.push(safe_memo::build_memo(text.as_bytes(), &[&config.fee_payer]));
     }
     Ok(Some((
         minimum_balance_for_rent_exemption,
