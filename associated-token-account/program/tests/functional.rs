@@ -7,11 +7,11 @@ use solana_sdk::{
     signature::Signer,
     transaction::{Transaction, TransactionError},
 };
-use spl_associated_token_account::*;
+use safe_associated_token_account::*;
 
 fn program_test(token_mint_address: Pubkey) -> ProgramTest {
     let mut pc = ProgramTest::new(
-        "spl_associated_token_account",
+        "safe_associated_token_account",
         id(),
         processor!(processor::process_instruction),
     );

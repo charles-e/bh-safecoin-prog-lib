@@ -125,7 +125,7 @@ async function GetPrograms(connection: Connection): Promise<void> {
     );
     associatedProgramId = await loadProgram(
       connection,
-      '../../target/deploy/spl_associated_token_account.so',
+      '../../target/deploy/safe_associated_token_account.so',
     );
     await store.save('config.json', {
       tokenProgramId: programId.toString(),

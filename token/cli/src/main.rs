@@ -36,7 +36,7 @@ use solana_sdk::{
     system_instruction, system_program,
     transaction::Transaction,
 };
-use spl_associated_token_account::*;
+use safe_associated_token_account::*;
 use safe_token::{
     self,
     instruction::*,

@@ -27,7 +27,7 @@ use {
         system_instruction,
         transaction::Transaction,
     },
-    spl_associated_token_account::{create_associated_token_account, get_associated_token_address},
+    safe_associated_token_account::{create_associated_token_account, get_associated_token_address},
     spl_stake_pool::{
         self,
         borsh::get_instance_packed_len,

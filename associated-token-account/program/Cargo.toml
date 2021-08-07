@@ -1,5 +1,5 @@
 [package]
-name = "spl-associated-token-account"
+name = "safe-associated-token-account"
 version = "1.0.2"
 description = "Safecoin Program Library Associated Token Account"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
