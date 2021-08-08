@@ -1,6 +1,6 @@
 [package]
 name = "safe-memo"
-version = "3.0.1"
+version = "3.0.4"
 description = "Safecoin Program Library Memo"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
 repository = "https://github.com/solana-labs/safecoin-program-library"
@@ -12,11 +12,11 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-safecoin-program = "1.6.16"
+solana_program = { package = "safecoin-program", version = "1.6.18" }
 
 [dev-dependencies]
-safecoin-program-test = "1.6.16"
-safecoin-sdk = "1.6.16"
+safecoin-program-test = "1.6.18"
+safecoin-sdk = "1.6.18"
 
 [lib]
 crate-type = ["cdylib", "lib"]
