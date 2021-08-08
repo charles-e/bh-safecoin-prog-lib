@@ -1,5 +1,5 @@
 [package]
-name = "spl-feature-proposal"
+name = "safe-feature-proposal"
 version = "1.0.0"
 description = "Safecoin Program Library Feature Proposal Program"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
@@ -22,6 +22,7 @@ safecoin-program-test = "1.6.16"
 safecoin-sdk = "1.6.16"
 
 [lib]
+name = "spl_feature_proposal"
 crate-type = ["cdylib", "lib"]
 
 [package.metadata.docs.rs]

@@ -8,6 +8,9 @@ license = "Apache-2.0"
 edition = "2018"
 publish = false
 
+[lib]
+name = "spl_token_swap_fuzz"
+
 [dependencies]
 honggfuzz = { version = "0.5.52" }
 arbitrary = { version = "1.0.1", features = ["derive"] }

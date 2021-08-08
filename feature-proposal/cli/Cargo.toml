@@ -1,5 +1,5 @@
 [package]
-name = "spl-feature-proposal-cli"
+name = "safe-feature-proposal-cli"
 version = "1.2.0"
 description = "SPL Feature Proposal Command-line Utility"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
@@ -15,10 +15,10 @@ solana-cli-config = "1.6.16"
 solana-client = "1.6.16"
 solana-logger = "1.6.16"
 safecoin-sdk = "1.6.16"
-spl-feature-proposal = { version = "1.0", path = "../program", features = ["no-entrypoint"] }
+safe-feature-proposal = { version = "1.0", path = "../program", features = ["no-entrypoint"] }
 
 [[bin]]
-name = "spl-feature-proposal"
+name = "safe-feature-proposal"
 path = "src/main.rs"
 
 [package.metadata.docs.rs]

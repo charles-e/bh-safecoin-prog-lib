@@ -2785,6 +2785,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "safe-feature-proposal"
+version = "1.0.0"
+dependencies = [
+ "borsh",
+ "borsh-derive",
+ "safe-token",
+ "safecoin-program",
+ "safecoin-program-test",
+ "safecoin-sdk",
+]
+
+[[package]]
+name = "safe-feature-proposal-cli"
+version = "1.2.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "safe-feature-proposal",
+ "safecoin-sdk",
+ "solana-clap-utils",
+ "solana-cli-config",
+ "solana-client",
+ "solana-logger",
+]
+
+[[package]]
 name = "safe-memo"
 version = "3.0.1"
 dependencies = [
@@ -3998,32 +4024,6 @@ dependencies = [
  "safecoin-program",
  "safecoin-program-test",
  "safecoin-sdk",
-]
-
-[[package]]
-name = "spl-feature-proposal"
-version = "1.0.0"
-dependencies = [
- "borsh",
- "borsh-derive",
- "safe-token",
- "safecoin-program",
- "safecoin-program-test",
- "safecoin-sdk",
-]
-
-[[package]]
-name = "spl-feature-proposal-cli"
-version = "1.2.0"
-dependencies = [
- "chrono",
- "clap",
- "safecoin-sdk",
- "solana-clap-utils",
- "solana-cli-config",
- "solana-client",
- "solana-logger",
- "spl-feature-proposal",
 ]
 
 [[package]]

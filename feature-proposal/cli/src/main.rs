@@ -369,7 +369,7 @@ fn process_propose(
     println!();
     println!("Periodically the votes must be tallied by running:");
     println!(
-        "  $ spl-feature-proposal tally {}",
+        "  $ safe-feature-proposal tally {}",
         feature_proposal_keypair.pubkey()
     );
     println!("Tallying is permissionless and may be run by anybody.");
