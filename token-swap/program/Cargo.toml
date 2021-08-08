@@ -31,6 +31,7 @@ sim =  { path = "./sim" }
 roots = "0.0.6"
 
 [lib]
+name = "spl_token_swap"
 crate-type = ["cdylib", "lib"]
 
 [package.metadata.docs.rs]
