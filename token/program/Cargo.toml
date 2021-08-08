@@ -23,6 +23,7 @@ thiserror = "1.0"
 safecoin-sdk = "1.6.16"
 
 [lib]
+name = "spl_token"
 crate-type = ["cdylib", "lib"]
 
 [package.metadata.docs.rs]

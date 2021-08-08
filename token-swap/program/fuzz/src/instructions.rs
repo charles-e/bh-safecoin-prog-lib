@@ -2,7 +2,7 @@ use {
     arbitrary::Arbitrary,
     honggfuzz::fuzz,
     spl_math::precise_number::PreciseNumber,
-    safe_token::error::TokenError,
+    spl_token::error::TokenError,
     spl_token_id_swap::{
         curve::{
             base::{CurveType, SwapCurve},

@@ -38,7 +38,7 @@ async fn test_success() {
 
     let sol_user_liquidity_account = create_and_mint_to_token_account(
         &mut banks_client,
-        safe_token::native_mint::id(),
+        spl_token::native_mint::id(),
         None,
         &payer,
         user_accounts_owner.pubkey(),
@@ -53,7 +53,7 @@ async fn test_success() {
         &sol_oracle,
         RESERVE_AMOUNT,
         TEST_RESERVE_CONFIG,
-        safe_token::native_mint::id(),
+        spl_token::native_mint::id(),
         sol_user_liquidity_account,
         &payer,
         &user_accounts_owner,
@@ -163,7 +163,7 @@ async fn test_invalid_fees() {
 
     let sol_user_liquidity_account = create_and_mint_to_token_account(
         &mut banks_client,
-        safe_token::native_mint::id(),
+        spl_token::native_mint::id(),
         None,
         &payer,
         user_accounts_owner.pubkey(),
@@ -188,7 +188,7 @@ async fn test_invalid_fees() {
                 &sol_oracle,
                 RESERVE_AMOUNT,
                 config,
-                safe_token::native_mint::id(),
+                spl_token::native_mint::id(),
                 sol_user_liquidity_account,
                 &payer,
                 &user_accounts_owner,
@@ -219,7 +219,7 @@ async fn test_invalid_fees() {
                 &sol_oracle,
                 RESERVE_AMOUNT,
                 config,
-                safe_token::native_mint::id(),
+                spl_token::native_mint::id(),
                 sol_user_liquidity_account,
                 &payer,
                 &user_accounts_owner,

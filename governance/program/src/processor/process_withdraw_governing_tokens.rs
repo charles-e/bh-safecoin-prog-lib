@@ -15,7 +15,7 @@ use crate::{
             get_token_owner_record_address_seeds, get_token_owner_record_data_for_seeds,
         },
     },
-    tools::safe_token::{get_spl_token_id_mint, transfer_safe_tokens_signed},
+    tools::spl_token::{get_spl_token_mint, transfer_spl_tokens_signed},
 };
 
 /// Processes WithdrawGoverningTokens instruction
@@ -37,7 +37,7 @@ pub fn process_withdraw_governing_tokens(
     }
 
     let realm_data = get_realm_data(realm_info)?;
-    let governing_token_mint = get_spl_token_id_mint(governing_token_holding_info)?;
+    let governing_token_mint = get_spl_token_mint(governing_token_holding_info)?;
 
     let token_owner_record_address_seeds = get_token_owner_record_address_seeds(
         realm_info.key,
@@ -54,7 +54,7 @@ pub fn process_withdraw_governing_tokens(
         return Err(GovernanceError::AllVotesMustBeRelinquishedToWithdrawGoverningTokens.into());
     }
 
-    transfer_safe_tokens_signed(
+    transfer_spl_tokens_signed(
         &governing_token_holding_info,
         &governing_token_destination_info,
         &realm_info,

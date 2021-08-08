@@ -48,7 +48,7 @@ async fn test_withdraw_fixed_amount() {
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,
@@ -281,7 +281,7 @@ async fn test_withdraw_too_large() {
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,

@@ -9,7 +9,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use safe_token::instruction::approve;
+use spl_token::instruction::approve;
 use spl_token_id_lending::{
     instruction::redeem_reserve_collateral, processor::process_instruction,
     state::INITIAL_COLLATERAL_RATIO,
@@ -56,7 +56,7 @@ async fn test_success() {
     let mut transaction = Transaction::new_with_payer(
         &[
             approve(
-                &safe_token::id(),
+                &spl_token::id(),
                 &usdc_test_reserve.user_collateral_pubkey,
                 &user_transfer_authority.pubkey(),
                 &user_accounts_owner.pubkey(),

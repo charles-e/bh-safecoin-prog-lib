@@ -58,7 +58,7 @@ async fn test_success() {
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
             liquidity_mint_decimals: 9,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: reserve_config,
             slots_elapsed: 1, // elapsed from 1; clock.slot = 2
             ..AddReserveArgs::default()

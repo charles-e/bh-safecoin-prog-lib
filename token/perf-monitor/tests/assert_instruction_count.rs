@@ -14,7 +14,7 @@ use solana_sdk::{
     pubkey::Pubkey,
     sysvar::rent::{self, Rent},
 };
-use safe_token::{
+use spl_token::{
     instruction::TokenInstruction,
     state::{Account, Mint},
 };
@@ -34,7 +34,7 @@ fn run_program(
     instruction_data: &[u8],
 ) -> u64 {
     let program_account = SafecoinAccount {
-        data: load_program("../../target/deploy/safe_token.so"),
+        data: load_program("../../target/deploy/spl_token.so"),
         ..SafecoinAccount::default()
     };
     let loader_id = bpf_loader::id();

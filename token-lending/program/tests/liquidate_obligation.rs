@@ -9,7 +9,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use safe_token::instruction::approve;
+use spl_token::instruction::approve;
 use spl_token_id_lending::{
     instruction::{liquidate_obligation, refresh_obligation},
     processor::process_instruction,
@@ -56,7 +56,7 @@ async fn test_success() {
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,
@@ -108,7 +108,7 @@ async fn test_success() {
     let mut transaction = Transaction::new_with_payer(
         &[
             approve(
-                &safe_token::id(),
+                &spl_token::id(),
                 &usdc_test_reserve.user_liquidity_pubkey,
                 &user_transfer_authority.pubkey(),
                 &user_accounts_owner.pubkey(),

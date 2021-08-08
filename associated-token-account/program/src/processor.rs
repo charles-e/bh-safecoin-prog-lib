@@ -51,7 +51,7 @@ pub fn process_instruction(
     // Fund the associated token account with the minimum balance to be rent exempt
     let rent = &Rent::from_account_info(rent_sysvar_info)?;
     let required_lamports = rent
-        .minimum_balance(safe_token::state::Account::LEN)
+        .minimum_balance(spl_token::state::Account::LEN)
         .max(1)
         .saturating_sub(associated_token_account_info.lamports());
 
@@ -78,7 +78,7 @@ pub fn process_instruction(
     invoke_signed(
         &system_instruction::allocate(
             associated_token_account_info.key,
-            safe_token::state::Account::LEN as u64,
+            spl_token::state::Account::LEN as u64,
         ),
         &[
             associated_token_account_info.clone(),
@@ -99,7 +99,7 @@ pub fn process_instruction(
 
     msg!("Initialize the associated token account");
     invoke(
-        &safe_token::instruction::initialize_account(
+        &spl_token::instruction::initialize_account(
             &spl_token_id_program_id,
             associated_token_account_info.key,
             spl_token_id_mint_info.key,

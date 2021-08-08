@@ -123,7 +123,7 @@ pub fn propose(
             AccountMeta::new(acceptance_token_address, false),
             AccountMeta::new(feature_id_address, false),
             AccountMeta::new_readonly(solana_program::system_program::id(), false),
-            AccountMeta::new_readonly(safe_token::id(), false),
+            AccountMeta::new_readonly(spl_token::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
         data: FeatureProposalInstruction::Propose {

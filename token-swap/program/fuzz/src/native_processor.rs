@@ -16,7 +16,7 @@ impl program_stubs::SyscallStubs for TestSyscallStubs {
         let mut new_account_infos = vec![];
 
         // mimic check for token program in accounts
-        if !account_infos.iter().any(|x| *x.key == safe_token::id()) {
+        if !account_infos.iter().any(|x| *x.key == spl_token::id()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -36,7 +36,7 @@ impl program_stubs::SyscallStubs for TestSyscallStubs {
             }
         }
 
-        safe_token::processor::Processor::process(
+        spl_token::processor::Processor::process(
             &instruction.program_id,
             &new_account_infos,
             &instruction.data,
@@ -73,7 +73,7 @@ pub fn do_process_instruction(instruction: Instruction, accounts: &[AccountInfo]
             &instruction.data,
         )
     } else {
-        safe_token::processor::Processor::process(
+        spl_token::processor::Processor::process(
             &instruction.program_id,
             &account_infos,
             &instruction.data,

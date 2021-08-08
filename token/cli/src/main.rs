@@ -37,7 +37,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use safe_associated_token_account::*;
-use safe_token::{
+use spl_token::{
     self,
     instruction::*,
     native_mint,
@@ -282,10 +282,10 @@ fn command_create_token(
             &token,
             minimum_balance_for_rent_exemption,
             Mint::LEN as u64,
-            &safe_token::id(),
+            &spl_token::id(),
         ),
         initialize_mint(
-            &safe_token::id(),
+            &spl_token::id(),
             &token,
             &authority,
             freeze_authority_pubkey.as_ref(),
@@ -326,9 +326,9 @@ fn command_create_account(
                     &account,
                     minimum_balance_for_rent_exemption,
                     Account::LEN as u64,
-                    &safe_token::id(),
+                    &spl_token::id(),
                 ),
-                initialize_account(&safe_token::id(), &account, &token, &owner)?,
+                initialize_account(&spl_token::id(), &account, &token, &owner)?,
             ],
         )
     } else {
@@ -390,10 +390,10 @@ fn command_create_multisig(
             &multisig,
             minimum_balance_for_rent_exemption,
             Multisig::LEN as u64,
-            &safe_token::id(),
+            &spl_token::id(),
         ),
         initialize_multisig(
-            &safe_token::id(),
+            &spl_token::id(),
             &multisig,
             multisig_members.iter().collect::<Vec<_>>().as_slice(),
             minimum_signers,
@@ -484,7 +484,7 @@ fn command_authorize(
     );
 
     let instructions = vec![set_authority(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         new_authority.as_ref(),
         authority_type,
@@ -552,7 +552,7 @@ fn command_transfer(
     };
     let (mint_pubkey, decimals) = resolve_mint_info(config, &sender, Some(token), mint_decimals)?;
     let maybe_transfer_balance =
-        ui_amount.map(|ui_amount| safe_token::ui_amount_to_amount(ui_amount, decimals));
+        ui_amount.map(|ui_amount| spl_token::ui_amount_to_amount(ui_amount, decimals));
     let transfer_balance = if !config.sign_only {
         let sender_token_amount = config
             .rpc_client
@@ -573,7 +573,7 @@ fn command_transfer(
         let transfer_balance = maybe_transfer_balance.unwrap_or(sender_balance);
         println!(
             "Transfer {} tokens\n  Sender: {}\n  Recipient: {}",
-            safe_token::amount_to_ui_amount(transfer_balance, decimals),
+            spl_token::amount_to_ui_amount(transfer_balance, decimals),
             sender,
             recipient
         );
@@ -600,7 +600,7 @@ fn command_transfer(
             .rpc_client
             .get_account_with_commitment(&recipient, config.rpc_client.commitment())?
             .value
-            .map(|account| account.owner == safe_token::id() && account.data.len() == Account::LEN);
+            .map(|account| account.owner == spl_token::id() && account.data.len() == Account::LEN);
 
         if recipient_account_info.is_none() && !allow_unfunded_recipient {
             return Err("Error: The recipient address is not funded. \
@@ -632,7 +632,7 @@ fn command_transfer(
             {
                 if recipient_token_account_data.owner == system_program::id() {
                     true
-                } else if recipient_token_account_data.owner == safe_token::id() {
+                } else if recipient_token_account_data.owner == spl_token::id() {
                     false
                 } else {
                     return Err(
@@ -674,7 +674,7 @@ fn command_transfer(
     }
 
     instructions.push(transfer_checked(
-        &safe_token::id(),
+        &spl_token::id(),
         &sender,
         &mint_pubkey,
         &recipient_token_account,
@@ -700,10 +700,10 @@ fn command_burn(
     println!("Burn {} tokens\n  Source: {}", ui_amount, source);
 
     let (mint_pubkey, decimals) = resolve_mint_info(config, &source, mint_address, mint_decimals)?;
-    let amount = safe_token::ui_amount_to_amount(ui_amount, decimals);
+    let amount = spl_token::ui_amount_to_amount(ui_amount, decimals);
 
     let instructions = vec![burn_checked(
-        &safe_token::id(),
+        &spl_token::id(),
         &source,
         &mint_pubkey,
         &source_owner,
@@ -728,10 +728,10 @@ fn command_mint(
     );
 
     let (_, decimals) = resolve_mint_info(config, &recipient, None, mint_decimals)?;
-    let amount = safe_token::ui_amount_to_amount(ui_amount, decimals);
+    let amount = spl_token::ui_amount_to_amount(ui_amount, decimals);
 
     let instructions = vec![mint_to_checked(
-        &safe_token::id(),
+        &spl_token::id(),
         &token,
         &recipient,
         &mint_authority,
@@ -753,7 +753,7 @@ fn command_freeze(
     println!("Freezing account: {}\n  Token: {}", account, token);
 
     let instructions = vec![freeze_account(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         &token,
         &freeze_authority,
@@ -773,7 +773,7 @@ fn command_thaw(
     println!("Freezing account: {}\n  Token: {}", account, token);
 
     let instructions = vec![thaw_account(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         &token,
         &freeze_authority,
@@ -798,10 +798,10 @@ fn command_wrap(
                 &wrapped_sol_account,
                 lamports,
                 Account::LEN as u64,
-                &safe_token::id(),
+                &spl_token::id(),
             ),
             initialize_account(
-                &safe_token::id(),
+                &spl_token::id(),
                 &wrapped_sol_account,
                 &native_mint::id(),
                 &wallet_address,
@@ -857,7 +857,7 @@ fn command_unwrap(
     println!("  Recipient: {}", &wallet_address);
 
     let instructions = vec![close_account(
-        &safe_token::id(),
+        &spl_token::id(),
         &address,
         &wallet_address,
         &wallet_address,
@@ -881,10 +881,10 @@ fn command_approve(
     );
 
     let (mint_pubkey, decimals) = resolve_mint_info(config, &account, mint_address, mint_decimals)?;
-    let amount = safe_token::ui_amount_to_amount(ui_amount, decimals);
+    let amount = spl_token::ui_amount_to_amount(ui_amount, decimals);
 
     let instructions = vec![approve_checked(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         &mint_pubkey,
         &delegate,
@@ -927,7 +927,7 @@ fn command_revoke(
     }
 
     let instructions = vec![revoke(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         &owner,
         &config.multisigner_pubkeys,
@@ -968,7 +968,7 @@ fn command_close(
     }
 
     let instructions = vec![close_account(
-        &safe_token::id(),
+        &spl_token::id(),
         &account,
         &recipient,
         &close_authority,
@@ -1008,7 +1008,7 @@ fn command_accounts(config: &Config, token: Option<Pubkey>, owner: Pubkey) -> Co
         &owner,
         match token {
             Some(token) => TokenAccountsFilter::Mint(token),
-            None => TokenAccountsFilter::ProgramId(safe_token::id()),
+            None => TokenAccountsFilter::ProgramId(spl_token::id()),
         },
     )?;
     if accounts.is_empty() {
@@ -1210,7 +1210,7 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
     println!("Fetching token accounts");
     let accounts = config
         .rpc_client
-        .get_token_accounts_by_owner(&owner, TokenAccountsFilter::ProgramId(safe_token::id()))?;
+        .get_token_accounts_by_owner(&owner, TokenAccountsFilter::ProgramId(spl_token::id()))?;
     if accounts.is_empty() {
         println!("Nothing to do");
         return Ok(None);
@@ -1302,7 +1302,7 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
             // Transfer the account balance into the associated token account
             if amount > 0 {
                 account_instructions.push(transfer_checked(
-                    &safe_token::id(),
+                    &spl_token::id(),
                     &address,
                     &token,
                     &associated_token_account,
@@ -1315,7 +1315,7 @@ fn command_gc(config: &Config, owner: Pubkey) -> CommandResult {
             // Close the account if config.owner is able to
             if close_authority == owner {
                 account_instructions.push(close_account(
-                    &safe_token::id(),
+                    &spl_token::id(),
                     &address,
                     &owner,
                     &owner,

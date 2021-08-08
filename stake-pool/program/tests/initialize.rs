@@ -225,7 +225,7 @@ async fn fail_with_wrong_max_validators() {
                 &stake_pool_accounts.reserve_stake.pubkey(),
                 &stake_pool_accounts.pool_mint.pubkey(),
                 &stake_pool_accounts.pool_fee_account.pubkey(),
-                &safe_token::id(),
+                &spl_token::id(),
                 None,
                 stake_pool_accounts.fee,
                 stake_pool_accounts.max_validators,
@@ -335,13 +335,13 @@ async fn fail_with_wrong_token_program_id() {
 
     let rent = banks_client.get_rent().await.unwrap();
 
-    let account_rent = rent.minimum_balance(safe_token::state::Account::LEN);
+    let account_rent = rent.minimum_balance(spl_token::state::Account::LEN);
     let mut transaction = Transaction::new_with_payer(
         &[system_instruction::create_account(
             &payer.pubkey(),
             &stake_pool_accounts.pool_fee_account.pubkey(),
             account_rent,
-            safe_token::state::Account::LEN as u64,
+            spl_token::state::Account::LEN as u64,
             &wrong_token_program.pubkey(),
         )],
         Some(&payer.pubkey()),
@@ -432,14 +432,14 @@ async fn fail_with_wrong_fee_account() {
     .await
     .unwrap();
     let rent = banks_client.get_rent().await.unwrap();
-    let account_rent = rent.minimum_balance(safe_token::state::Account::LEN);
+    let account_rent = rent.minimum_balance(spl_token::state::Account::LEN);
 
     let mut transaction = Transaction::new_with_payer(
         &[system_instruction::create_account(
             &payer.pubkey(),
             &stake_pool_accounts.pool_fee_account.pubkey(),
             account_rent,
-            safe_token::state::Account::LEN as u64,
+            spl_token::state::Account::LEN as u64,
             &Keypair::new().pubkey(),
         )],
         Some(&payer.pubkey()),
@@ -548,7 +548,7 @@ async fn fail_with_not_rent_exempt_pool() {
                 &stake_pool_accounts.reserve_stake.pubkey(),
                 &stake_pool_accounts.pool_mint.pubkey(),
                 &stake_pool_accounts.pool_fee_account.pubkey(),
-                &safe_token::id(),
+                &spl_token::id(),
                 None,
                 stake_pool_accounts.fee,
                 stake_pool_accounts.max_validators,
@@ -622,7 +622,7 @@ async fn fail_with_not_rent_exempt_validator_list() {
                 &stake_pool_accounts.reserve_stake.pubkey(),
                 &stake_pool_accounts.pool_mint.pubkey(),
                 &stake_pool_accounts.pool_fee_account.pubkey(),
-                &safe_token::id(),
+                &spl_token::id(),
                 None,
                 stake_pool_accounts.fee,
                 stake_pool_accounts.max_validators,
@@ -689,7 +689,7 @@ async fn fail_without_manager_signature() {
         AccountMeta::new_readonly(stake_pool_accounts.pool_fee_account.pubkey(), false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
-        AccountMeta::new_readonly(safe_token::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
     ];
     let stake_pool_init_instruction = Instruction {
         program_id: id(),

@@ -127,10 +127,10 @@ fn command_create_pool(
         + 1;
     let mint_account_balance = config
         .rpc_client
-        .get_minimum_balance_for_rent_exemption(safe_token::state::Mint::LEN)?;
+        .get_minimum_balance_for_rent_exemption(spl_token::state::Mint::LEN)?;
     let pool_fee_account_balance = config
         .rpc_client
-        .get_minimum_balance_for_rent_exemption(safe_token::state::Account::LEN)?;
+        .get_minimum_balance_for_rent_exemption(spl_token::state::Account::LEN)?;
     let stake_pool_account_lamports = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(get_packed_len::<StakePool>())?;
@@ -145,7 +145,7 @@ fn command_create_pool(
         + stake_pool_account_lamports
         + validator_list_balance;
 
-    let default_decimals = safe_token::native_mint::DECIMALS;
+    let default_decimals = spl_token::native_mint::DECIMALS;
 
     // Calculate withdraw authority used for minting pool tokens
     let (withdraw_authority, _) = find_withdraw_authority_program_address(
@@ -180,28 +180,28 @@ fn command_create_pool(
                 &config.fee_payer.pubkey(),
                 &mint_keypair.pubkey(),
                 mint_account_balance,
-                safe_token::state::Mint::LEN as u64,
-                &safe_token::id(),
+                spl_token::state::Mint::LEN as u64,
+                &spl_token::id(),
             ),
             // Account for the pool fee accumulation
             system_instruction::create_account(
                 &config.fee_payer.pubkey(),
                 &pool_fee_account.pubkey(),
                 pool_fee_account_balance,
-                safe_token::state::Account::LEN as u64,
-                &safe_token::id(),
+                spl_token::state::Account::LEN as u64,
+                &spl_token::id(),
             ),
             // Initialize pool token mint account
-            safe_token::instruction::initialize_mint(
-                &safe_token::id(),
+            spl_token::instruction::initialize_mint(
+                &spl_token::id(),
                 &mint_keypair.pubkey(),
                 &withdraw_authority,
                 None,
                 default_decimals,
             )?,
             // Initialize fee receiver account
-            safe_token::instruction::initialize_account(
-                &safe_token::id(),
+            spl_token::instruction::initialize_account(
+                &spl_token::id(),
                 &pool_fee_account.pubkey(),
                 &mint_keypair.pubkey(),
                 &config.manager.pubkey(),
@@ -238,7 +238,7 @@ fn command_create_pool(
                 &reserve_stake.pubkey(),
                 &mint_keypair.pubkey(),
                 &pool_fee_account.pubkey(),
-                &safe_token::id(),
+                &spl_token::id(),
                 deposit_authority,
                 fee,
                 max_validators,
@@ -508,7 +508,7 @@ fn add_associated_token_account(
 
         let min_account_balance = config
             .rpc_client
-            .get_minimum_balance_for_rent_exemption(safe_token::state::Account::LEN)
+            .get_minimum_balance_for_rent_exemption(spl_token::state::Account::LEN)
             .unwrap();
 
         instructions.push(create_associated_token_account(
@@ -598,7 +598,7 @@ fn command_deposit(
             &validator_stake_account,
             &token_receiver,
             &stake_pool.pool_mint,
-            &safe_token::id(),
+            &spl_token::id(),
         )
     } else {
         spl_stake_pool::instruction::deposit(
@@ -611,7 +611,7 @@ fn command_deposit(
             &validator_stake_account,
             &token_receiver,
             &stake_pool.pool_mint,
-            &safe_token::id(),
+            &spl_token::id(),
         )
     };
 
@@ -662,7 +662,7 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
     );
     println!(
         "Total Pool Tokens: {}",
-        safe_token::amount_to_ui_amount(stake_pool.pool_token_supply, pool_mint.decimals)
+        spl_token::amount_to_ui_amount(stake_pool.pool_token_supply, pool_mint.decimals)
     );
 
     if config.verbose {
@@ -692,7 +692,7 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
         if pool_mint.supply != stake_pool.pool_token_supply {
             println!(
                 "BUG! Pool Tokens supply mismatch.  Pool mint reports {}",
-                safe_token::amount_to_ui_amount(pool_mint.supply, pool_mint.decimals)
+                spl_token::amount_to_ui_amount(pool_mint.supply, pool_mint.decimals)
             );
         }
     }
@@ -794,7 +794,7 @@ fn prepare_withdraw_accounts(
     if remaining_amount > 0 {
         return Err(format!(
             "No stake accounts found in this pool with enough balance to withdraw {} pool tokens.",
-            safe_token::amount_to_ui_amount(pool_amount, pool_mint.decimals)
+            spl_token::amount_to_ui_amount(pool_amount, pool_mint.decimals)
         )
         .into());
     }
@@ -817,7 +817,7 @@ fn command_withdraw(
 
     let stake_pool = get_stake_pool(&config.rpc_client, stake_pool_address)?;
     let pool_mint = get_token_mint(&config.rpc_client, &stake_pool.pool_mint)?;
-    let pool_amount = safe_token::ui_amount_to_amount(pool_amount, pool_mint.decimals);
+    let pool_amount = spl_token::ui_amount_to_amount(pool_amount, pool_mint.decimals);
 
     let pool_withdraw_authority =
         find_withdraw_authority_program_address(&spl_stake_pool::id(), stake_pool_address).0;
@@ -836,8 +836,8 @@ fn command_withdraw(
     if token_account.amount < pool_amount {
         return Err(format!(
             "Not enough token balance to withdraw {} pool tokens.\nMaximum withdraw amount is {} pool tokens.",
-            safe_token::amount_to_ui_amount(pool_amount, pool_mint.decimals),
-            safe_token::amount_to_ui_amount(token_account.amount, pool_mint.decimals)
+            spl_token::amount_to_ui_amount(pool_amount, pool_mint.decimals),
+            spl_token::amount_to_ui_amount(token_account.amount, pool_mint.decimals)
         )
         .into());
     }
@@ -890,8 +890,8 @@ fn command_withdraw(
 
     instructions.push(
         // Approve spending token
-        safe_token::instruction::approve(
-            &safe_token::id(),
+        spl_token::instruction::approve(
+            &spl_token::id(),
             &pool_token_account,
             &user_transfer_authority.pubkey(),
             &config.token_owner.pubkey(),
@@ -916,7 +916,7 @@ fn command_withdraw(
             "Withdrawing from account {}, amount {}, {} pool tokens",
             withdraw_account.address,
             Safe(sol_withdraw_amount),
-            safe_token::amount_to_ui_amount(withdraw_account.pool_amount, pool_mint.decimals),
+            spl_token::amount_to_ui_amount(withdraw_account.pool_amount, pool_mint.decimals),
         );
 
         if stake_receiver.is_none() {
@@ -959,7 +959,7 @@ fn command_withdraw(
             &user_transfer_authority.pubkey(),
             &pool_token_account,
             &stake_pool.pool_mint,
-            &safe_token::id(),
+            &spl_token::id(),
             withdraw_account.pool_amount,
         ));
     }

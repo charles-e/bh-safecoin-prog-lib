@@ -11,7 +11,7 @@ use solana_sdk::{
     system_instruction::create_account,
     transaction::Transaction,
 };
-use safe_token::{instruction::approve, solana_program::program_pack::Pack};
+use spl_token::{instruction::approve, solana_program::program_pack::Pack};
 use spl_token_id_lending::{
     instruction::{
         borrow_obligation_liquidity, deposit_obligation_collateral, init_obligation,
@@ -67,7 +67,7 @@ async fn test_success() {
         AddReserveArgs {
             user_liquidity_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
             liquidity_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             ..AddReserveArgs::default()
@@ -130,7 +130,7 @@ async fn test_success() {
             ),
             // 3
             approve(
-                &safe_token::id(),
+                &spl_token::id(),
                 &sol_test_reserve.user_collateral_pubkey,
                 &user_transfer_authority_pubkey,
                 &user_accounts_owner_pubkey,
@@ -189,7 +189,7 @@ async fn test_success() {
             ),
             // 10
             approve(
-                &safe_token::id(),
+                &spl_token::id(),
                 &usdc_test_reserve.user_liquidity_pubkey,
                 &user_transfer_authority_pubkey,
                 &user_accounts_owner_pubkey,

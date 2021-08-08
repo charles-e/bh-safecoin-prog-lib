@@ -25,8 +25,8 @@ use solana_program::{
     pubkey::Pubkey,
     sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
-use safe_token::solana_program::instruction::AccountMeta;
-use safe_token::state::{Account, Mint};
+use spl_token::solana_program::instruction::AccountMeta;
+use spl_token::state::{Account, Mint};
 use std::convert::TryInto;
 
 /// Processes an instruction
@@ -1720,7 +1720,7 @@ fn assert_uninitialized<T: Pack + IsInitialized>(
     }
 }
 
-/// Unpacks a safe_token `Mint`.
+/// Unpacks a spl_token `Mint`.
 fn unpack_mint(data: &[u8]) -> Result<Mint, LendingError> {
     Mint::unpack(data).map_err(|_| LendingError::InvalidTokenMint)
 }
@@ -1818,7 +1818,7 @@ fn get_pyth_price(pyth_price_info: &AccountInfo, clock: &Clock) -> Result<Decima
     Ok(market_price)
 }
 
-/// Issue a safe_token `InitializeAccount` instruction.
+/// Issue a spl_token `InitializeAccount` instruction.
 #[inline(always)]
 fn spl_token_id_init_account(params: TokenInitializeAccountParams<'_>) -> ProgramResult {
     let TokenInitializeAccountParams {
@@ -1828,7 +1828,7 @@ fn spl_token_id_init_account(params: TokenInitializeAccountParams<'_>) -> Progra
         rent,
         token_program,
     } = params;
-    let ix = safe_token::instruction::initialize_account(
+    let ix = spl_token::instruction::initialize_account(
         token_program.key,
         account.key,
         mint.key,
@@ -1838,7 +1838,7 @@ fn spl_token_id_init_account(params: TokenInitializeAccountParams<'_>) -> Progra
     result.map_err(|_| LendingError::TokenInitializeAccountFailed.into())
 }
 
-/// Issue a safe_token `InitializeMint` instruction.
+/// Issue a spl_token `InitializeMint` instruction.
 #[inline(always)]
 fn spl_token_id_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramResult {
     let TokenInitializeMintParams {
@@ -1848,7 +1848,7 @@ fn spl_token_id_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramR
         token_program,
         decimals,
     } = params;
-    let ix = safe_token::instruction::initialize_mint(
+    let ix = spl_token::instruction::initialize_mint(
         token_program.key,
         mint.key,
         authority,
@@ -1859,7 +1859,7 @@ fn spl_token_id_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramR
     result.map_err(|_| LendingError::TokenInitializeMintFailed.into())
 }
 
-/// Issue a safe_token `Transfer` instruction.
+/// Issue a spl_token `Transfer` instruction.
 #[inline(always)]
 fn spl_token_id_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
     let TokenTransferParams {
@@ -1871,7 +1871,7 @@ fn spl_token_id_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
         authority_signer_seeds,
     } = params;
     let result = invoke_signed(
-        &safe_token::instruction::transfer(
+        &spl_token::instruction::transfer(
             token_program.key,
             source.key,
             destination.key,
@@ -1885,7 +1885,7 @@ fn spl_token_id_transfer(params: TokenTransferParams<'_, '_>) -> ProgramResult {
     result.map_err(|_| LendingError::TokenTransferFailed.into())
 }
 
-/// Issue a safe_token `MintTo` instruction.
+/// Issue a spl_token `MintTo` instruction.
 fn spl_token_id_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
     let TokenMintToParams {
         mint,
@@ -1896,7 +1896,7 @@ fn spl_token_id_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
         authority_signer_seeds,
     } = params;
     let result = invoke_signed(
-        &safe_token::instruction::mint_to(
+        &spl_token::instruction::mint_to(
             token_program.key,
             mint.key,
             destination.key,
@@ -1910,7 +1910,7 @@ fn spl_token_id_mint_to(params: TokenMintToParams<'_, '_>) -> ProgramResult {
     result.map_err(|_| LendingError::TokenMintToFailed.into())
 }
 
-/// Issue a safe_token `Burn` instruction.
+/// Issue a spl_token `Burn` instruction.
 #[inline(always)]
 fn spl_token_id_burn(params: TokenBurnParams<'_, '_>) -> ProgramResult {
     let TokenBurnParams {
@@ -1922,7 +1922,7 @@ fn spl_token_id_burn(params: TokenBurnParams<'_, '_>) -> ProgramResult {
         authority_signer_seeds,
     } = params;
     let result = invoke_signed(
-        &safe_token::instruction::burn(
+        &spl_token::instruction::burn(
             token_program.key,
             source.key,
             mint.key,

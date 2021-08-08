@@ -10,7 +10,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::{Transaction, TransactionError},
 };
-use safe_token::solana_program::instruction::InstructionError;
+use spl_token::solana_program::instruction::InstructionError;
 use spl_token_id_lending::{
     error::LendingError, instruction::flash_loan, processor::process_instruction,
 };

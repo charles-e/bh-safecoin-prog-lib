@@ -117,9 +117,9 @@ pub fn process_instruction(
                 &system_instruction::create_account(
                     funder_info.key,
                     mint_info.key,
-                    1.max(rent.minimum_balance(safe_token::state::Mint::get_packed_len())),
-                    safe_token::state::Mint::get_packed_len() as u64,
-                    &safe_token::id(),
+                    1.max(rent.minimum_balance(spl_token::state::Mint::get_packed_len())),
+                    spl_token::state::Mint::get_packed_len() as u64,
+                    &spl_token::id(),
                 ),
                 &[
                     funder_info.clone(),
@@ -131,12 +131,12 @@ pub fn process_instruction(
 
             msg!("Initializing mint");
             invoke(
-                &safe_token::instruction::initialize_mint(
-                    &safe_token::id(),
+                &spl_token::instruction::initialize_mint(
+                    &spl_token::id(),
                     mint_info.key,
                     mint_info.key,
                     None,
-                    safe_token::native_mint::DECIMALS,
+                    spl_token::native_mint::DECIMALS,
                 )?,
                 &[
                     mint_info.clone(),
@@ -150,9 +150,9 @@ pub fn process_instruction(
                 &system_instruction::create_account(
                     funder_info.key,
                     distributor_token_info.key,
-                    1.max(rent.minimum_balance(safe_token::state::Account::get_packed_len())),
-                    safe_token::state::Account::get_packed_len() as u64,
-                    &safe_token::id(),
+                    1.max(rent.minimum_balance(spl_token::state::Account::get_packed_len())),
+                    spl_token::state::Account::get_packed_len() as u64,
+                    &spl_token::id(),
                 ),
                 &[
                     funder_info.clone(),
@@ -164,8 +164,8 @@ pub fn process_instruction(
 
             msg!("Initializing distributor token account");
             invoke(
-                &safe_token::instruction::initialize_account(
-                    &safe_token::id(),
+                &spl_token::instruction::initialize_account(
+                    &spl_token::id(),
                     distributor_token_info.key,
                     mint_info.key,
                     feature_proposal_info.key,
@@ -184,9 +184,9 @@ pub fn process_instruction(
                 &system_instruction::create_account(
                     funder_info.key,
                     acceptance_token_info.key,
-                    1.max(rent.minimum_balance(safe_token::state::Account::get_packed_len())),
-                    safe_token::state::Account::get_packed_len() as u64,
-                    &safe_token::id(),
+                    1.max(rent.minimum_balance(spl_token::state::Account::get_packed_len())),
+                    spl_token::state::Account::get_packed_len() as u64,
+                    &spl_token::id(),
                 ),
                 &[
                     funder_info.clone(),
@@ -198,8 +198,8 @@ pub fn process_instruction(
 
             msg!("Initializing acceptance token account");
             invoke(
-                &safe_token::instruction::initialize_account(
-                    &safe_token::id(),
+                &spl_token::instruction::initialize_account(
+                    &spl_token::id(),
                     acceptance_token_info.key,
                     mint_info.key,
                     feature_proposal_info.key,
@@ -213,11 +213,11 @@ pub fn process_instruction(
                 ],
             )?;
             invoke(
-                &safe_token::instruction::set_authority(
-                    &safe_token::id(),
+                &spl_token::instruction::set_authority(
+                    &spl_token::id(),
                     acceptance_token_info.key,
                     Some(&feature_proposal_info.key),
-                    safe_token::instruction::AuthorityType::CloseAccount,
+                    spl_token::instruction::AuthorityType::CloseAccount,
                     feature_proposal_info.key,
                     &[],
                 )?,
@@ -228,11 +228,11 @@ pub fn process_instruction(
                 ],
             )?;
             invoke(
-                &safe_token::instruction::set_authority(
-                    &safe_token::id(),
+                &spl_token::instruction::set_authority(
+                    &spl_token::id(),
                     acceptance_token_info.key,
                     Some(&program_id),
-                    safe_token::instruction::AuthorityType::AccountOwner,
+                    spl_token::instruction::AuthorityType::AccountOwner,
                     feature_proposal_info.key,
                     &[],
                 )?,
@@ -247,8 +247,8 @@ pub fn process_instruction(
             // `feature_proposal`
             msg!("Minting {} tokens", tokens_to_mint);
             invoke_signed(
-                &safe_token::instruction::mint_to(
-                    &safe_token::id(),
+                &spl_token::instruction::mint_to(
+                    &spl_token::id(),
                     mint_info.key,
                     distributor_token_info.key,
                     mint_info.key,
@@ -333,7 +333,7 @@ pub fn process_instruction(
 
                     msg!("Unpacking acceptance token account");
                     let acceptance_token =
-                        safe_token::state::Account::unpack(&acceptance_token_info.data.borrow())?;
+                        spl_token::state::Account::unpack(&acceptance_token_info.data.borrow())?;
 
                     msg!(
                             "Feature proposal has received {} tokens, and {} tokens required for acceptance",

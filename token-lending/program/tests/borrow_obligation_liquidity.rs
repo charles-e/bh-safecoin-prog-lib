@@ -53,7 +53,7 @@ async fn test_borrow_usdc_fixed_amount() {
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,
@@ -217,7 +217,7 @@ async fn test_borrow_sol_max_amount() {
         &user_accounts_owner,
         AddReserveArgs {
             liquidity_amount: SAFE_RESERVE_LIQUIDITY_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,
@@ -334,7 +334,7 @@ async fn test_borrow_too_large() {
         &user_accounts_owner,
         AddReserveArgs {
             collateral_amount: SAFE_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_mint_pubkey: safe_token::native_mint::id(),
+            liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
             mark_fresh: true,

@@ -13,7 +13,7 @@ use crate::{
         governance::get_governance_data,
         proposal::get_proposal_data_for_governance_and_governing_mint,
     },
-    tools::safe_token::get_spl_token_id_mint_supply,
+    tools::spl_token::get_spl_token_mint_supply,
 };
 
 use borsh::BorshSerialize;
@@ -38,7 +38,7 @@ pub fn process_finalize_vote(_program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         governing_token_mint_info.key,
     )?;
 
-    let governing_token_supply = get_spl_token_id_mint_supply(&governing_token_mint_info)?;
+    let governing_token_supply = get_spl_token_mint_supply(&governing_token_mint_info)?;
 
     proposal_data.finalize_vote(governing_token_supply, &governance_data.config, clock.slot)?;
 
