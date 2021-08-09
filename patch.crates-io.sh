@@ -35,25 +35,25 @@ for crate in "${workspace_crates[@]}"; do
   else
     cat >> "$crate" <<PATCH
 [patch.crates-io]
-solana-account-decoder = {path = "$solana_dir/account-decoder" }
-solana-banks-client = { path = "$solana_dir/banks-client"}
-solana-banks-server = { path = "$solana_dir/banks-server"}
-solana-bpf-loader-program = { path = "$solana_dir/programs/bpf_loader" }
-solana-clap-utils = {path = "$solana_dir/clap-utils" }
-solana-cli-config = {path = "$solana_dir/cli-config" }
-solana-cli-output = {path = "$solana_dir/cli-output" }
-solana-client = { path = "$solana_dir/client"}
-solana-core = { path = "$solana_dir/core"}
-solana-logger = {path = "$solana_dir/logger" }
-solana-notifier = { path = "$solana_dir/notifier" }
-solana-remote-wallet = {path = "$solana_dir/remote-wallet" }
+safecoin-account-decoder = {path = "$solana_dir/account-decoder" }
+safecoin-banks-client = { path = "$solana_dir/banks-client"}
+safecoin-banks-server = { path = "$solana_dir/banks-server"}
+safecoin-bpf-loader-program = { path = "$solana_dir/programs/bpf_loader" }
+safecoin-clap-utils = {path = "$solana_dir/clap-utils" }
+safecoin-cli-config = {path = "$solana_dir/cli-config" }
+safecoin-cli-output = {path = "$solana_dir/cli-output" }
+safecoin-client = { path = "$solana_dir/client"}
+safecoin-core = { path = "$solana_dir/core"}
+safecoin-logger = {path = "$solana_dir/logger" }
+safecoin-notifier = { path = "$solana_dir/notifier" }
+safecoin-remote-wallet = {path = "$solana_dir/remote-wallet" }
 safecoin-program = { path = "$solana_dir/sdk/program" }
 safecoin-program-test = { path = "$solana_dir/program-test" }
-solana-runtime = { path = "$solana_dir/runtime" }
+safecoin-runtime = { path = "$solana_dir/runtime" }
 safecoin-sdk = { path = "$solana_dir/sdk" }
-solana-stake-program = { path = "$solana_dir/programs/stake" }
-solana-transaction-status = { path = "$solana_dir/transaction-status" }
-solana-vote-program = { path = "$solana_dir/programs/vote" }
+safecoin-stake-program = { path = "$solana_dir/programs/stake" }
+safecoin-transaction-status = { path = "$solana_dir/transaction-status" }
+safecoin-vote-program = { path = "$solana_dir/programs/vote" }
 PATCH
   fi
 done

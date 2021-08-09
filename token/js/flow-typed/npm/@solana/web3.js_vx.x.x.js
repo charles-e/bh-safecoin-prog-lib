@@ -900,9 +900,9 @@ declare module '@safecoin/web3.js' {
    */
   declare export type Version = {
     /**
-     * Version of solana-core
+     * Version of safecoin-core
      */
-    'solana-core': string,
+    'safecoin-core': string,
     'feature-set'?: number,
     ...
   };
@@ -2788,7 +2788,7 @@ feeCalculator: FeeCalculator,...
    */
   declare export type StakeAuthorizationType = {
     /**
-     * The Stake Authorization index (from solana-stake-program)
+     * The Stake Authorization index (from safecoin-stake-program)
      */
     index: number,
     ...
@@ -2821,9 +2821,9 @@ feeCalculator: FeeCalculator,...
     /**
      * Max space of a Stake account
      *
-     * This is generated from the solana-stake-program StakeState struct as
+     * This is generated from the safecoin-stake-program StakeState struct as
      * `std::mem::size_of::<StakeState>()`:
-     * https://docs.rs/solana-stake-program/1.4.4/solana_stake_program/stake_state/enum.StakeState.html
+     * https://docs.rs/safecoin-stake-program/1.4.4/solana_stake_program/stake_state/enum.StakeState.html
      */
     static space: number;
 

@@ -3,11 +3,11 @@ use clap::{
     ArgMatches, SubCommand,
 };
 use console::Emoji;
-use solana_account_decoder::{
+use safecoin_account_decoder::{
     parse_token::{TokenAccountType, UiAccountState},
     UiAccountData,
 };
-use solana_clap_utils::{
+use safecoin_clap_utils::{
     fee_payer::fee_payer_arg,
     input_parsers::{pubkey_of_signer, pubkeys_of_multiple_signers, value_of},
     input_validators::{
@@ -19,11 +19,11 @@ use solana_clap_utils::{
     offline::{self, *},
     ArgConstant,
 };
-use solana_cli_output::{display::println_name_value, return_signers, OutputFormat};
-use solana_client::{
+use safecoin_cli_output::{display::println_name_value, return_signers, OutputFormat};
+use safecoin_client::{
     blockhash_query::BlockhashQuery, rpc_client::RpcClient, rpc_request::TokenAccountsFilter,
 };
-use solana_remote_wallet::remote_wallet::RemoteWalletManager;
+use safecoin_remote_wallet::remote_wallet::RemoteWalletManager;
 use solana_sdk::{
     commitment_config::CommitmentConfig,
     instruction::Instruction,
@@ -1375,7 +1375,7 @@ fn main() {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *safecoin_cli_config::CONFIG_FILE {
                 arg.default_value(&config_file)
             } else {
                 arg
@@ -2114,9 +2114,9 @@ fn main() {
 
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            safecoin_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            safecoin_cli_config::Config::default()
         };
         let json_rpc_url = normalize_to_url_if_moniker(
             matches

@@ -1,8 +1,8 @@
 use {
     bincode::deserialize,
     borsh::BorshDeserialize,
-    solana_account_decoder::UiAccountEncoding,
-    solana_client::{
+    safecoin_account_decoder::UiAccountEncoding,
+    safecoin_client::{
         client_error::ClientError,
         rpc_client::RpcClient,
         rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},

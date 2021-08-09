@@ -4,11 +4,11 @@ use {
         crate_description, crate_name, crate_version, value_t_or_exit, App, AppSettings, Arg,
         SubCommand,
     },
-    solana_clap_utils::{
+    safecoin_clap_utils::{
         input_parsers::{keypair_of, pubkey_of},
         input_validators::{is_keypair, is_url, is_valid_percentage, is_valid_pubkey},
     },
-    solana_client::rpc_client::RpcClient,
+    safecoin_client::rpc_client::RpcClient,
     solana_sdk::{
         clock::UnixTimestamp,
         commitment_config::CommitmentConfig,
@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *safecoin_cli_config::CONFIG_FILE {
                 arg.default_value(&config_file)
             } else {
                 arg
@@ -142,9 +142,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            safecoin_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            safecoin_cli_config::Config::default()
         };
 
         Config {

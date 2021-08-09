@@ -20,7 +20,7 @@ safecoin-program-test = "1.6.18"
 safecoin-sdk = "1.6.18"
 
 [lib]
-name = "spl_associated_token_account"
+name = "safe_associated_token_account"
 crate-type = ["cdylib", "lib"]
 
 [package.metadata.docs.rs]

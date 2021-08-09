@@ -10,11 +10,11 @@ edition = "2018"
 [dependencies]
 chrono = "0.4.19"
 clap = "2.33.3"
-solana-clap-utils = "1.6.16"
-solana-cli-config = "1.6.16"
-solana-client = "1.6.16"
-solana-logger = "1.6.16"
-safecoin-sdk = "1.6.16"
+safecoin-clap-utils = "1.6.18"
+safecoin-cli-config = "1.6.18"
+safecoin-client = "1.6.18"
+safecoin-logger = "1.6.18"
+safecoin-sdk = "1.6.18"
 safe-feature-proposal = { version = "1.0", path = "../program", features = ["no-entrypoint"] }
 
 [[bin]]

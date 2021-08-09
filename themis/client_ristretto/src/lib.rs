@@ -260,7 +260,7 @@ pub async fn test_e2e(
 mod tests {
     use super::*;
     use solana_banks_client::start_client;
-    use solana_banks_server::banks_server::start_local_server;
+    use safecoin_banks_server::banks_server::start_local_server;
     use solana_runtime::{bank::Bank, bank_forks::BankForks};
     use solana_sdk::{
         account::Account, account_info::AccountInfo, genesis_config::create_genesis_config,

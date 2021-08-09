@@ -1,9 +1,9 @@
 use crate::get_associated_token_address;
-use solana_account_decoder::{
+use safecoin_account_decoder::{
     parse_token::{TokenAccountType, UiTokenAccount},
     UiAccountData,
 };
-use solana_client::rpc_response::RpcKeyedAccount;
+use safecoin_client::rpc_response::RpcKeyedAccount;
 use solana_sdk::pubkey::Pubkey;
 use std::{
     collections::{btree_map::Entry, BTreeMap},

@@ -13,11 +13,11 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-safecoin-program = "1.6.16"
+safecoin-program = "1.6.18"
 
 [dev-dependencies]
-safecoin-program-test = "1.6.16"
-safecoin-sdk = "1.6.16"
+safecoin-program-test = "1.6.18"
+safecoin-sdk = "1.6.18"
 
 [lib]
 crate-type = ["cdylib", "lib"]

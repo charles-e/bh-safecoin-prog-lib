@@ -9,14 +9,14 @@ use {
         crate_description, crate_name, crate_version, value_t, value_t_or_exit, App, AppSettings,
         Arg, ArgGroup, SubCommand,
     },
-    solana_clap_utils::{
+    safecoin_clap_utils::{
         input_parsers::{keypair_of, pubkey_of},
         input_validators::{
             is_amount, is_keypair, is_keypair_or_ask_keyword, is_parsable, is_pubkey, is_url,
         },
         keypair::signer_from_path,
     },
-    solana_client::rpc_client::RpcClient,
+    safecoin_client::rpc_client::RpcClient,
     solana_program::{
         borsh::get_packed_len, instruction::Instruction, program_pack::Pack, pubkey::Pubkey,
     },
@@ -84,7 +84,7 @@ fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(),
 fn send_transaction(
     config: &Config,
     transaction: Transaction,
-) -> solana_client::client_error::Result<()> {
+) -> safecoin_client::client_error::Result<()> {
     if config.dry_run {
         let result = config.rpc_client.simulate_transaction(&transaction)?;
         println!("Simulate result: {:?}", result);
@@ -1085,7 +1085,7 @@ fn main() {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *safecoin_cli_config::CONFIG_FILE {
                 arg.default_value(&config_file)
             } else {
                 arg
@@ -1619,9 +1619,9 @@ fn main() {
     let mut wallet_manager = None;
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            safecoin_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            safecoin_cli_config::Config::default()
         };
         let json_rpc_url = value_t!(matches, "json_rpc_url", String)
             .unwrap_or_else(|_| cli_config.json_rpc_url.clone());

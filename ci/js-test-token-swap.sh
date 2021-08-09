@@ -2,7 +2,7 @@
 
 set -ex
 cd "$(dirname "$0")/.."
-source ./ci/solana-version.sh install
+source ./ci/safecoin-version.sh install
 
 cd token-swap/js
 npm install

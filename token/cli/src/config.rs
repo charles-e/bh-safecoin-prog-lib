@@ -1,10 +1,10 @@
 use clap::ArgMatches;
-use solana_clap_utils::{
+use safecoin_clap_utils::{
     input_parsers::pubkey_of_signer,
     keypair::{pubkey_from_path, signer_from_path},
 };
-use solana_client::{blockhash_query::BlockhashQuery, rpc_client::RpcClient};
-use solana_remote_wallet::remote_wallet::RemoteWalletManager;
+use safecoin_client::{blockhash_query::BlockhashQuery, rpc_client::RpcClient};
+use safecoin_remote_wallet::remote_wallet::RemoteWalletManager;
 use solana_sdk::{pubkey::Pubkey, signature::Signer};
 use safe_associated_token_account::*;
 use std::{process::exit, sync::Arc};
