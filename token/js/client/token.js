@@ -25,11 +25,11 @@ import * as Layout from './layout';
 import {sendAndConfirmTransaction} from './util/send-and-confirm-transaction';
 
 export const TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
-  'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  'HMGr16f8Ct1Zeb9TGPypt9rPgzCkmhCQB8Not8vwiPW1',
 );
 
 export const ASSOCIATED_TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
-  'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+  'PUFQTv9BK3ax6bKPFnyjBTbVa3782mcfvb22TZovvrm',
 );
 
 const FAILED_TO_FIND_ACCOUNT = 'Failed to find account';
@@ -98,7 +98,7 @@ const AuthorityTypeCodes = {
 
 // The address of the special mint for wrapped native token.
 export const NATIVE_MINT: PublicKey = new PublicKey(
-  'So11111111111111111111111111111111111111112',
+  'Safe111111111111111111111111111111111111112',
 );
 
 /**

@@ -4,7 +4,7 @@
 pub const DECIMALS: u8 = 9;
 
 // The Mint for native SAFE Token accounts
-solana_program::declare_id!("So11111111111111111111111111111111111111112");
+solana_program::declare_id!("Safe111111111111111111111111111111111111112");
 
 #[cfg(test)]
 mod tests {

@@ -541,7 +541,7 @@ curl http://api.mainnet-beta.solana.com -X POST -H "Content-Type: application/js
     "id": 1,
     "method": "getProgramAccounts",
     "params": [
-      "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "HMGr16f8Ct1Zeb9TGPypt9rPgzCkmhCQB8Not8vwiPW1",
       {
         "encoding": "jsonParsed",
         "filters": [
@@ -577,7 +577,7 @@ curl http://api.mainnet-beta.solana.com -X POST -H "Content-Type: application/js
     "id": 1,
     "method": "getProgramAccounts",
     "params": [
-      "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "HMGr16f8Ct1Zeb9TGPypt9rPgzCkmhCQB8Not8vwiPW1",
       {
         "encoding": "jsonParsed",
         "filters": [
@@ -705,7 +705,7 @@ called from other programs that interact with the Token Program's interface.
 
 Accounts containing wrapped SAFE are associated with a specific Mint called the
 "Native Mint" using the public key
-`So11111111111111111111111111111111111111112`.
+`Safe111111111111111111111111111111111111112`.
 
 These accounts have a few unique behaviors
 
