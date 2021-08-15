@@ -1,6 +1,6 @@
 [package]
 name = "safe-associated-token-account"
-version = "1.0.4"
+version = "1.0.6"
 description = "Safecoin Program Library Associated Token Account"
 authors = ["Safecoin Maintainers <maintainers@solana.foundation>"]
 repository = "https://github.com/solana-labs/safecoin-program-library"
@@ -12,12 +12,12 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-safecoin-program = "1.6.18"
-safe-token = { version = "^3.1.3", path = "../../token/program", features = ["no-entrypoint"] }
+safecoin-program = "1.6.19"
+safe-token = { version = "^3.1.5", path = "../../token/program", features = ["no-entrypoint"] }
 
 [dev-dependencies]
-safecoin-program-test = "1.6.18"
-safecoin-sdk = "1.6.18"
+safecoin-program-test = "1.6.19"
+safecoin-sdk = "1.6.20"
 
 [lib]
 name = "safe_associated_token_account"

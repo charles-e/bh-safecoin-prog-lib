@@ -12,11 +12,11 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-solana_program = { package = "safecoin-program", version = "1.6.18" }
+solana_program = { package = "safecoin-program", version = "1.6.19" }
 
 [dev-dependencies]
-safecoin-program-test = "1.6.18"
-safecoin-sdk = "1.6.18"
+safecoin-program-test = "1.6.19"
+safecoin-sdk = "1.6.20"
 
 [lib]
 crate-type = ["cdylib", "lib"]
