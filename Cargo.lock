@@ -2779,21 +2779,21 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 [[package]]
 name = "safe-associated-token-account"
 version = "1.0.6"
-dependencies = [
- "safe-token 3.1.6",
- "safecoin-program",
- "safecoin-program-test",
- "safecoin-sdk",
-]
-
-[[package]]
-name = "safe-associated-token-account"
-version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5eba68ae61ae8a20fe9eb9210338ece784d16b8da9bdd392f4d5f9e36d45ec96"
 dependencies = [
  "safe-token 3.1.5",
  "safecoin-program",
+]
+
+[[package]]
+name = "safe-associated-token-account"
+version = "1.0.7"
+dependencies = [
+ "safe-token 3.1.6",
+ "safecoin-program",
+ "safecoin-program-test",
+ "safecoin-sdk",
 ]
 
 [[package]]
@@ -2874,7 +2874,7 @@ version = "2.0.11"
 dependencies = [
  "clap",
  "console 0.14.1",
- "safe-associated-token-account 1.0.6",
+ "safe-associated-token-account 1.0.7",
  "safe-memo 3.0.4",
  "safe-token 3.1.6",
  "safecoin-account-decoder",
@@ -3532,7 +3532,7 @@ dependencies = [
  "bincode",
  "bs58 0.3.1",
  "lazy_static",
- "safe-associated-token-account 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "safe-associated-token-account 1.0.6",
  "safe-memo 3.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "safe-token 3.1.5",
  "safecoin-account-decoder",
@@ -4061,7 +4061,7 @@ dependencies = [
  "bs58 0.4.0",
  "clap",
  "lazy_static",
- "safe-associated-token-account 1.0.6",
+ "safe-associated-token-account 1.0.7",
  "safe-token 3.1.6",
  "safecoin-account-decoder",
  "safecoin-clap-utils",
