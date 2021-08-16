@@ -169,15 +169,15 @@ pub fn transfer_spl_tokens_signed<'a>(
 /// Asserts the given account_info represents a valid SPL Token account which is initialized and belongs to spl_token program
 pub fn assert_is_valid_spl_token_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
     if account_info.data_is_empty() {
-        return Err(GovernanceError::SplTokenAccountNotInitialized.into());
+        return Err(GovernanceError::SafeTokenAccountNotInitialized.into());
     }
 
     if account_info.owner != &spl_token::id() {
-        return Err(GovernanceError::SplTokenAccountWithInvalidOwner.into());
+        return Err(GovernanceError::SafeTokenAccountWithInvalidOwner.into());
     }
 
     if account_info.data_len() != Account::LEN {
-        return Err(GovernanceError::SplTokenInvalidTokenAccountData.into());
+        return Err(GovernanceError::SafeTokenInvalidTokenAccountData.into());
     }
 
     Ok(())
@@ -186,15 +186,15 @@ pub fn assert_is_valid_spl_token_account(account_info: &AccountInfo) -> Result<(
 /// Asserts the given mint_info represents a valid SPL Token Mint account  which is initialized and belongs to spl_token program
 pub fn assert_is_valid_spl_token_mint(mint_info: &AccountInfo) -> Result<(), ProgramError> {
     if mint_info.data_is_empty() {
-        return Err(GovernanceError::SplTokenMintNotInitialized.into());
+        return Err(GovernanceError::SafeTokenMintNotInitialized.into());
     }
 
     if mint_info.owner != &spl_token::id() {
-        return Err(GovernanceError::SplTokenMintWithInvalidOwner.into());
+        return Err(GovernanceError::SafeTokenMintWithInvalidOwner.into());
     }
 
     if mint_info.data_len() != Mint::LEN {
-        return Err(GovernanceError::SplTokenInvalidMintAccountData.into());
+        return Err(GovernanceError::SafeTokenInvalidMintAccountData.into());
     }
 
     Ok(())

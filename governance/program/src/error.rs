@@ -184,27 +184,27 @@ pub enum GovernanceError {
 
     /// Invalid Token account owner
     #[error("Invalid Token account owner")]
-    SplTokenAccountWithInvalidOwner,
+    SafeTokenAccountWithInvalidOwner,
 
     /// Invalid Mint account owner
     #[error("Invalid Mint account owner")]
-    SplTokenMintWithInvalidOwner,
+    SafeTokenMintWithInvalidOwner,
 
     /// Token Account is not initialized
     #[error("Token Account is not initialized")]
-    SplTokenAccountNotInitialized,
+    SafeTokenAccountNotInitialized,
 
     /// Token account data is invalid
     #[error("Token account data is invalid")]
-    SplTokenInvalidTokenAccountData,
+    SafeTokenInvalidTokenAccountData,
 
     /// Token mint account data is invalid
     #[error("Token mint account data is invalid")]
-    SplTokenInvalidMintAccountData,
+    SafeTokenInvalidMintAccountData,
 
     /// Token Mint is not initialized
     #[error("Token Mint account is not initialized")]
-    SplTokenMintNotInitialized,
+    SafeTokenMintNotInitialized,
 
     /// ---- Bpf Upgradable Loader Tools Errors ----
 
