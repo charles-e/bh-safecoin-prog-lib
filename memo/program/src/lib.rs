@@ -18,7 +18,7 @@ pub mod v1 {
     solana_program::declare_id!("4DDUJ1rA8Vd7e6SFWanf4V8JnsfapjCGNutQYw8Vtt45");
 }
 
-solana_program::declare_id!("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+solana_program::declare_id!("9h7wfE8nxQ6YsRedqNHwroEZbA5bMAmNsh8GdxwBTtaV");
 
 /// Build a memo instruction, possibly signed
 ///
