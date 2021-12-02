@@ -3223,9 +3223,9 @@ dependencies = [
 
 [[package]]
 name = "safecoin-logger"
-version = "1.6.18"
+version = "1.7.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ace9475fca7cb400ceec74b6ff31b76865ce04bf48d6e69c3cd011b1d87c7ae5"
+checksum = "7f18b525936c12d66b4a3e3d1088d2a4340211298d8dc523d839969a2eb8f913"
 dependencies = [
  "env_logger",
  "lazy_static",

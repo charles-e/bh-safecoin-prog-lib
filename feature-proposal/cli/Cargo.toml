@@ -13,7 +13,7 @@ clap = "2.33.3"
 safecoin-clap-utils = "1.6.18"
 safecoin-cli-config = "1.6.18"
 safecoin-client = "1.6.18"
-safecoin-logger = "1.6.18"
+safecoin-logger = "1.7.17"
 safecoin-sdk = "1.6.18"
 safe-feature-proposal = { version = "1.0", path = "../program", features = ["no-entrypoint"] }
 
