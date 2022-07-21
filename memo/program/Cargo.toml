@@ -17,12 +17,12 @@ test-bpf = []
 
 [dependencies]
 solana_program = { package = "safecoin-program", version = "1.6.19" }
-zeroize = "=1.3.0"
+zeroize = "=1.5.7"
 
 [dev-dependencies]
 safecoin-program-test = "1.6.19"
 safecoin-sdk = "1.6.20"
-zeroize = "=1.3.0"
+zeroize = "=1.5.7"
 
 [lib]
 crate-type = ["cdylib", "lib"]
